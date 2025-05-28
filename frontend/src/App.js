@@ -530,7 +530,7 @@ function App() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">6% $DRB + 6% $cbBTC sent to:</span>
                 <span className="text-blue-400 font-mono text-xs">
-                  {activeChain === 'base' ? '0xFE2...ca7' : 'Solana recipient not set'}
+                  {activeChain === 'base' ? '0xFE2...ca7' : 'CtFt...aPC'}
                 </span>
               </div>
             </div>
