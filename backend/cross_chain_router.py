@@ -40,8 +40,9 @@ class CrossChainRouter:
             "ethereum": {"chain_id": 1, "wormhole_id": 2, "lifi_id": "ETH"},
             "base": {"chain_id": 8453, "wormhole_id": 30, "lifi_id": "BAS"},
             "polygon": {"chain_id": 137, "wormhole_id": 5, "lifi_id": "POL"},
-            "arbitrum": {"chain_id": 42161, "wormhole_id": 23, "lifi_id": "ARB"},
-            "solana": {"chain_id": "mainnet-beta", "wormhole_id": 1, "lifi_id": "SOL"}
+            "solana": {"chain_id": "mainnet-beta", "wormhole_id": 1, "lifi_id": "SOL"},
+            "sui": {"chain_id": "mainnet", "wormhole_id": 21, "lifi_id": "SUI"},
+            "bitcoin": {"chain_id": "mainnet", "wormhole_id": 0, "lifi_id": "BTC"}
         }
         
     async def analyze_cross_chain_route(self, 
