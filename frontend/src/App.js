@@ -667,6 +667,17 @@ function App() {
                   <p className="text-gray-500 text-sm mb-6">
                     Burn Relief Bot supports both MetaMask and Phantom across all chains
                   </p>
+                  
+                  {/* Cross-chain Bridge Recommendation */}
+                  <div className="bg-blue-600 bg-opacity-20 border border-blue-500 rounded-lg p-4 mb-6">
+                    <div className="flex items-center justify-center mb-2">
+                      <Info className="w-4 h-4 text-blue-400 mr-2" />
+                      <span className="text-blue-400 text-sm font-medium">Cross-Chain Tip</span>
+                    </div>
+                    <p className="text-blue-300 text-xs">
+                      For tokens on other chains, bridge to {activeChain} first for optimal $DRB and $cbBTC swaps
+                    </p>
+                  </div>
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={() => connectWallet('metamask')}
