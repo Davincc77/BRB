@@ -168,10 +168,11 @@ class BlockchainService:
             logger.error(f"Error executing burn transaction: {e}")
             return {"success": False, "error": str(e)}
     
-    async def _execute_evm_burn_sim(self, token_address: str, burn_amount: Decimal, drb_amount: Decimal,
-                                  cbbtc_amount: Decimal, user_address: str, recipient_wallet: str, 
-                                  chain: str) -> Dict[str, Any]:
-        """Simulated EVM burn transaction"""
+    async def _execute_evm_burn_new(self, token_address: str, burn_amount: Decimal,
+                                  drb_grok_amount: Decimal, drb_team_amount: Decimal,
+                                  cbbtc_community_amount: Decimal, cbbtc_team_amount: Decimal,
+                                  user_address: str, recipient_wallet: str, chain: str) -> Dict[str, Any]:
+        """Execute burn transaction on EVM chains with new allocation"""
         try:
             transactions = []
             
@@ -180,43 +181,67 @@ class BlockchainService:
                 "type": "burn",
                 "amount": str(burn_amount),
                 "to": self.burn_address,
-                "hash": f"0x{'1234567890abcdef' * 4}",  # Simulated hash
+                "hash": f"0x{'1234567890abcdef' * 4}",
                 "status": "pending"
             }
             transactions.append(burn_tx)
             
-            # 2. Swap 6% to DRB
+            # 2. Swap 7% to DRB for Grok's wallet
             drb_token = self.tokens["DRB"].get(chain)
-            if drb_token:
-                drb_tx = {
-                    "type": "swap_to_drb",
-                    "amount": str(drb_amount),
-                    "to": recipient_wallet,
+            if drb_token and drb_grok_amount > 0:
+                drb_grok_tx = {
+                    "type": "swap_to_drb_grok",
+                    "amount": str(drb_grok_amount),
+                    "to": "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9",  # Grok's wallet
                     "output_token": drb_token,
-                    "hash": f"0x{'abcdef1234567890' * 4}",  # Simulated hash
+                    "hash": f"0x{'abcdef1234567890' * 4}",
                     "status": "pending"
                 }
-                transactions.append(drb_tx)
+                transactions.append(drb_grok_tx)
             
-            # 3. Swap 6% to cbBTC
-            cbbtc_token = self.tokens["cbBTC"].get(chain)
-            if cbbtc_token:
-                cbbtc_tx = {
-                    "type": "swap_to_cbbtc",
-                    "amount": str(cbbtc_amount),
-                    "to": recipient_wallet,
-                    "output_token": cbbtc_token,
-                    "hash": f"0x{'fedcba0987654321' * 4}",  # Simulated hash
+            # 3. Swap 1% to DRB for team
+            if drb_token and drb_team_amount > 0:
+                drb_team_tx = {
+                    "type": "swap_to_drb_team",
+                    "amount": str(drb_team_amount),
+                    "to": "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7",  # Team wallet
+                    "output_token": drb_token,
+                    "hash": f"0x{'fedcba0987654321' * 4}",
                     "status": "pending"
                 }
-                transactions.append(cbbtc_tx)
+                transactions.append(drb_team_tx)
+            
+            # 4. Swap 3% to cbBTC for community
+            cbbtc_token = self.tokens["cbBTC"].get(chain)
+            if cbbtc_token and cbbtc_community_amount > 0:
+                cbbtc_community_tx = {
+                    "type": "swap_to_cbbtc_community",
+                    "amount": str(cbbtc_community_amount),
+                    "to": "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7",  # Community wallet
+                    "output_token": cbbtc_token,
+                    "hash": f"0x{'123abc456def7890' * 4}",
+                    "status": "pending"
+                }
+                transactions.append(cbbtc_community_tx)
+            
+            # 5. Swap 1% to cbBTC for team
+            if cbbtc_token and cbbtc_team_amount > 0:
+                cbbtc_team_tx = {
+                    "type": "swap_to_cbbtc_team",
+                    "amount": str(cbbtc_team_amount),
+                    "to": "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7",  # Team wallet
+                    "output_token": cbbtc_token,
+                    "hash": f"0x{'def789abc0123456' * 4}",
+                    "status": "pending"
+                }
+                transactions.append(cbbtc_team_tx)
             
             return {
                 "success": True,
                 "chain": chain,
                 "transactions": transactions,
-                "total_gas_estimate": "450000",
-                "estimated_completion": "2-5 minutes"
+                "total_gas_estimate": "750000",  # Increased for more transactions
+                "estimated_completion": "3-7 minutes"
             }
             
         except Exception as e:
