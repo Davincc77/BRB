@@ -45,23 +45,30 @@ function App() {
   };
 
   const checkWalletConnection = async () => {
-    if (activeChain === 'base' && window.ethereum) {
+    // Check MetaMask connection
+    if (window.ethereum) {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
         if (accounts.length > 0) {
           setWalletAddress(accounts[0]);
           setIsWalletConnected(true);
+          setConnectedWallet('metamask');
+          return;
         }
       } catch (error) {
-        console.error('Error checking wallet connection:', error);
+        console.error('Error checking MetaMask connection:', error);
       }
-    } else if (activeChain === 'solana' && window.solana) {
+    }
+
+    // Check Phantom connection  
+    if (window.solana) {
       try {
         const response = await window.solana.connect({ onlyIfTrusted: true });
         setWalletAddress(response.publicKey.toString());
         setIsWalletConnected(true);
+        setConnectedWallet('phantom');
       } catch (error) {
-        console.error('Error checking Solana wallet:', error);
+        console.error('Error checking Phantom wallet:', error);
       }
     }
   };
