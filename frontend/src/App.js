@@ -100,6 +100,34 @@ function App() {
   };
 
   // Update quotes when amount changes
+  const updateSwapQuotes = async (tokenAddr, amt) => {
+    if (!tokenAddr || !amt || !availableChains[activeChain]) return;
+    
+    try {
+      const [drbQuote, cbbtcQuote] = await Promise.all([
+        axios.post(`${API}/swap-quote`, {
+          input_token: tokenAddr,
+          output_token: availableChains[activeChain]?.drb_token || '0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2',
+          amount: (parseFloat(amt) * 0.06).toString(),
+          chain: activeChain
+        }),
+        axios.post(`${API}/swap-quote`, {
+          input_token: tokenAddr,
+          output_token: availableChains[activeChain]?.cbbtc_token || '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf',
+          amount: (parseFloat(amt) * 0.06).toString(),
+          chain: activeChain
+        })
+      ]);
+      
+      setSwapQuotes({
+        drb: drbQuote.data,
+        cbbtc: cbbtcQuote.data
+      });
+    } catch (error) {
+      console.error('Failed to fetch swap quotes:', error);
+    }
+  };
+
   // Fetch optimal routes information
   const fetchOptimalRoutes = async () => {
     try {
