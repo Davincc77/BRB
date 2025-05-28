@@ -3,12 +3,12 @@ import './App.css';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { Flame, Wallet, ArrowRight, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Flame, Wallet, ArrowRight, CheckCircle, XCircle, Clock, Trophy, Users, TrendingUp, Award } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Chain configurations
+// Chain configurations will be fetched from backend
 const BASE_CHAIN_CONFIG = {
   chainId: '0x2105', // 8453 in hex
   chainName: 'Base',
