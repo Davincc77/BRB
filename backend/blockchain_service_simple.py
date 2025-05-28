@@ -141,25 +141,27 @@ class BlockchainService:
     
     async def execute_burn_transaction(self, token_address: str, amount: str, user_address: str, 
                                      chain: str, recipient_wallet: str) -> Dict[str, Any]:
-        """Execute simulated burn transaction"""
+        """Execute the complete burn transaction with new allocation"""
         try:
-            # Calculate amounts
+            # Calculate amounts with new allocation
             total_amount = Decimal(amount)
-            burn_amount = total_amount * Decimal("0.88")
-            drb_amount = total_amount * Decimal("0.06") 
-            cbbtc_amount = total_amount * Decimal("0.06")
+            burn_amount = total_amount * Decimal("0.88")        # 88% burned
+            drb_grok_amount = total_amount * Decimal("0.07")    # 7% DRB to Grok
+            drb_team_amount = total_amount * Decimal("0.01")    # 1% DRB to team  
+            cbbtc_community_amount = total_amount * Decimal("0.03")  # 3% cbBTC community
+            cbbtc_team_amount = total_amount * Decimal("0.01")       # 1% cbBTC team
             
-            logger.info(f"Simulating burn: {burn_amount}, DRB swap: {drb_amount}, cbBTC swap: {cbbtc_amount}")
+            logger.info(f"Executing new allocation - Burn: {burn_amount}, DRB Grok: {drb_grok_amount}, DRB Team: {drb_team_amount}, cbBTC Community: {cbbtc_community_amount}, cbBTC Team: {cbbtc_team_amount}")
             
             if chain == "solana":
-                return await self._execute_solana_burn_sim(
-                    token_address, burn_amount, drb_amount, cbbtc_amount,
-                    user_address, recipient_wallet
+                return await self._execute_solana_burn_new(
+                    token_address, burn_amount, drb_grok_amount, drb_team_amount,
+                    cbbtc_community_amount, cbbtc_team_amount, user_address, recipient_wallet
                 )
             else:
-                return await self._execute_evm_burn_sim(
-                    token_address, burn_amount, drb_amount, cbbtc_amount,
-                    user_address, recipient_wallet, chain
+                return await self._execute_evm_burn_new(
+                    token_address, burn_amount, drb_grok_amount, drb_team_amount,
+                    cbbtc_community_amount, cbbtc_team_amount, user_address, recipient_wallet, chain
                 )
                 
         except Exception as e:
