@@ -299,27 +299,20 @@ function App() {
           
           {/* Chain Selector */}
           <div className="flex items-center space-x-4">
-            <div className="flex bg-gray-800 rounded-lg p-1">
-              <button
-                onClick={() => handleChainSwitch('base')}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  activeChain === 'base' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Base
-              </button>
-              <button
-                onClick={() => handleChainSwitch('solana')}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  activeChain === 'solana' 
-                    ? 'bg-purple-600 text-white' 
-                    : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Solana
-              </button>
+            <div className="flex bg-gray-800 rounded-lg p-1 max-w-md overflow-x-auto">
+              {Object.entries(availableChains).map(([chainKey, chainConfig]) => (
+                <button
+                  key={chainKey}
+                  onClick={() => handleChainSwitch(chainKey)}
+                  className={`px-3 py-2 rounded-md transition-colors whitespace-nowrap text-sm ${
+                    activeChain === chainKey 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  {chainConfig.name}
+                </button>
+              ))}
             </div>
 
             {/* Wallet Connection */}
