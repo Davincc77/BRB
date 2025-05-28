@@ -933,8 +933,57 @@ function App() {
                     />
                   </div>
 
-                  {/* Burn Summary */}
-                  {amount && tokenValidation?.is_valid && (
+                  {/* Cross-Chain Route Display */}
+                  {crossChainMode && crossChainRoute && amount && tokenValidation?.is_valid && (
+                    <div className="bg-purple-600 bg-opacity-20 border border-purple-500 rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-purple-300 font-medium flex items-center">
+                          {analyzingRoute ? (
+                            <>
+                              <Clock className="w-4 h-4 mr-2 animate-spin" />
+                              Analyzing Route...
+                            </>
+                          ) : (
+                            <>
+                              🌉 Cross-Chain Route
+                              {crossChainRoute.cross_chain_required && (
+                                <span className="ml-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded text-xs">
+                                  Multi-Chain
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </h4>
+                        <div className="text-right text-xs">
+                          <div className="text-purple-300">Est. Time: {crossChainRoute.total_estimated_time}</div>
+                          <div className="text-purple-400">Est. Cost: {crossChainRoute.total_estimated_cost}</div>
+                        </div>
+                      </div>
+                      
+                      {!analyzingRoute && crossChainRoute.routes && (
+                        <div className="space-y-2">
+                          {crossChainRoute.routes.map((route, index) => (
+                            <div key={index} className="bg-purple-700 bg-opacity-30 rounded p-2 text-xs">
+                              <div className="flex items-center justify-between">
+                                <span className="text-purple-200">
+                                  Step {route.step}: {route.type.replace(/_/g, ' ')}
+                                </span>
+                                <span className="text-purple-300">
+                                  {route.source_chain} {route.target_chain !== route.source_chain ? `→ ${route.target_chain}` : ''}
+                                </span>
+                              </div>
+                              <div className="text-purple-400 mt-1">
+                                Amount: {formatAmount(route.amount)} • {route.estimated_time}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Regular Burn Summary */}
+                  {!crossChainMode && amount && tokenValidation?.is_valid && (
                     <div className="bg-gray-700 rounded-lg p-4 space-y-2">
                       <h4 className="text-sm font-medium text-gray-300">Burn Summary</h4>
                       <div className="space-y-1 text-sm">
