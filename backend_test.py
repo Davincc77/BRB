@@ -248,6 +248,16 @@ class CryptoBurnAgentTester:
         }
         return self.run_test("Create Polygon Burn Transaction", "POST", "burn", data=data)
     
+    def test_arbitrum_burn_transaction(self):
+        """Test creating a burn transaction on Arbitrum"""
+        data = {
+            "wallet_address": self.test_wallet,
+            "token_address": self.valid_arbitrum_token,
+            "amount": "1000",
+            "chain": "arbitrum"
+        }
+        return self.run_test("Create Arbitrum Burn Transaction", "POST", "burn", data=data)
+        
     def test_burn_amount_calculation(self):
         """Test the 88/6/6 split calculation"""
         data = {
