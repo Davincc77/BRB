@@ -742,6 +742,146 @@ async def get_token_price(token_address: str, chain: str):
         logger.error(f"Token price error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get token price")
 
+# Cross-chain endpoints
+@api_router.post("/cross-chain/analyze-route", response_model=CrossChainRouteResponse)
+async def analyze_cross_chain_route(request: CrossChainRouteRequest):
+    """Analyze optimal cross-chain route for burning"""
+    try:
+        route_analysis = await cross_chain_router.analyze_cross_chain_route(
+            request.source_chain,
+            request.source_token,
+            request.amount
+        )
+        
+        if not route_analysis.get("success"):
+            return CrossChainRouteResponse(
+                success=False,
+                source_chain=request.source_chain,
+                optimal_routing=False,
+                routes=[],
+                total_estimated_time="Unknown",
+                total_estimated_cost="Unknown",
+                cross_chain_required=False,
+                error=route_analysis.get("error", "Route analysis failed")
+            )
+        
+        return CrossChainRouteResponse(**route_analysis)
+        
+    except Exception as e:
+        logger.error(f"Cross-chain route analysis error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to analyze cross-chain route")
+
+@api_router.post("/cross-chain/execute-burn")
+async def execute_cross_chain_burn(request: CrossChainBurnRequest):
+    """Execute cross-chain burn with automatic routing"""
+    try:
+        # First analyze the optimal route
+        route_analysis = await cross_chain_router.analyze_cross_chain_route(
+            request.source_chain,
+            request.source_token,
+            request.amount
+        )
+        
+        if not route_analysis.get("success"):
+            raise HTTPException(status_code=400, detail=route_analysis.get("error", "Route analysis failed"))
+        
+        # Execute the cross-chain burn sequence
+        execution_result = await cross_chain_router.execute_cross_chain_burn(
+            route_analysis["routes"],
+            request.wallet_address
+        )
+        
+        if not execution_result.get("success"):
+            raise HTTPException(status_code=400, detail=execution_result.get("error", "Execution failed"))
+        
+        # Create cross-chain transaction record
+        cross_chain_tx = CrossChainTransaction(
+            user_address=request.wallet_address,
+            source_chain=request.source_chain,
+            source_token=request.source_token,
+            amount=request.amount,
+            execution_plan=execution_result["execution_plan"],
+            total_steps=len(execution_result["execution_plan"]),
+            estimated_completion=route_analysis["total_estimated_time"],
+            status="executing"
+        )
+        
+        # Save to database
+        await db.cross_chain_transactions.insert_one(cross_chain_tx.dict())
+        
+        return {
+            "success": True,
+            "cross_chain_transaction_id": cross_chain_tx.id,
+            "route_analysis": route_analysis,
+            "execution_plan": execution_result["execution_plan"],
+            "total_transactions": execution_result["total_transactions"],
+            "estimated_completion": route_analysis["total_estimated_time"],
+            "message": "Cross-chain burn initiated successfully"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Cross-chain burn execution error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to execute cross-chain burn")
+
+@api_router.get("/cross-chain/transaction/{transaction_id}")
+async def get_cross_chain_transaction(transaction_id: str):
+    """Get cross-chain transaction status"""
+    try:
+        transaction = await db.cross_chain_transactions.find_one({"id": transaction_id})
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Cross-chain transaction not found")
+        
+        return CrossChainTransaction(**transaction)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get cross-chain transaction error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch cross-chain transaction")
+
+@api_router.get("/cross-chain/monitor/{tx_hash}/{chain}")
+async def monitor_cross_chain_transaction(tx_hash: str, chain: str):
+    """Monitor specific cross-chain transaction"""
+    try:
+        status = await cross_chain_router.monitor_cross_chain_transaction(tx_hash, chain)
+        return status
+        
+    except Exception as e:
+        logger.error(f"Cross-chain monitoring error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to monitor cross-chain transaction")
+
+@api_router.get("/cross-chain/supported-tokens/{chain}")
+async def get_supported_tokens(chain: str):
+    """Get supported tokens for cross-chain operations"""
+    try:
+        tokens = await cross_chain_router.get_supported_tokens(chain)
+        return {"chain": chain, "supported_tokens": tokens}
+        
+    except Exception as e:
+        logger.error(f"Supported tokens error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get supported tokens")
+
+@api_router.get("/cross-chain/optimal-routes")
+async def get_optimal_routes():
+    """Get current optimal routing information"""
+    try:
+        return {
+            "optimal_chains": {
+                "DRB": "base",
+                "cbBTC": "ethereum"
+            },
+            "supported_bridges": ["Li.Fi", "Wormhole", "Stargate", "Hyperlane"],
+            "supported_chains": ["ethereum", "base", "polygon", "arbitrum", "solana"],
+            "routing_strategy": "Lowest cost + fastest execution",
+            "last_updated": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Optimal routes error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get optimal routes")
+
 # Include the router in the main app
 app.include_router(api_router)
 
