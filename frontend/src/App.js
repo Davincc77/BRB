@@ -240,8 +240,9 @@ function App() {
       setAmount('');
       setTokenValidation(null);
       
-      // Refresh transactions
+      // Refresh transactions and stats
       fetchTransactions();
+      fetchBurnStats();
       
     } catch (error) {
       console.error('Burn error:', error);
@@ -395,178 +396,178 @@ function App() {
         {/* Tab Content */}
         {activeTab === 'burn' && (
           <div className="grid lg:grid-cols-2 gap-8">
-          
-          {/* Burn Interface */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-              <Flame className="w-6 h-6 text-orange-500 mr-2" />
-              Burn Tokens
-            </h2>
+            {/* Burn Interface */}
+            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+                <Flame className="w-6 h-6 text-orange-500 mr-2" />
+                Burn Tokens
+              </h2>
 
-            {!isWalletConnected ? (
-              <div className="text-center py-12">
-                <Wallet className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-4">Connect your wallet to start burning tokens on {activeChain}</p>
-                <p className="text-gray-500 text-sm mb-6">
-                  Use either MetaMask or Phantom - both work on Base and Solana chains
-                </p>
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={() => connectWallet('metamask')}
-                    className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-                  >
-                    <Wallet className="w-5 h-5" />
-                    <span>Connect MetaMask</span>
-                  </button>
-                  <button
-                    onClick={() => connectWallet('phantom')}
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
-                  >
-                    <Wallet className="w-5 h-5" />
-                    <span>Connect Phantom</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Token Address Input */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Token Contract Address
-                  </label>
-                  <input
-                    type="text"
-                    value={tokenAddress}
-                    onChange={handleTokenAddressChange}
-                    placeholder={`Enter ${activeChain} token address...`}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
-                  />
-                  
-                  {/* Token Validation Status */}
-                  {isValidating && (
-                    <div className="mt-2 flex items-center text-yellow-500">
-                      <Clock className="w-4 h-4 mr-2 animate-spin" />
-                      <span className="text-sm">Validating token...</span>
-                    </div>
-                  )}
-                  
-                  {tokenValidation && (
-                    <div className={`mt-2 flex items-center ${tokenValidation.is_valid ? 'text-green-500' : 'text-red-500'}`}>
-                      {tokenValidation.is_valid ? 
-                        <CheckCircle className="w-4 h-4 mr-2" /> : 
-                        <XCircle className="w-4 h-4 mr-2" />
-                      }
-                      <span className="text-sm">
-                        {tokenValidation.is_valid 
-                          ? `Valid token: ${tokenValidation.token_symbol} (${tokenValidation.token_name})`
-                          : tokenValidation.reason
-                        }
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Amount Input */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Amount to Burn
-                  </label>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Enter amount..."
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-
-                {/* Burn Summary */}
-                {amount && tokenValidation?.is_valid && (
-                  <div className="bg-gray-700 rounded-lg p-4 space-y-2">
-                    <h4 className="text-sm font-medium text-gray-300">Burn Summary</h4>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">88% Burned:</span>
-                        <span className="text-red-400">{formatAmount((parseFloat(amount) * 0.88).toString())}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">6% → $DRB:</span>
-                        <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.06).toString())}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">6% → $cbBTC:</span>
-                        <span className="text-orange-400">{formatAmount((parseFloat(amount) * 0.06).toString())}</span>
-                      </div>
-                    </div>
+              {!isWalletConnected ? (
+                <div className="text-center py-12">
+                  <Wallet className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">Connect your wallet to start burning tokens on {activeChain}</p>
+                  <p className="text-gray-500 text-sm mb-6">
+                    Use either MetaMask or Phantom - both work on all chains
+                  </p>
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={() => connectWallet('metamask')}
+                      className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+                    >
+                      <Wallet className="w-5 h-5" />
+                      <span>Connect MetaMask</span>
+                    </button>
+                    <button
+                      onClick={() => connectWallet('phantom')}
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+                    >
+                      <Wallet className="w-5 h-5" />
+                      <span>Connect Phantom</span>
+                    </button>
                   </div>
-                )}
-
-                {/* Burn Button */}
-                <button
-                  onClick={handleBurn}
-                  disabled={!tokenValidation?.is_valid || !amount || isLoading}
-                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <Clock className="w-5 h-5 animate-spin" />
-                      <span>Processing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Flame className="w-5 h-5" />
-                      <span>Burn Tokens</span>
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Transaction History */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-6">Recent Transactions</h2>
-            
-            {transactions.length === 0 ? (
-              <div className="text-center py-12">
-                <Clock className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400">No transactions yet</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {transactions.map((tx) => (
-                  <div key={tx.id} className="bg-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        {getStatusIcon(tx.status)}
-                        <span className="text-sm font-medium text-white capitalize">
-                          {tx.status}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Token Address Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Token Contract Address
+                    </label>
+                    <input
+                      type="text"
+                      value={tokenAddress}
+                      onChange={handleTokenAddressChange}
+                      placeholder={`Enter ${activeChain} token address...`}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                    />
+                    
+                    {/* Token Validation Status */}
+                    {isValidating && (
+                      <div className="mt-2 flex items-center text-yellow-500">
+                        <Clock className="w-4 h-4 mr-2 animate-spin" />
+                        <span className="text-sm">Validating token...</span>
+                      </div>
+                    )}
+                    
+                    {tokenValidation && (
+                      <div className={`mt-2 flex items-center ${tokenValidation.is_valid ? 'text-green-500' : 'text-red-500'}`}>
+                        {tokenValidation.is_valid ? 
+                          <CheckCircle className="w-4 h-4 mr-2" /> : 
+                          <XCircle className="w-4 h-4 mr-2" />
+                        }
+                        <span className="text-sm">
+                          {tokenValidation.is_valid 
+                            ? `Valid token: ${tokenValidation.token_symbol} (${tokenValidation.token_name})`
+                            : tokenValidation.reason
+                          }
                         </span>
                       </div>
-                      <span className="text-xs text-gray-400">
-                        {new Date(tx.timestamp).toLocaleDateString()}
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Wallet:</span>
-                        <span className="text-white">{formatAddress(tx.wallet_address)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Amount:</span>
-                        <span className="text-white">{formatAmount(tx.amount)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Chain:</span>
-                        <span className="text-white capitalize">{tx.chain}</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {/* Amount Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Amount to Burn
+                    </label>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="Enter amount..."
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Burn Summary */}
+                  {amount && tokenValidation?.is_valid && (
+                    <div className="bg-gray-700 rounded-lg p-4 space-y-2">
+                      <h4 className="text-sm font-medium text-gray-300">Burn Summary</h4>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">88% Burned:</span>
+                          <span className="text-red-400">{formatAmount((parseFloat(amount) * 0.88).toString())}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">6% → $DRB:</span>
+                          <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.06).toString())}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">6% → $cbBTC:</span>
+                          <span className="text-orange-400">{formatAmount((parseFloat(amount) * 0.06).toString())}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Burn Button */}
+                  <button
+                    onClick={handleBurn}
+                    disabled={!tokenValidation?.is_valid || !amount || isLoading}
+                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Clock className="w-5 h-5 animate-spin" />
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Flame className="w-5 h-5" />
+                        <span>Burn Tokens</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Transaction History */}
+            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+              <h2 className="text-xl font-bold text-white mb-6">Recent Transactions</h2>
+              
+              {transactions.length === 0 ? (
+                <div className="text-center py-12">
+                  <Clock className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400">No transactions yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {transactions.map((tx) => (
+                    <div key={tx.id} className="bg-gray-700 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          {getStatusIcon(tx.status)}
+                          <span className="text-sm font-medium text-white capitalize">
+                            {tx.status}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-400">
+                          {new Date(tx.timestamp).toLocaleDateString()}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Wallet:</span>
+                          <span className="text-white">{formatAddress(tx.wallet_address)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Amount:</span>
+                          <span className="text-white">{formatAmount(tx.amount)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Chain:</span>
+                          <span className="text-white capitalize">{tx.chain}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -682,7 +683,7 @@ function App() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">6% $DRB + 6% $cbBTC sent to:</span>
                 <span className="text-blue-400 font-mono text-xs">
-                  {activeChain === 'base' ? '0xFE2...ca7' : 'CtFt...aPC'}
+                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
                 </span>
               </div>
             </div>
