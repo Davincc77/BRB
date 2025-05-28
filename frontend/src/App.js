@@ -702,62 +702,165 @@ function App() {
 
         {/* Community Tab */}
         {activeTab === 'community' && (
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-                <Users className="w-6 h-6 text-blue-500 mr-2" />
-                Community Stats
-              </h2>
+          <div className="animate-fadeInUp">
+            <div className="grid lg:grid-cols-3 gap-6 mb-8">
+              {/* Enhanced Stats Cards */}
               {burnStats ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-gray-700 rounded-lg">
-                      <div className="text-2xl font-bold text-white">{burnStats.total_burns}</div>
-                      <div className="text-gray-400 text-sm">Total Burns</div>
+                <>
+                  <div className="stat-card group">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-blue-600 bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform">
+                        <Activity className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <div className="text-right">
+                        <div className="stat-value stat-value-primary">{burnStats.total_burns}</div>
+                        <div className="text-gray-400 text-sm">Total Burns</div>
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-gray-700 rounded-lg">
-                      <div className="text-2xl font-bold text-white">{burnStats.total_users}</div>
-                      <div className="text-gray-400 text-sm">Total Users</div>
+                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-pulse-soft"></div>
                     </div>
                   </div>
-                  <div className="text-center p-4 bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-red-400">{parseFloat(burnStats.total_amount_burned).toLocaleString()}</div>
-                    <div className="text-gray-400 text-sm">Total Tokens Burned</div>
+
+                  <div className="stat-card group">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-green-600 bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform">
+                        <Users className="w-6 h-6 text-green-400" />
+                      </div>
+                      <div className="text-right">
+                        <div className="stat-value stat-value-success">{burnStats.total_users}</div>
+                        <div className="text-gray-400 text-sm">Active Users</div>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full animate-pulse-soft"></div>
+                    </div>
                   </div>
-                </div>
+
+                  <div className="stat-card group">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-red-600 bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform">
+                        <Flame className="w-6 h-6 text-red-400" />
+                      </div>
+                      <div className="text-right">
+                        <div className="stat-value stat-value-danger">
+                          {parseFloat(burnStats.total_amount_burned).toLocaleString()}
+                        </div>
+                        <div className="text-gray-400 text-sm">Tokens Burned</div>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full animate-pulse-soft"></div>
+                    </div>
+                  </div>
+                </>
               ) : (
-                <div className="text-center py-8">
-                  <Clock className="w-16 h-16 text-gray-500 mx-auto mb-4 animate-spin" />
-                  <p className="text-gray-400">Loading community stats...</p>
-                </div>
+                // Loading skeletons
+                Array(3).fill(0).map((_, i) => (
+                  <div key={i} className="stat-card loading-shimmer">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="skeleton w-12 h-12 rounded-lg"></div>
+                      <div className="text-right">
+                        <div className="skeleton-text w-16 h-8"></div>
+                        <div className="skeleton-text w-20 h-4"></div>
+                      </div>
+                    </div>
+                    <div className="skeleton h-2 rounded-full"></div>
+                  </div>
+                ))
               )}
             </div>
-            
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-                <TrendingUp className="w-6 h-6 text-green-500 mr-2" />
-                Trending Tokens
-              </h2>
-              {burnStats && burnStats.trending_tokens.length > 0 ? (
-                <div className="space-y-3">
-                  {burnStats.trending_tokens.map((token, index) => (
-                    <div key={index} className="bg-gray-700 rounded-lg p-3">
-                      <div className="flex justify-between items-center">
-                        <span className="font-mono text-sm text-white">{formatAddress(token.token_address)}</span>
-                        <span className="text-blue-400 text-sm capitalize">{token.chain}</span>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="card">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+                  <TrendingUp className="w-6 h-6 text-green-500 mr-2" />
+                  Trending Tokens
+                </h2>
+                {burnStats && burnStats.trending_tokens.length > 0 ? (
+                  <div className="space-y-3">
+                    {burnStats.trending_tokens.map((token, index) => (
+                      <div key={index} className="transaction-item group">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <span 
+                                className="font-mono text-sm text-white cursor-pointer hover:text-blue-400 transition-colors"
+                                onClick={() => copyToClipboard(token.token_address, 'Token address')}
+                                title="Click to copy address"
+                              >
+                                {formatAddress(token.token_address)}
+                              </span>
+                              <div className="text-xs text-gray-400 mt-1">
+                                {token.burn_count} burns • {parseFloat(token.total_burned).toLocaleString()} tokens
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-blue-400 text-sm capitalize bg-blue-600 bg-opacity-20 px-2 py-1 rounded">
+                              {token.chain}
+                            </span>
+                            <button
+                              onClick={() => copyToClipboard(token.token_address, 'Token address')}
+                              className="p-1 hover:bg-gray-600 rounded transition-colors"
+                              title="Copy address"
+                            >
+                              <Copy className="w-3 h-3 text-gray-400" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-400 mt-1">
-                        {token.burn_count} burns • {parseFloat(token.total_burned).toLocaleString()} tokens
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Flame className="w-16 h-16 text-gray-500 mx-auto mb-4 animate-pulse-soft" />
+                    <p className="text-gray-400">No trending tokens yet</p>
+                    <p className="text-gray-500 text-sm mt-2">Be the first to burn some tokens!</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="card">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+                  <BarChart3 className="w-6 h-6 text-purple-500 mr-2" />
+                  Recent Activity
+                </h2>
+                <div className="space-y-3">
+                  {transactions.slice(0, 5).map((tx, index) => (
+                    <div key={tx.id} className="transaction-item">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-2 h-2 rounded-full ${
+                            tx.status === 'completed' ? 'bg-green-400' : 
+                            tx.status === 'failed' ? 'bg-red-400' : 'bg-yellow-400'
+                          } animate-pulse-soft`}></div>
+                          <div>
+                            <div className="text-sm text-white">
+                              {formatAmount(tx.amount)} tokens burned
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {formatAddress(tx.wallet_address)} • {tx.chain}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {new Date(tx.timestamp).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
                   ))}
+                  {transactions.length === 0 && (
+                    <div className="text-center py-8">
+                      <Activity className="w-12 h-12 text-gray-500 mx-auto mb-3 animate-pulse-soft" />
+                      <p className="text-gray-400 text-sm">No recent activity</p>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Flame className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-400">No trending tokens yet</p>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         )}
