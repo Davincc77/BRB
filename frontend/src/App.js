@@ -605,25 +605,50 @@ function App() {
                     </div>
                   )}
 
-                  {/* Burn Button */}
+                  {/* Enhanced Burn Button */}
                   <button
-                    onClick={handleBurn}
+                    onClick={() => {
+                      simulateBurnProgress();
+                      handleBurn();
+                    }}
                     disabled={!tokenValidation?.is_valid || !amount || isLoading}
-                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                    className="w-full btn-danger relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    {isLoading ? (
-                      <>
-                        <Clock className="w-5 h-5 animate-spin" />
-                        <span>Processing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Flame className="w-5 h-5" />
-                        <span>Burn Tokens</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </>
+                    <div className="relative z-10 flex items-center justify-center space-x-2">
+                      {isLoading ? (
+                        <>
+                          <Clock className="w-5 h-5 animate-spin" />
+                          <span>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Flame className="w-5 h-5 group-hover:animate-bounce" />
+                          <span>Burn Tokens</span>
+                          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </div>
+                    {isLoading && (
+                      <div className="absolute bottom-0 left-0 h-1 bg-yellow-400 transition-all duration-300" 
+                           style={{width: `${burnProgress}%`}}></div>
                     )}
                   </button>
+
+                  {/* Progress indicator */}
+                  {burnProgress > 0 && burnProgress < 100 && (
+                    <div className="mt-4 animate-fadeInUp">
+                      <div className="flex justify-between text-sm text-gray-400 mb-2">
+                        <span>Burn Progress</span>
+                        <span>{Math.round(burnProgress)}%</span>
+                      </div>
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-fill" 
+                          style={{width: `${burnProgress}%`}}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
