@@ -474,16 +474,19 @@ async def create_burn_transaction(request: BurnRequest):
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported chain: {request.chain}")
         
-        # Create transaction record
+        # Create transaction record with new allocation structure
         burn_tx = BurnTransaction(
             wallet_address=request.wallet_address,
             token_address=request.token_address,
             amount=request.amount,
             chain=request.chain,
             burn_amount=amounts["burn_amount"],
-            drb_swap_amount=amounts["drb_swap_amount"],
-            cbbtc_swap_amount=amounts["cbbtc_swap_amount"],
-            recipient_wallet=recipient_wallet
+            drb_total_amount=amounts["drb_total_amount"],
+            drb_grok_amount=amounts["drb_grok_amount"],
+            drb_team_amount=amounts["drb_team_amount"],
+            cbbtc_total_amount=amounts["cbbtc_total_amount"],
+            cbbtc_community_amount=amounts["cbbtc_community_amount"],
+            cbbtc_team_amount=amounts["cbbtc_team_amount"]
         )
         
         # Save to database
