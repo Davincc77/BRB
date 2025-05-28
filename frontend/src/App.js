@@ -518,6 +518,24 @@ function App() {
         {/* Info Section */}
         <div className="mt-8 bg-gray-800 rounded-xl p-6 border border-gray-700">
           <h3 className="text-lg font-bold text-white mb-4">How It Works</h3>
+          
+          {/* Token Flow Information */}
+          <div className="mb-6 bg-gray-700 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-300 mb-3">Token Distribution</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">88% Burned to:</span>
+                <span className="text-red-400 font-mono text-xs">0x000...dEaD</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">6% $DRB + 6% $cbBTC sent to:</span>
+                <span className="text-blue-400 font-mono text-xs">
+                  {activeChain === 'base' ? '0xFE2...ca7' : 'Solana recipient not set'}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6 text-sm">
             <div className="text-center">
               <div className="bg-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -534,7 +552,7 @@ function App() {
               </div>
               <h4 className="font-medium text-white mb-2">6% → $DRB</h4>
               <p className="text-gray-400">
-                Automatically swapped to $DRB tokens via DEX
+                Automatically swapped to $DRB tokens and sent to recipient wallet
               </p>
             </div>
             <div className="text-center">
@@ -543,7 +561,7 @@ function App() {
               </div>
               <h4 className="font-medium text-white mb-2">6% → $cbBTC</h4>
               <p className="text-gray-400">
-                Automatically swapped to $cbBTC tokens via DEX
+                Automatically swapped to $cbBTC tokens and sent to recipient wallet
               </p>
             </div>
           </div>
