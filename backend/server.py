@@ -34,7 +34,7 @@ CBBTC_TOKEN_CA = "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
 
 # Recipient wallets for swapped tokens
 BASE_RECIPIENT_WALLET = "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7"
-SOLANA_RECIPIENT_WALLET = None  # To be configured
+SOLANA_RECIPIENT_WALLET = "CtFtfe2pYRiJVAUrEZtdFKZVV2UFpdaWBU1Ve7aPC"
 
 # Base chain configuration
 BASE_RPC_URL = "https://mainnet.base.org"
