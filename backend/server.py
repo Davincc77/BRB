@@ -492,6 +492,164 @@ async def get_transaction(transaction_id: str):
         logger.error(f"Get transaction error: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch transaction")
 
+# Real blockchain endpoints
+@api_router.post("/swap-quote", response_model=SwapQuoteResponse)
+async def get_swap_quote(request: SwapQuoteRequest):
+    """Get real-time swap quote from DEX"""
+    try:
+        quote = await blockchain_service.get_swap_quote(
+            request.input_token,
+            request.output_token, 
+            request.amount,
+            request.chain
+        )
+        
+        if "error" in quote:
+            return SwapQuoteResponse(
+                input_amount=request.amount,
+                output_amount="0",
+                price_impact="0%",
+                gas_estimate="0",
+                error=quote["error"]
+            )
+        
+        return SwapQuoteResponse(
+            input_amount=request.amount,
+            output_amount=quote.get("outputAmount", "0"),
+            price_impact=quote.get("slippage", "0%"),
+            gas_estimate=quote.get("gasEstimate", "0"),
+            route=quote.get("route")
+        )
+        
+    except Exception as e:
+        logger.error(f"Swap quote error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get swap quote")
+
+@api_router.post("/execute-burn", response_model=dict)
+async def execute_real_burn(request: ExecuteBurnRequest):
+    """Execute real blockchain burn transaction"""
+    try:
+        # Validate token first
+        validation = await validate_token(TokenValidationRequest(
+            token_address=request.token_address,
+            chain=request.chain
+        ))
+        
+        if not validation.is_valid:
+            raise HTTPException(status_code=400, detail=validation.reason)
+        
+        # Get recipient wallet for chain
+        if request.chain not in SUPPORTED_CHAINS:
+            raise HTTPException(status_code=400, detail=f"Unsupported chain: {request.chain}")
+        
+        recipient_wallet = SUPPORTED_CHAINS[request.chain]["recipient_wallet"]
+        
+        # Execute blockchain transaction
+        result = await blockchain_service.execute_burn_transaction(
+            request.token_address,
+            request.amount,
+            request.wallet_address,
+            request.chain,
+            recipient_wallet
+        )
+        
+        if not result.get("success"):
+            raise HTTPException(status_code=400, detail=result.get("error", "Transaction failed"))
+        
+        # Calculate amounts for database record
+        amounts = calculate_amounts(request.amount)
+        
+        # Create burn transaction record
+        burn_tx = BurnTransaction(
+            wallet_address=request.wallet_address,
+            token_address=request.token_address,
+            amount=request.amount,
+            chain=request.chain,
+            burn_amount=amounts["burn_amount"],
+            drb_swap_amount=amounts["drb_swap_amount"],
+            cbbtc_swap_amount=amounts["cbbtc_swap_amount"],
+            recipient_wallet=recipient_wallet,
+            status="processing"
+        )
+        
+        # Save burn transaction
+        await db.burn_transactions.insert_one(burn_tx.dict())
+        
+        # Save individual blockchain transactions
+        for tx in result.get("transactions", []):
+            blockchain_tx = BlockchainTransaction(
+                burn_transaction_id=burn_tx.id,
+                tx_type=tx["type"],
+                tx_hash=tx.get("hash", tx.get("signature", "")),
+                chain=request.chain,
+                status="pending"
+            )
+            await db.blockchain_transactions.insert_one(blockchain_tx.dict())
+        
+        return {
+            "success": True,
+            "burn_transaction_id": burn_tx.id,
+            "blockchain_result": result,
+            "message": "Burn transaction initiated successfully"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Execute burn error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to execute burn transaction")
+
+@api_router.get("/gas-estimates/{chain}", response_model=GasEstimate)
+async def get_gas_estimates(chain: str):
+    """Get current gas estimates for chain"""
+    try:
+        estimates = await blockchain_service.estimate_gas_fees(chain)
+        
+        if "error" in estimates:
+            raise HTTPException(status_code=400, detail=estimates["error"])
+        
+        return GasEstimate(
+            chain=chain,
+            slow={"price": estimates.get("base_fee", "0"), "time": "2-5 minutes"},
+            standard={"price": str(float(estimates.get("base_fee", "0")) * 1.2), "time": "1-2 minutes"},
+            fast={"price": str(float(estimates.get("base_fee", "0")) * 1.5), "time": "30 seconds"},
+            currency=estimates.get("currency", "Gwei")
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Gas estimates error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get gas estimates")
+
+@api_router.get("/transaction-status/{tx_hash}/{chain}")
+async def get_transaction_status(tx_hash: str, chain: str):
+    """Get real-time transaction status from blockchain"""
+    try:
+        status = await blockchain_service.get_transaction_status(tx_hash, chain)
+        return status
+        
+    except Exception as e:
+        logger.error(f"Transaction status error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get transaction status")
+
+@api_router.get("/token-price/{token_address}/{chain}")
+async def get_token_price(token_address: str, chain: str):
+    """Get current token price"""
+    try:
+        price = await blockchain_service.get_token_price(token_address, chain)
+        
+        if price is None:
+            raise HTTPException(status_code=404, detail="Token price not found")
+        
+        return {"token_address": token_address, "chain": chain, "price_usd": price}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Token price error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get token price")
+
 # Include the router in the main app
 app.include_router(api_router)
 
