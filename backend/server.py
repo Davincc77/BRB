@@ -160,6 +160,48 @@ class Challenge(BaseModel):
     reward_description: str
     status: str = "active"  # active, completed, expired
 
+# Real blockchain transaction models
+class SwapQuoteRequest(BaseModel):
+    input_token: str
+    output_token: str
+    amount: str
+    chain: str
+
+class SwapQuoteResponse(BaseModel):
+    input_amount: str
+    output_amount: str
+    price_impact: str
+    gas_estimate: str
+    route: Optional[dict] = None
+    error: Optional[str] = None
+
+class ExecuteBurnRequest(BaseModel):
+    wallet_address: str
+    token_address: str
+    amount: str
+    chain: str
+    slippage_tolerance: float = 3.0  # 3% default
+
+class BlockchainTransaction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    burn_transaction_id: str
+    tx_type: str  # "burn", "swap_to_drb", "swap_to_cbbtc"
+    tx_hash: str
+    chain: str
+    status: str = "pending"  # pending, confirmed, failed
+    confirmations: int = 0
+    gas_used: Optional[str] = None
+    gas_price: Optional[str] = None
+    block_number: Optional[int] = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class GasEstimate(BaseModel):
+    chain: str
+    slow: dict
+    standard: dict
+    fast: dict
+    currency: str
+
 # Utility functions
 def is_token_blacklisted(token_address: str, token_symbol: str = None) -> bool:
     """Check if token is blacklisted"""
