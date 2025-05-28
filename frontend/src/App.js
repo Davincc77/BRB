@@ -568,7 +568,104 @@ function App() {
               </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Community Tab */}
+        {activeTab === 'community' && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+                <Users className="w-6 h-6 text-blue-500 mr-2" />
+                Community Stats
+              </h2>
+              {burnStats ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-gray-700 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{burnStats.total_burns}</div>
+                      <div className="text-gray-400 text-sm">Total Burns</div>
+                    </div>
+                    <div className="text-center p-4 bg-gray-700 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{burnStats.total_users}</div>
+                      <div className="text-gray-400 text-sm">Total Users</div>
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-gray-700 rounded-lg">
+                    <div className="text-2xl font-bold text-red-400">{parseFloat(burnStats.total_amount_burned).toLocaleString()}</div>
+                    <div className="text-gray-400 text-sm">Total Tokens Burned</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Clock className="w-16 h-16 text-gray-500 mx-auto mb-4 animate-spin" />
+                  <p className="text-gray-400">Loading community stats...</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+                <TrendingUp className="w-6 h-6 text-green-500 mr-2" />
+                Trending Tokens
+              </h2>
+              {burnStats && burnStats.trending_tokens.length > 0 ? (
+                <div className="space-y-3">
+                  {burnStats.trending_tokens.map((token, index) => (
+                    <div key={index} className="bg-gray-700 rounded-lg p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="font-mono text-sm text-white">{formatAddress(token.token_address)}</span>
+                        <span className="text-blue-400 text-sm capitalize">{token.chain}</span>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {token.burn_count} burns • {parseFloat(token.total_burned).toLocaleString()} tokens
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Flame className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400">No trending tokens yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Leaderboard Tab */}
+        {activeTab === 'leaderboard' && (
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+              <Trophy className="w-6 h-6 text-yellow-500 mr-2" />
+              Top Burners
+            </h2>
+            {burnStats && burnStats.top_burners.length > 0 ? (
+              <div className="space-y-3">
+                {burnStats.top_burners.map((burner, index) => (
+                  <div key={index} className="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        index === 0 ? 'bg-yellow-600' : index === 1 ? 'bg-gray-500' : index === 2 ? 'bg-orange-600' : 'bg-gray-600'
+                      }`}>
+                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                      </div>
+                      <span className="font-mono text-white">{formatAddress(burner.wallet_address)}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-white font-medium">{parseFloat(burner.total_amount).toLocaleString()}</div>
+                      <div className="text-gray-400 text-sm">{burner.total_burns} burns</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-400">No burners yet - be the first!</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Info Section */}
         <div className="mt-8 bg-gray-800 rounded-xl p-6 border border-gray-700">
