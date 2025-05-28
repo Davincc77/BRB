@@ -353,25 +353,58 @@ function App() {
       )}
 
       {/* Header */}
-      <header className="p-6 border-b border-gray-700">
+      <header className="p-6 border-b border-gray-700 backdrop-blur-md bg-gray-900 bg-opacity-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <Flame className="w-8 h-8 text-orange-500" />
-            <h1 className="text-2xl font-bold text-white">Crypto Burn Agent</h1>
+          <div className="flex items-center space-x-3 animate-fadeInUp">
+            <div className="relative">
+              <Flame className="w-8 h-8 text-orange-500 animate-pulse-soft" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-bounce-soft"></div>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Crypto Burn Agent</h1>
+              <p className="text-xs text-gray-400">Multi-chain token burning protocol</p>
+            </div>
           </div>
           
-          {/* Chain Selector */}
           <div className="flex items-center space-x-4">
-            <div className="flex bg-gray-800 rounded-lg p-1 max-w-md overflow-x-auto">
+            {/* Settings & Controls */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={refreshData}
+                disabled={isRefreshing}
+                className={`p-2 rounded-lg transition-all duration-300 ${
+                  isRefreshing 
+                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transform hover:scale-105'
+                }`}
+                title="Refresh data"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </button>
+              
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className={`p-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${
+                  soundEnabled 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                }`}
+                title={soundEnabled ? 'Disable sounds' : 'Enable sounds'}
+              >
+                <Bell className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Chain Selector */}
+            <div className="chain-selector animate-slideInRight">
               {Object.entries(availableChains).map(([chainKey, chainConfig]) => (
                 <button
                   key={chainKey}
                   onClick={() => handleChainSwitch(chainKey)}
-                  className={`px-3 py-2 rounded-md transition-colors whitespace-nowrap text-sm ${
-                    activeChain === chainKey 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-300 hover:text-white'
+                  className={`chain-option ${
+                    activeChain === chainKey ? 'chain-option-active' : 'chain-option-inactive'
                   }`}
+                  title={`Switch to ${chainConfig.name}`}
                 >
                   {chainConfig.name}
                 </button>
@@ -380,32 +413,41 @@ function App() {
 
             {/* Wallet Connection */}
             {isWalletConnected ? (
-              <div className="flex items-center space-x-2">
-                <div className="bg-green-600 text-white px-3 py-2 rounded-lg text-sm flex items-center space-x-2">
-                  <span>{formatAddress(walletAddress)}</span>
+              <div className="flex items-center space-x-2 animate-slideInRight">
+                <div className="glass-card px-3 py-2 text-sm flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-soft"></div>
+                  <span 
+                    className="text-white cursor-pointer hover:text-green-400 transition-colors"
+                    onClick={() => copyToClipboard(walletAddress, 'Wallet address')}
+                    title="Click to copy address"
+                  >
+                    {formatAddress(walletAddress)}
+                  </span>
                   <span className="text-green-200 text-xs">
-                    ({connectedWallet === 'metamask' ? 'MetaMask' : 'Phantom'})
+                    ({connectedWallet === 'metamask' ? '🦊 MetaMask' : '👻 Phantom'})
                   </span>
                 </div>
                 <button
                   onClick={disconnectWallet}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105"
                 >
                   Disconnect
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 animate-slideInRight">
                 <button
                   onClick={() => connectWallet('metamask')}
-                  className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  className="wallet-button wallet-metamask flex items-center space-x-2"
+                  title="Connect MetaMask wallet"
                 >
                   <Wallet className="w-4 h-4" />
                   <span>MetaMask</span>
                 </button>
                 <button
                   onClick={() => connectWallet('phantom')}
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  className="wallet-button wallet-phantom flex items-center space-x-2"
+                  title="Connect Phantom wallet"
                 >
                   <Wallet className="w-4 h-4" />
                   <span>Phantom</span>
