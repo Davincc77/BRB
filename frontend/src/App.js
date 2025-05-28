@@ -59,6 +59,7 @@ function App() {
     checkWalletConnection();
     fetchTransactions();
     fetchBurnStats();
+    fetchOptimalRoutes();
   }, []);
 
   const fetchAvailableChains = async () => {
