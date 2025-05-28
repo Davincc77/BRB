@@ -287,31 +287,111 @@ function App() {
     }
 
     setIsLoading(true);
+    simulateBurnProgress();
+    
     try {
-      const response = await axios.post(`${API}/burn`, {
+      // First get swap quotes for transparency
+      const [drbQuote, cbbtcQuote] = await Promise.all([
+        axios.post(`${API}/swap-quote`, {
+          input_token: tokenAddress,
+          output_token: availableChains[activeChain]?.drb_token || '0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2',
+          amount: (parseFloat(amount) * 0.06).toString(),
+          chain: activeChain
+        }),
+        axios.post(`${API}/swap-quote`, {
+          input_token: tokenAddress,
+          output_token: availableChains[activeChain]?.cbbtc_token || '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf',
+          amount: (parseFloat(amount) * 0.06).toString(),
+          chain: activeChain
+        })
+      ]);
+
+      // Show quotes to user
+      showNotification(
+        `Swap rates: 6% → ${parseFloat(drbQuote.data.output_amount).toFixed(2)} $DRB, 6% → ${parseFloat(cbbtcQuote.data.output_amount).toFixed(2)} $cbBTC`,
+        'info'
+      );
+
+      // Execute real blockchain transaction
+      const response = await axios.post(`${API}/execute-burn`, {
         wallet_address: walletAddress,
         token_address: tokenAddress,
         amount: amount,
         chain: activeChain
       });
 
-      showNotification('Burn transaction created! Please confirm in your wallet.', 'success');
+      if (response.data.success) {
+        showNotification('🔥 Burn transaction initiated! Check your wallet for confirmations.', 'success');
+        
+        // Show transaction details
+        const result = response.data.blockchain_result;
+        showNotification(
+          `${result.transactions.length} transactions created. Estimated completion: ${result.estimated_completion}`,
+          'info'
+        );
+        
+        // Start monitoring transaction status
+        monitorTransactionStatus(response.data.burn_transaction_id, result.transactions);
+      } else {
+        throw new Error(response.data.message || 'Transaction failed');
+      }
       
       // Reset form
       setTokenAddress('');
       setAmount('');
       setTokenValidation(null);
+      setBurnProgress(100);
       
-      // Refresh transactions and stats
-      fetchTransactions();
-      fetchBurnStats();
+      // Refresh data
+      setTimeout(() => {
+        fetchTransactions();
+        fetchBurnStats();
+        setBurnProgress(0);
+      }, 2000);
       
     } catch (error) {
       console.error('Burn error:', error);
-      showNotification(error.response?.data?.detail || 'Failed to create burn transaction', 'error');
+      setBurnProgress(0);
+      showNotification(
+        error.response?.data?.detail || error.message || 'Failed to execute burn transaction', 
+        'error'
+      );
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Monitor transaction status
+  const monitorTransactionStatus = async (burnTxId, transactions) => {
+    let attempts = 0;
+    const maxAttempts = 20;
+    
+    const checkStatus = async () => {
+      try {
+        for (const tx of transactions) {
+          const statusResponse = await axios.get(
+            `${API}/transaction-status/${tx.hash || tx.signature}/${activeChain}`
+          );
+          
+          if (statusResponse.data.status === 'confirmed') {
+            showNotification(
+              `✅ ${tx.type.replace('_', ' ')} transaction confirmed!`,
+              'success'
+            );
+          }
+        }
+      } catch (error) {
+        console.error('Status check error:', error);
+      }
+      
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(checkStatus, 10000); // Check every 10 seconds
+      }
+    };
+    
+    // Start monitoring after 5 seconds
+    setTimeout(checkStatus, 5000);
   };
 
   const fetchTransactions = async () => {
