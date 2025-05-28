@@ -296,6 +296,11 @@ function App() {
     setTokenAddress('');
     setAmount('');
     setTokenValidation(null);
+    setSwapQuotes(null);
+    setRealTimePrice(null);
+    
+    // Fetch gas estimates for new chain
+    fetchGasEstimates(newChain);
     
     showNotification(`Switched to ${newChain} chain`, 'info');
   };
