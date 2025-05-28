@@ -248,15 +248,42 @@ class CryptoBurnAgentTester:
         }
         return self.run_test("Create Polygon Burn Transaction", "POST", "burn", data=data)
     
-    def test_arbitrum_burn_transaction(self):
-        """Test creating a burn transaction on Arbitrum"""
+    def test_burn_amount_calculation(self):
+        """Test the 88/6/6 split calculation"""
         data = {
             "wallet_address": self.test_wallet,
-            "token_address": self.valid_arbitrum_token,
+            "token_address": self.valid_base_token,
             "amount": "1000",
-            "chain": "arbitrum"
+            "chain": "base"
         }
-        return self.run_test("Create Arbitrum Burn Transaction", "POST", "burn", data=data)
+        success, response = self.run_test("Burn Amount Calculation", "POST", "burn", data=data)
+        
+        if success and response:
+            # Check if the amounts are calculated correctly
+            burn_amount = float(response.get("burn_amount", 0))
+            drb_amount = float(response.get("drb_swap_amount", 0))
+            cbbtc_amount = float(response.get("cbbtc_swap_amount", 0))
+            
+            expected_burn = 1000 * 0.88
+            expected_drb = 1000 * 0.06
+            expected_cbbtc = 1000 * 0.06
+            
+            calculation_correct = (
+                abs(burn_amount - expected_burn) < 0.01 and
+                abs(drb_amount - expected_drb) < 0.01 and
+                abs(cbbtc_amount - expected_cbbtc) < 0.01
+            )
+            
+            if calculation_correct:
+                print("✅ Burn calculation is correct (88/6/6 split)")
+                return True, response
+            else:
+                print(f"❌ Burn calculation is incorrect:")
+                print(f"  Expected: {expected_burn}/{expected_drb}/{expected_cbbtc}")
+                print(f"  Got: {burn_amount}/{drb_amount}/{cbbtc_amount}")
+                return False, response
+        
+        return success, response
 
 def main():
     print("=" * 50)
