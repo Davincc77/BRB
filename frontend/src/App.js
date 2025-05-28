@@ -74,6 +74,55 @@ function App() {
     }
   };
 
+  // Fetch gas estimates for current chain
+  const fetchGasEstimates = async (chain) => {
+    try {
+      const response = await axios.get(`${API}/gas-estimates/${chain}`);
+      setGasEstimates(response.data);
+    } catch (error) {
+      console.error('Failed to fetch gas estimates:', error);
+    }
+  };
+
+  // Fetch token price
+  const fetchTokenPrice = async (tokenAddress, chain) => {
+    try {
+      const response = await axios.get(`${API}/token-price/${tokenAddress}/${chain}`);
+      setRealTimePrice(response.data);
+    } catch (error) {
+      console.error('Failed to fetch token price:', error);
+    }
+  };
+
+  // Update quotes when amount changes
+  const updateSwapQuotes = async (tokenAddr, amt) => {
+    if (!tokenAddr || !amt || !availableChains[activeChain]) return;
+    
+    try {
+      const [drbQuote, cbbtcQuote] = await Promise.all([
+        axios.post(`${API}/swap-quote`, {
+          input_token: tokenAddr,
+          output_token: '0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2', // $DRB
+          amount: (parseFloat(amt) * 0.06).toString(),
+          chain: activeChain
+        }),
+        axios.post(`${API}/swap-quote`, {
+          input_token: tokenAddr,
+          output_token: '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf', // $cbBTC
+          amount: (parseFloat(amt) * 0.06).toString(),
+          chain: activeChain
+        })
+      ]);
+      
+      setSwapQuotes({
+        drb: drbQuote.data,
+        cbbtc: cbbtcQuote.data
+      });
+    } catch (error) {
+      console.error('Failed to fetch swap quotes:', error);
+    }
+  };
+
   const showNotification = (message, type = 'info') => {
     setNotification({ message, type });
     
