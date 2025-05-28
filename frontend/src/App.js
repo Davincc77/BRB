@@ -966,7 +966,11 @@ function App() {
                   <button
                     onClick={() => {
                       simulateBurnProgress();
-                      handleBurn();
+                      if (crossChainMode) {
+                        handleCrossChainBurn();
+                      } else {
+                        handleBurn();
+                      }
                     }}
                     disabled={!tokenValidation?.is_valid || !amount || isLoading}
                     className="w-full btn-danger relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
@@ -975,12 +979,12 @@ function App() {
                       {isLoading ? (
                         <>
                           <Clock className="w-5 h-5 animate-spin" />
-                          <span>Processing...</span>
+                          <span>{crossChainMode ? 'Processing Cross-Chain...' : 'Processing...'}</span>
                         </>
                       ) : (
                         <>
                           <Flame className="w-5 h-5 group-hover:animate-bounce" />
-                          <span>Burn Tokens</span>
+                          <span>{crossChainMode ? 'Cross-Chain Burn' : 'Burn Tokens'}</span>
                           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </>
                       )}
