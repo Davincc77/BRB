@@ -38,9 +38,29 @@ function App() {
 
   // Check if wallet is already connected
   useEffect(() => {
+    fetchAvailableChains();
     checkWalletConnection();
     fetchTransactions();
+    fetchBurnStats();
   }, []);
+
+  const fetchAvailableChains = async () => {
+    try {
+      const response = await axios.get(`${API}/chains`);
+      setAvailableChains(response.data.chains);
+    } catch (error) {
+      console.error('Failed to fetch chains:', error);
+    }
+  };
+
+  const fetchBurnStats = async () => {
+    try {
+      const response = await axios.get(`${API}/stats`);
+      setBurnStats(response.data);
+    } catch (error) {
+      console.error('Failed to fetch burn stats:', error);
+    }
+  };
 
   const showNotification = (message, type = 'info') => {
     setNotification({ message, type });
