@@ -323,13 +323,26 @@ function App() {
             {!isWalletConnected ? (
               <div className="text-center py-12">
                 <Wallet className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400 mb-4">Connect your wallet to start burning tokens</p>
-                <button
-                  onClick={connectWallet}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg transition-colors"
-                >
-                  Connect {activeChain === 'base' ? 'MetaMask' : 'Phantom'}
-                </button>
+                <p className="text-gray-400 mb-4">Connect your wallet to start burning tokens on {activeChain}</p>
+                <p className="text-gray-500 text-sm mb-6">
+                  Use either MetaMask or Phantom - both work on Base and Solana chains
+                </p>
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={() => connectWallet('metamask')}
+                    className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+                  >
+                    <Wallet className="w-5 h-5" />
+                    <span>Connect MetaMask</span>
+                  </button>
+                  <button
+                    onClick={() => connectWallet('phantom')}
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+                  >
+                    <Wallet className="w-5 h-5" />
+                    <span>Connect Phantom</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
