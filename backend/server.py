@@ -82,6 +82,20 @@ BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD"
 DRB_TOKEN_CA = "0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2"
 CBBTC_TOKEN_CA = "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
 
+# New allocation addresses
+GROK_WALLET = "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9"
+TEAM_WALLET = "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7"  # Team wallet for both DRB and cbBTC
+COMMUNITY_WALLET = "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7"  # Community pools/contests wallet
+
+# New allocation percentages
+BURN_PERCENTAGE = 88.0  # 88% burned
+DRB_PERCENTAGE = 8.0    # 8% total DRB allocation
+DRB_GROK_PERCENTAGE = 7.0    # 7% DRB to Grok's wallet  
+DRB_TEAM_PERCENTAGE = 1.0    # 1% DRB to team
+CBBTC_PERCENTAGE = 4.0       # 4% total cbBTC allocation
+CBBTC_COMMUNITY_PERCENTAGE = 3.0  # 3% cbBTC for community pools/contests
+CBBTC_TEAM_PERCENTAGE = 1.0       # 1% cbBTC to team
+
 # Legacy constants for backward compatibility
 BASE_RECIPIENT_WALLET = SUPPORTED_CHAINS["base"]["recipient_wallet"]
 SOLANA_RECIPIENT_WALLET = SUPPORTED_CHAINS["solana"]["recipient_wallet"]
