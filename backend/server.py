@@ -15,6 +15,8 @@ import requests
 import asyncio
 
 # Import blockchain service
+import sys
+sys.path.append('/app/backend')
 from blockchain_service import blockchain_service
 
 ROOT_DIR = Path(__file__).parent
