@@ -315,9 +315,21 @@ async def get_config():
         "drb_token_address": DRB_TOKEN_CA,
         "cbbtc_token_address": CBBTC_TOKEN_CA,
         "supported_chains": SUPPORTED_CHAINS,
-        "burn_percentage": 88,
-        "drb_swap_percentage": 6,
-        "cbbtc_swap_percentage": 6
+        "allocation": {
+            "burn_percentage": BURN_PERCENTAGE,
+            "drb_total_percentage": DRB_PERCENTAGE,
+            "drb_grok_percentage": DRB_GROK_PERCENTAGE,
+            "drb_team_percentage": DRB_TEAM_PERCENTAGE,
+            "cbbtc_total_percentage": CBBTC_PERCENTAGE,
+            "cbbtc_community_percentage": CBBTC_COMMUNITY_PERCENTAGE,
+            "cbbtc_team_percentage": CBBTC_TEAM_PERCENTAGE
+        },
+        "wallets": {
+            "burn_address": BURN_ADDRESS,
+            "grok_wallet": GROK_WALLET,
+            "team_wallet": TEAM_WALLET,
+            "community_wallet": COMMUNITY_WALLET
+        }
     }
 
 @api_router.get("/chains")
