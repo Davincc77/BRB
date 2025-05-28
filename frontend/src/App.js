@@ -73,7 +73,60 @@ function App() {
 
   const showNotification = (message, type = 'info') => {
     setNotification({ message, type });
+    
+    // Enhanced notification with sound
+    if (soundEnabled) {
+      try {
+        const audio = new Audio(`data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgEKH/K7tiJNgcZZ7vt559NEAxQqOPwtmMcBjiS2PLNeSsFJXfH8N2QQAoUXrTq66hVFApGn+Dws2wdCkOS2eLHfCgE=`);
+        audio.volume = 0.3;
+        audio.play().catch(() => {}); // Ignore errors
+      } catch (error) {
+        console.log('Audio notification failed');
+      }
+    }
+    
     setTimeout(() => setNotification(null), 5000);
+  };
+
+  // Enhanced refresh function
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        fetchAvailableChains(),
+        fetchBurnStats(),
+        fetchTransactions()
+      ]);
+      showNotification('Data refreshed successfully!', 'success');
+    } catch (error) {
+      showNotification('Failed to refresh data', 'error');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Copy to clipboard function
+  const copyToClipboard = async (text, label = 'Text') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showNotification(`${label} copied to clipboard!`, 'success');
+    } catch (error) {
+      showNotification('Failed to copy to clipboard', 'error');
+    }
+  };
+
+  // Enhanced progress tracking
+  const simulateBurnProgress = () => {
+    setBurnProgress(0);
+    const interval = setInterval(() => {
+      setBurnProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 200);
   };
 
   const checkWalletConnection = async () => {
