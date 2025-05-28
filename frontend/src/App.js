@@ -35,6 +35,15 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [burnStats, setBurnStats] = useState(null);
   const [activeTab, setActiveTab] = useState('burn'); // 'burn', 'community', 'leaderboard'
+  
+  // Enhanced UX state
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [burnProgress, setBurnProgress] = useState(0);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [tooltipVisible, setTooltipVisible] = useState('');
+  const [darkMode, setDarkMode] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Check if wallet is already connected
   useEffect(() => {
