@@ -57,7 +57,7 @@ SUPPORTED_CHAINS = {
         "chain_id": 1,
         "rpc_url": "https://ethereum-rpc.publicnode.com",
         "explorer": "https://etherscan.io",
-        "recipient_wallet": "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7",
+        "recipient_wallet": "0xFE726d9b5853F3B652456a27A3DC33Bff72A2ca7",
         "currency": "ETH"
     },
     "polygon": {
@@ -65,16 +65,24 @@ SUPPORTED_CHAINS = {
         "chain_id": 137,
         "rpc_url": "https://polygon-rpc.com",
         "explorer": "https://polygonscan.com",
-        "recipient_wallet": "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7",
+        "recipient_wallet": "0xFE726d9b5853F3B652456a27A3DC33Bff72A2ca7",
         "currency": "MATIC"
     },
-    "arbitrum": {
-        "name": "Arbitrum",
-        "chain_id": 42161,
-        "rpc_url": "https://arb1.arbitrum.io/rpc",
-        "explorer": "https://arbiscan.io",
-        "recipient_wallet": "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7",
-        "currency": "ETH"
+    "sui": {
+        "name": "Sui",
+        "chain_id": "mainnet",
+        "rpc_url": "https://fullnode.mainnet.sui.io:443",
+        "explorer": "https://explorer.sui.io",
+        "recipient_wallet": "0x062bf04ef97312c2b309819c22f97d0693458688180788acc1f8752733de6f39",
+        "currency": "SUI"
+    },
+    "bitcoin": {
+        "name": "Bitcoin",
+        "chain_id": "mainnet",
+        "rpc_url": "https://blockstream.info/api",
+        "explorer": "https://blockstream.info",
+        "recipient_wallet": "bc1q3kwh56mure28frleeys7gpdg3xwgf7fk8ew80z",
+        "currency": "BTC"
     }
 }
 
