@@ -44,6 +44,9 @@ function App() {
   const [tooltipVisible, setTooltipVisible] = useState('');
   const [darkMode, setDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [gasEstimates, setGasEstimates] = useState(null);
+  const [swapQuotes, setSwapQuotes] = useState(null);
+  const [realTimePrice, setRealTimePrice] = useState(null);
 
   // Check if wallet is already connected
   useEffect(() => {
