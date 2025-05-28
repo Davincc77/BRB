@@ -100,32 +100,147 @@ function App() {
   };
 
   // Update quotes when amount changes
-  const updateSwapQuotes = async (tokenAddr, amt) => {
-    if (!tokenAddr || !amt || !availableChains[activeChain]) return;
+  // Fetch optimal routes information
+  const fetchOptimalRoutes = async () => {
+    try {
+      const response = await axios.get(`${API}/cross-chain/optimal-routes`);
+      setOptimalRoutes(response.data);
+    } catch (error) {
+      console.error('Failed to fetch optimal routes:', error);
+    }
+  };
+
+  // Analyze cross-chain route
+  const analyzeCrossChainRoute = async (sourceChain, sourceToken, amount) => {
+    if (!sourceToken || !amount) return;
+    
+    setAnalyzingRoute(true);
+    try {
+      const response = await axios.post(`${API}/cross-chain/analyze-route`, {
+        source_chain: sourceChain,
+        source_token: sourceToken,
+        amount: amount
+      });
+      
+      setCrossChainRoute(response.data);
+      
+      if (response.data.cross_chain_required) {
+        showNotification(
+          `Cross-chain routing required! Estimated time: ${response.data.total_estimated_time}`,
+          'info'
+        );
+      }
+    } catch (error) {
+      console.error('Failed to analyze cross-chain route:', error);
+      showNotification('Failed to analyze cross-chain route', 'error');
+    } finally {
+      setAnalyzingRoute(false);
+    }
+  };
+
+  // Execute cross-chain burn
+  const handleCrossChainBurn = async () => {
+    if (!isWalletConnected || !tokenAddress || !amount || !tokenValidation?.is_valid) {
+      showNotification('Please fill all fields and ensure token is valid', 'error');
+      return;
+    }
+
+    setIsLoading(true);
+    simulateBurnProgress();
     
     try {
-      const [drbQuote, cbbtcQuote] = await Promise.all([
-        axios.post(`${API}/swap-quote`, {
-          input_token: tokenAddr,
-          output_token: '0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2', // $DRB
-          amount: (parseFloat(amt) * 0.06).toString(),
-          chain: activeChain
-        }),
-        axios.post(`${API}/swap-quote`, {
-          input_token: tokenAddr,
-          output_token: '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf', // $cbBTC
-          amount: (parseFloat(amt) * 0.06).toString(),
-          chain: activeChain
-        })
-      ]);
-      
-      setSwapQuotes({
-        drb: drbQuote.data,
-        cbbtc: cbbtcQuote.data
+      const response = await axios.post(`${API}/cross-chain/execute-burn`, {
+        wallet_address: walletAddress,
+        source_chain: activeChain,
+        source_token: tokenAddress,
+        amount: amount,
+        approve_cross_chain: true
       });
+
+      if (response.data.success) {
+        showNotification('🌉 Cross-chain burn initiated! Multiple transactions starting...', 'success');
+        
+        // Show execution plan
+        const plan = response.data.execution_plan;
+        showNotification(
+          `${plan.length} transactions created across multiple chains. Est. completion: ${response.data.estimated_completion}`,
+          'info'
+        );
+        
+        // Start monitoring cross-chain transactions
+        monitorCrossChainTransaction(response.data.cross_chain_transaction_id, plan);
+      } else {
+        throw new Error(response.data.message || 'Cross-chain transaction failed');
+      }
+      
+      // Reset form
+      setTokenAddress('');
+      setAmount('');
+      setTokenValidation(null);
+      setCrossChainRoute(null);
+      setBurnProgress(100);
+      
+      // Refresh data
+      setTimeout(() => {
+        fetchTransactions();
+        fetchBurnStats();
+        setBurnProgress(0);
+      }, 2000);
+      
     } catch (error) {
-      console.error('Failed to fetch swap quotes:', error);
+      console.error('Cross-chain burn error:', error);
+      setBurnProgress(0);
+      showNotification(
+        error.response?.data?.detail || error.message || 'Failed to execute cross-chain burn', 
+        'error'
+      );
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Monitor cross-chain transaction
+  const monitorCrossChainTransaction = async (txId, executionPlan) => {
+    let attempts = 0;
+    const maxAttempts = 30;
+    
+    const checkStatus = async () => {
+      try {
+        const statusResponse = await axios.get(`${API}/cross-chain/transaction/${txId}`);
+        const txData = statusResponse.data;
+        
+        showNotification(
+          `Cross-chain transaction ${txData.status} - Step ${txData.current_step}/${txData.total_steps}`,
+          txData.status === 'completed' ? 'success' : 'info'
+        );
+        
+        // Monitor individual transactions
+        for (const tx of executionPlan) {
+          if (tx.tx_hash || tx.signature) {
+            const monitorResponse = await axios.get(
+              `${API}/cross-chain/monitor/${tx.tx_hash || tx.signature}/${tx.chain || activeChain}`
+            );
+            
+            if (monitorResponse.data.status === 'confirmed') {
+              showNotification(
+                `✅ ${tx.type.replace('_', ' ')} confirmed on ${tx.chain || activeChain}!`,
+                'success'
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Cross-chain status check error:', error);
+      }
+      
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(checkStatus, 15000); // Check every 15 seconds for cross-chain
+      }
+    };
+    
+    // Start monitoring after 5 seconds
+    setTimeout(checkStatus, 5000);
   };
 
   const showNotification = (message, type = 'info') => {
