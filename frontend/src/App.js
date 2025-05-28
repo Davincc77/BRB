@@ -274,8 +274,11 @@ function App() {
             {/* Wallet Connection */}
             {isWalletConnected ? (
               <div className="flex items-center space-x-2">
-                <div className="bg-green-600 text-white px-3 py-2 rounded-lg text-sm">
-                  {formatAddress(walletAddress)}
+                <div className="bg-green-600 text-white px-3 py-2 rounded-lg text-sm flex items-center space-x-2">
+                  <span>{formatAddress(walletAddress)}</span>
+                  <span className="text-green-200 text-xs">
+                    ({connectedWallet === 'metamask' ? 'MetaMask' : 'Phantom'})
+                  </span>
                 </div>
                 <button
                   onClick={disconnectWallet}
@@ -285,13 +288,22 @@ function App() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={connectWallet}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-              >
-                <Wallet className="w-5 h-5" />
-                <span>Connect {activeChain === 'base' ? 'MetaMask' : 'Phantom'}</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => connectWallet('metamask')}
+                  className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                >
+                  <Wallet className="w-4 h-4" />
+                  <span>MetaMask</span>
+                </button>
+                <button
+                  onClick={() => connectWallet('phantom')}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                >
+                  <Wallet className="w-4 h-4" />
+                  <span>Phantom</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
