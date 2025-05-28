@@ -127,10 +127,16 @@ class BurnTransaction(BaseModel):
     amount: str
     chain: str
     burn_amount: str  # 88%
-    drb_swap_amount: str  # 6% 
-    cbbtc_swap_amount: str  # 6%
-    recipient_wallet: str  # Where swapped tokens are sent
-    burn_wallet: str = BURN_ADDRESS  # Where burned tokens are sent
+    drb_total_amount: str  # 8% total DRB
+    drb_grok_amount: str   # 7% DRB to Grok's wallet
+    drb_team_amount: str   # 1% DRB to team
+    cbbtc_total_amount: str    # 4% total cbBTC
+    cbbtc_community_amount: str # 3% cbBTC for community
+    cbbtc_team_amount: str      # 1% cbBTC to team
+    burn_wallet: str = BURN_ADDRESS
+    grok_wallet: str = GROK_WALLET
+    team_wallet: str = TEAM_WALLET
+    community_wallet: str = COMMUNITY_WALLET
     status: str = "pending"  # pending, processing, completed, failed
     tx_hash: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
