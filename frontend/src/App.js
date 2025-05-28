@@ -47,6 +47,11 @@ function App() {
   const [gasEstimates, setGasEstimates] = useState(null);
   const [swapQuotes, setSwapQuotes] = useState(null);
   const [realTimePrice, setRealTimePrice] = useState(null);
+  const [crossChainMode, setCrossChainMode] = useState(false);
+  const [crossChainRoute, setCrossChainRoute] = useState(null);
+  const [analyzingRoute, setAnalyzingRoute] = useState(false);
+  const [crossChainTransactions, setCrossChainTransactions] = useState([]);
+  const [optimalRoutes, setOptimalRoutes] = useState(null);
 
   // Check if wallet is already connected
   useEffect(() => {
