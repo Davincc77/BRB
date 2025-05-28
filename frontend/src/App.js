@@ -486,7 +486,11 @@ function App() {
     setTimeout(() => {
       validateToken(address);
       if (address && amount) {
-        updateSwapQuotes(address, amount);
+        if (crossChainMode) {
+          analyzeCrossChainRoute(activeChain, address, amount);
+        } else {
+          updateSwapQuotes(address, amount);
+        }
         fetchTokenPrice(address, activeChain);
       }
     }, 500);
@@ -496,9 +500,15 @@ function App() {
     const newAmount = e.target.value;
     setAmount(newAmount);
     
-    // Update swap quotes when amount changes
+    // Update swap quotes or analyze cross-chain route when amount changes
     if (tokenAddress && newAmount && tokenValidation?.is_valid) {
-      setTimeout(() => updateSwapQuotes(tokenAddress, newAmount), 300);
+      setTimeout(() => {
+        if (crossChainMode) {
+          analyzeCrossChainRoute(activeChain, tokenAddress, newAmount);
+        } else {
+          updateSwapQuotes(tokenAddress, newAmount);
+        }
+      }, 300);
     }
   };
 
