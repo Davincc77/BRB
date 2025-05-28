@@ -361,8 +361,8 @@ function App() {
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-bounce-soft"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Crypto Burn Agent</h1>
-              <p className="text-xs text-gray-400">Multi-chain token burning protocol</p>
+              <h1 className="text-2xl font-bold text-white">Burn Relief Bot</h1>
+              <p className="text-xs text-gray-400">Automated multi-chain token burning protocol</p>
             </div>
           </div>
           
