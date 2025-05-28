@@ -598,16 +598,19 @@ async def execute_real_burn(request: ExecuteBurnRequest):
         # Calculate amounts for database record
         amounts = calculate_amounts(request.amount)
         
-        # Create burn transaction record
+        # Create burn transaction record with new allocation structure
         burn_tx = BurnTransaction(
             wallet_address=request.wallet_address,
             token_address=request.token_address,
             amount=request.amount,
             chain=request.chain,
             burn_amount=amounts["burn_amount"],
-            drb_swap_amount=amounts["drb_swap_amount"],
-            cbbtc_swap_amount=amounts["cbbtc_swap_amount"],
-            recipient_wallet=recipient_wallet,
+            drb_total_amount=amounts["drb_total_amount"],
+            drb_grok_amount=amounts["drb_grok_amount"],
+            drb_team_amount=amounts["drb_team_amount"],
+            cbbtc_total_amount=amounts["cbbtc_total_amount"],
+            cbbtc_community_amount=amounts["cbbtc_community_amount"],
+            cbbtc_team_amount=amounts["cbbtc_team_amount"],
             status="processing"
         )
         
