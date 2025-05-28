@@ -380,14 +380,10 @@ async def create_burn_transaction(request: BurnRequest):
         amounts = calculate_amounts(request.amount)
         
         # Determine recipient wallet based on chain
-        if request.chain == "base":
-            recipient_wallet = BASE_RECIPIENT_WALLET
-        elif request.chain == "solana":
-            if SOLANA_RECIPIENT_WALLET is None:
-                raise HTTPException(status_code=400, detail="Solana recipient wallet not configured")
-            recipient_wallet = SOLANA_RECIPIENT_WALLET
+        if request.chain in SUPPORTED_CHAINS:
+            recipient_wallet = SUPPORTED_CHAINS[request.chain]["recipient_wallet"]
         else:
-            raise HTTPException(status_code=400, detail="Unsupported chain")
+            raise HTTPException(status_code=400, detail=f"Unsupported chain: {request.chain}")
         
         # Create transaction record
         burn_tx = BurnTransaction(
