@@ -232,13 +232,93 @@ async def get_config():
         "burn_address": BURN_ADDRESS,
         "drb_token_address": DRB_TOKEN_CA,
         "cbbtc_token_address": CBBTC_TOKEN_CA,
-        "base_recipient_wallet": BASE_RECIPIENT_WALLET,
-        "solana_recipient_wallet": SOLANA_RECIPIENT_WALLET,
-        "supported_chains": ["base", "solana"],
+        "supported_chains": SUPPORTED_CHAINS,
         "burn_percentage": 88,
         "drb_swap_percentage": 6,
         "cbbtc_swap_percentage": 6
     }
+
+@api_router.get("/chains")
+async def get_supported_chains():
+    """Get all supported chains"""
+    return {"chains": SUPPORTED_CHAINS}
+
+@api_router.get("/stats", response_model=BurnStats)
+async def get_burn_stats():
+    """Get community burn statistics"""
+    try:
+        # Get total burns and users
+        total_burns = await db.burn_transactions.count_documents({})
+        total_users = len(await db.burn_transactions.distinct("wallet_address"))
+        
+        # Calculate total amount burned across all chains
+        pipeline = [
+            {"$group": {
+                "_id": None,
+                "total_burned": {"$sum": {"$toDouble": "$burn_amount"}}
+            }}
+        ]
+        result = await db.burn_transactions.aggregate(pipeline).to_list(1)
+        total_amount_burned = str(result[0]["total_burned"]) if result else "0"
+        
+        # Get trending tokens (most burned)
+        trending_pipeline = [
+            {"$group": {
+                "_id": {"token_address": "$token_address", "chain": "$chain"},
+                "burn_count": {"$sum": 1},
+                "total_burned": {"$sum": {"$toDouble": "$burn_amount"}}
+            }},
+            {"$sort": {"burn_count": -1}},
+            {"$limit": 5}
+        ]
+        trending_result = await db.burn_transactions.aggregate(trending_pipeline).to_list(5)
+        trending_tokens = [
+            {
+                "token_address": item["_id"]["token_address"],
+                "chain": item["_id"]["chain"],
+                "burn_count": item["burn_count"],
+                "total_burned": str(item["total_burned"])
+            }
+            for item in trending_result
+        ]
+        
+        # Get top burners
+        burners_pipeline = [
+            {"$group": {
+                "_id": "$wallet_address",
+                "total_burns": {"$sum": 1},
+                "total_amount": {"$sum": {"$toDouble": "$burn_amount"}}
+            }},
+            {"$sort": {"total_amount": -1}},
+            {"$limit": 10}
+        ]
+        burners_result = await db.burn_transactions.aggregate(burners_pipeline).to_list(10)
+        top_burners = [
+            {
+                "wallet_address": item["_id"],
+                "total_burns": item["total_burns"],
+                "total_amount": str(item["total_amount"])
+            }
+            for item in burners_result
+        ]
+        
+        return BurnStats(
+            total_burns=total_burns,
+            total_amount_burned=total_amount_burned,
+            total_users=total_users,
+            trending_tokens=trending_tokens,
+            top_burners=top_burners
+        )
+        
+    except Exception as e:
+        logger.error(f"Stats error: {e}")
+        return BurnStats(
+            total_burns=0,
+            total_amount_burned="0",
+            total_users=0,
+            trending_tokens=[],
+            top_burners=[]
+        )
 
 @api_router.post("/validate-token", response_model=TokenValidationResponse)
 async def validate_token(request: TokenValidationRequest):
