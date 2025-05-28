@@ -1074,40 +1074,59 @@ function App() {
                 <span className="text-red-400 font-mono text-xs">0x000...dEaD</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">6% $DRB + 6% $cbBTC sent to:</span>
-                <span className="text-blue-400 font-mono text-xs">
+                <span className="text-gray-400">7% $DRB sent to Grok:</span>
+                <span className="text-blue-400 font-mono text-xs">0xb10...4f9</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">1% $DRB + 1% $cbBTC to Team:</span>
+                <span className="text-green-400 font-mono text-xs">
+                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">3% $cbBTC for Community:</span>
+                <span className="text-purple-400 font-mono text-xs">
                   {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 text-sm">
+          <div className="grid md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
               <div className="bg-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Flame className="w-6 h-6 text-white" />
               </div>
               <h4 className="font-medium text-white mb-2">88% Burned</h4>
               <p className="text-gray-400">
-                Tokens are sent to the burn address and permanently removed from circulation
+                Permanently removed from circulation
               </p>
             </div>
             <div className="text-center">
               <div className="bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <ArrowRight className="w-6 h-6 text-white" />
               </div>
-              <h4 className="font-medium text-white mb-2">6% → $DRB</h4>
+              <h4 className="font-medium text-white mb-2">7% → Grok</h4>
               <p className="text-gray-400">
-                Automatically swapped to $DRB tokens and sent to recipient wallet
+                $DRB tokens sent to Grok's wallet
               </p>
             </div>
             <div className="text-center">
-              <div className="bg-orange-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="bg-green-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <ArrowRight className="w-6 h-6 text-white" />
               </div>
-              <h4 className="font-medium text-white mb-2">6% → $cbBTC</h4>
+              <h4 className="font-medium text-white mb-2">2% → Team</h4>
               <p className="text-gray-400">
-                Automatically swapped to $cbBTC tokens and sent to recipient wallet
+                1% $DRB + 1% $cbBTC to team wallet
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <ArrowRight className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-medium text-white mb-2">3% → Community</h4>
+              <p className="text-gray-400">
+                $cbBTC for pools and contests
               </p>
             </div>
           </div>
