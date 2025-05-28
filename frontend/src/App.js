@@ -846,6 +846,32 @@ function App() {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Cross-Chain Mode Toggle */}
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-white font-medium">🌉 Cross-Chain Mode</h4>
+                        <p className="text-purple-100 text-sm">Auto-route to optimal chains for best $DRB & $cbBTC liquidity</p>
+                      </div>
+                      <button
+                        onClick={() => setCrossChainMode(!crossChainMode)}
+                        className={`w-12 h-6 rounded-full transition-colors ${
+                          crossChainMode ? 'bg-green-500' : 'bg-gray-400'
+                        } relative`}
+                      >
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${
+                          crossChainMode ? 'translate-x-7' : 'translate-x-1'
+                        }`}></div>
+                      </button>
+                    </div>
+                    {crossChainMode && optimalRoutes && (
+                      <div className="mt-3 bg-black bg-opacity-30 rounded p-3 text-xs">
+                        <p className="text-blue-200">
+                          🎯 Optimal: $DRB on {optimalRoutes.optimal_chains.DRB}, $cbBTC on {optimalRoutes.optimal_chains.cbBTC}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                   {/* Token Address Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
