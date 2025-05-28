@@ -12,6 +12,10 @@ from datetime import datetime
 from web3 import Web3
 from eth_utils import is_address
 import requests
+import asyncio
+
+# Import blockchain service
+from blockchain_service import blockchain_service
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
