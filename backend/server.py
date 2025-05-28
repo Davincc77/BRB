@@ -223,7 +223,7 @@ async def get_token_info(token_address: str, chain: str):
 # API Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Crypto Burn Agent API"}
+    return {"message": "Burn Relief Bot API", "version": "1.0.0", "status": "active"}
 
 @api_router.get("/config")
 async def get_config():
