@@ -1,5 +1,5 @@
 """
-Blockchain service for real DEX integration and token burning
+Blockchain service for Burn Relief Bot - Real DEX integration and token burning
 Handles Uniswap V3 (EVM chains) and Jupiter (Solana) integrations
 """
 
