@@ -17,7 +17,7 @@ import asyncio
 # Import blockchain service
 import sys
 sys.path.append('/app/backend')
-from blockchain_service import blockchain_service
+from blockchain_service_simple import blockchain_service
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
