@@ -395,6 +395,45 @@ function App() {
         {/* Tab Content */}
         {activeTab === 'burn' && (
           <div className="grid lg:grid-cols-2 gap-8">
+        <div className="flex space-x-1 bg-gray-800 rounded-lg p-1 mb-6">
+          <button
+            onClick={() => setActiveTab('burn')}
+            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+              activeTab === 'burn' 
+                ? 'bg-orange-600 text-white' 
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            <Flame className="w-4 h-4 inline mr-2" />
+            Burn Tokens
+          </button>
+          <button
+            onClick={() => setActiveTab('community')}
+            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+              activeTab === 'community' 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            <Users className="w-4 h-4 inline mr-2" />
+            Community
+          </button>
+          <button
+            onClick={() => setActiveTab('leaderboard')}
+            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+              activeTab === 'leaderboard' 
+                ? 'bg-purple-600 text-white' 
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            <Trophy className="w-4 h-4 inline mr-2" />
+            Leaderboard
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'burn' && (
+          <div className="grid lg:grid-cols-2 gap-8">
           
           {/* Burn Interface */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
