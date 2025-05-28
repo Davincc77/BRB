@@ -225,6 +225,43 @@ class GasEstimate(BaseModel):
     fast: dict
     currency: str
 
+# Cross-chain models
+class CrossChainRouteRequest(BaseModel):
+    source_chain: str
+    source_token: str
+    amount: str
+
+class CrossChainRouteResponse(BaseModel):
+    success: bool
+    source_chain: str
+    optimal_routing: bool
+    routes: List[dict]
+    total_estimated_time: str
+    total_estimated_cost: str
+    cross_chain_required: bool
+    error: Optional[str] = None
+
+class CrossChainBurnRequest(BaseModel):
+    wallet_address: str
+    source_chain: str
+    source_token: str
+    amount: str
+    approve_cross_chain: bool = True
+
+class CrossChainTransaction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_address: str
+    source_chain: str
+    source_token: str
+    amount: str
+    execution_plan: List[dict]
+    status: str = "planning"  # planning, executing, monitoring, completed, failed
+    current_step: int = 0
+    total_steps: int = 0
+    estimated_completion: str
+    actual_completion: Optional[datetime] = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
 # Utility functions
 def is_token_blacklisted(token_address: str, token_symbol: str = None) -> bool:
     """Check if token is blacklisted"""
