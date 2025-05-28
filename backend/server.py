@@ -184,9 +184,10 @@ def calculate_amounts(total_amount: str):
 
 async def get_token_info(token_address: str, chain: str):
     """Get token information from blockchain"""
-    if chain == "base":
+    if chain in ["base", "ethereum", "polygon", "arbitrum"]:
         try:
-            web3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
+            chain_config = SUPPORTED_CHAINS[chain]
+            web3 = Web3(Web3.HTTPProvider(chain_config["rpc_url"]))
             
             # ERC-20 ABI for name and symbol
             erc20_abi = [
@@ -212,7 +213,7 @@ async def get_token_info(token_address: str, chain: str):
             
             return {"name": name, "symbol": symbol}
         except Exception as e:
-            logger.error(f"Error getting token info: {e}")
+            logger.error(f"Error getting token info for {chain}: {e}")
             return None
     
     # For Solana, we'd need to implement similar logic
