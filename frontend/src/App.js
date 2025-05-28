@@ -747,12 +747,20 @@ function App() {
                           <span className="text-red-400">{formatAmount((parseFloat(amount) * 0.88).toString())}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-400">6% → $DRB:</span>
-                          <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.06).toString())}</span>
+                          <span className="text-gray-400">7% → $DRB (Grok):</span>
+                          <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.07).toString())}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-400">6% → $cbBTC:</span>
-                          <span className="text-orange-400">{formatAmount((parseFloat(amount) * 0.06).toString())}</span>
+                          <span className="text-gray-400">1% → $DRB (Team):</span>
+                          <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">3% → $cbBTC (Community):</span>
+                          <span className="text-orange-400">{formatAmount((parseFloat(amount) * 0.03).toString())}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">1% → $cbBTC (Team):</span>
+                          <span className="text-orange-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
                         </div>
                       </div>
                     </div>
