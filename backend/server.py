@@ -125,6 +125,37 @@ class TokenValidationResponse(BaseModel):
     token_name: Optional[str] = None
     token_symbol: Optional[str] = None
 
+# Community models
+class BurnStats(BaseModel):
+    total_burns: int
+    total_amount_burned: str
+    total_users: int
+    trending_tokens: List[dict]
+    top_burners: List[dict]
+
+class Achievement(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_address: str
+    achievement_type: str  # "first_burn", "big_burner", "multi_chain", etc.
+    title: str
+    description: str
+    icon: str
+    earned_at: datetime = Field(default_factory=datetime.utcnow)
+    chain: str
+    amount: Optional[str] = None
+
+class Challenge(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    target_amount: str
+    current_amount: str = "0"
+    participants: int = 0
+    start_date: datetime
+    end_date: datetime
+    reward_description: str
+    status: str = "active"  # active, completed, expired
+
 # Utility functions
 def is_token_blacklisted(token_address: str, token_symbol: str = None) -> bool:
     """Check if token is blacklisted"""
