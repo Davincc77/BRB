@@ -324,8 +324,15 @@ async def get_burn_stats():
 async def validate_token(request: TokenValidationRequest):
     """Validate if a token can be burned"""
     try:
-        # Basic address validation
-        if request.chain == "base":
+        # Check if chain is supported
+        if request.chain not in SUPPORTED_CHAINS:
+            return TokenValidationResponse(
+                is_valid=False,
+                reason=f"Unsupported chain: {request.chain}"
+            )
+        
+        # Basic address validation for EVM chains
+        if request.chain in ["base", "ethereum", "polygon", "arbitrum"]:
             if not is_address(request.token_address):
                 return TokenValidationResponse(
                     is_valid=False,
