@@ -278,7 +278,7 @@ function App() {
           <div className="flex items-center space-x-4">
             <div className="flex bg-gray-800 rounded-lg p-1">
               <button
-                onClick={() => setActiveChain('base')}
+                onClick={() => handleChainSwitch('base')}
                 className={`px-4 py-2 rounded-md transition-colors ${
                   activeChain === 'base' 
                     ? 'bg-blue-600 text-white' 
@@ -288,7 +288,7 @@ function App() {
                 Base
               </button>
               <button
-                onClick={() => setActiveChain('solana')}
+                onClick={() => handleChainSwitch('solana')}
                 className={`px-4 py-2 rounded-md transition-colors ${
                   activeChain === 'solana' 
                     ? 'bg-purple-600 text-white' 
