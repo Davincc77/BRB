@@ -326,6 +326,7 @@ def main():
     tester.test_polygon_burn_transaction()
     tester.test_arbitrum_burn_transaction()
     tester.test_burn_blacklisted_token()
+    tester.test_burn_amount_calculation()
     
     # Transaction retrieval tests
     tester.test_get_transactions()
