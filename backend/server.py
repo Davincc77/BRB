@@ -67,6 +67,8 @@ class BurnTransaction(BaseModel):
     burn_amount: str  # 88%
     drb_swap_amount: str  # 6% 
     cbbtc_swap_amount: str  # 6%
+    recipient_wallet: str  # Where swapped tokens are sent
+    burn_wallet: str = BURN_ADDRESS  # Where burned tokens are sent
     status: str = "pending"  # pending, processing, completed, failed
     tx_hash: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
