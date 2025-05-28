@@ -510,9 +510,9 @@ function App() {
               {!isWalletConnected ? (
                 <div className="text-center py-12">
                   <Wallet className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-400 mb-4">Connect your wallet to start burning tokens on {activeChain}</p>
+                  <p className="text-gray-400 mb-4">Connect your wallet to start burning tokens on {availableChains[activeChain]?.name || activeChain}</p>
                   <p className="text-gray-500 text-sm mb-6">
-                    Use either MetaMask or Phantom - both work on all chains
+                    Burn Relief Bot supports both MetaMask and Phantom across all chains
                   </p>
                   <div className="flex justify-center space-x-4">
                     <button
