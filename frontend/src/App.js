@@ -22,6 +22,7 @@ const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 function App() {
   // State management
   const [activeChain, setActiveChain] = useState('base');
+  const [availableChains, setAvailableChains] = useState({});
   const [walletAddress, setWalletAddress] = useState('');
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [connectedWallet, setConnectedWallet] = useState(''); // 'metamask' or 'phantom'
@@ -32,6 +33,8 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [burnStats, setBurnStats] = useState(null);
+  const [activeTab, setActiveTab] = useState('burn'); // 'burn', 'community', 'leaderboard'
 
   // Check if wallet is already connected
   useEffect(() => {
