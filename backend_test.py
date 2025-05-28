@@ -265,16 +265,34 @@ def main():
     
     tester = CryptoBurnAgentTester()
     
-    # Run tests
+    # Basic API tests
     tester.test_root_endpoint()
-    tester.test_validate_valid_token()
+    
+    # Configuration and chains tests
+    tester.test_get_config()
+    tester.test_get_chains()
+    
+    # Community features tests
+    tester.test_get_burn_stats()
+    
+    # Multi-chain token validation tests
+    tester.test_validate_valid_token()  # Base chain
+    tester.test_ethereum_token_validation()
+    tester.test_polygon_token_validation()
+    tester.test_arbitrum_token_validation()
     tester.test_validate_invalid_token_format()
     tester.test_validate_blacklisted_token()
-    tester.test_burn_transaction()
+    
+    # Multi-chain burn transaction tests
+    tester.test_burn_transaction()  # Base chain
+    tester.test_ethereum_burn_transaction()
+    tester.test_polygon_burn_transaction()
+    tester.test_arbitrum_burn_transaction()
     tester.test_burn_blacklisted_token()
+    
+    # Transaction retrieval tests
     tester.test_get_transactions()
     tester.test_get_transactions_by_wallet()
-    tester.test_burn_amount_calculation()
     
     # Print results
     print("\n" + "=" * 50)
