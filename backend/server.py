@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,10 +6,12 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime
-
+from web3 import Web3
+from eth_utils import is_address
+import requests
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -25,32 +27,235 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Constants
+BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD"
+DRB_TOKEN_CA = "0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2"
+CBBTC_TOKEN_CA = "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
 
-# Define Models
-class StatusCheck(BaseModel):
+# Base chain configuration
+BASE_RPC_URL = "https://mainnet.base.org"
+BASE_CHAIN_ID = 8453
+
+# Blacklisted tokens (case-insensitive)
+BLACKLISTED_TOKENS = {
+    DRB_TOKEN_CA.lower(),
+    # ETH related
+    "eth", "ethereum", "weth", 
+    # BTC related  
+    "btc", "bitcoin", "wbtc", "cbbtc",
+    # Other blocked tokens
+    "xrp", "sui", "sol", "solana"
+}
+
+# Models
+class BurnRequest(BaseModel):
+    wallet_address: str
+    token_address: str
+    amount: str
+    chain: str  # "base" or "solana"
+    
+class BurnTransaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
+    wallet_address: str
+    token_address: str
+    amount: str
+    chain: str
+    burn_amount: str  # 88%
+    drb_swap_amount: str  # 6% 
+    cbbtc_swap_amount: str  # 6%
+    status: str = "pending"  # pending, processing, completed, failed
+    tx_hash: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class TokenValidationRequest(BaseModel):
+    token_address: str
+    chain: str
 
-# Add your routes to the router instead of directly to app
+class TokenValidationResponse(BaseModel):
+    is_valid: bool
+    reason: Optional[str] = None
+    token_name: Optional[str] = None
+    token_symbol: Optional[str] = None
+
+# Utility functions
+def is_token_blacklisted(token_address: str, token_symbol: str = None) -> bool:
+    """Check if token is blacklisted"""
+    # Check by address
+    if token_address.lower() in BLACKLISTED_TOKENS:
+        return True
+    
+    # Check by symbol if provided
+    if token_symbol and token_symbol.lower() in BLACKLISTED_TOKENS:
+        return True
+        
+    return False
+
+def calculate_amounts(total_amount: str):
+    """Calculate burn and swap amounts based on 88/6/6 split"""
+    total = float(total_amount)
+    burn_amount = total * 0.88
+    drb_amount = total * 0.06
+    cbbtc_amount = total * 0.06
+    
+    return {
+        "burn_amount": str(burn_amount),
+        "drb_swap_amount": str(drb_amount), 
+        "cbbtc_swap_amount": str(cbbtc_amount)
+    }
+
+async def get_token_info(token_address: str, chain: str):
+    """Get token information from blockchain"""
+    if chain == "base":
+        try:
+            web3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
+            
+            # ERC-20 ABI for name and symbol
+            erc20_abi = [
+                {
+                    "constant": True,
+                    "inputs": [],
+                    "name": "name",
+                    "outputs": [{"name": "", "type": "string"}],
+                    "type": "function"
+                },
+                {
+                    "constant": True,
+                    "inputs": [],
+                    "name": "symbol", 
+                    "outputs": [{"name": "", "type": "string"}],
+                    "type": "function"
+                }
+            ]
+            
+            contract = web3.eth.contract(address=token_address, abi=erc20_abi)
+            name = contract.functions.name().call()
+            symbol = contract.functions.symbol().call()
+            
+            return {"name": name, "symbol": symbol}
+        except Exception as e:
+            logger.error(f"Error getting token info: {e}")
+            return None
+    
+    # For Solana, we'd need to implement similar logic
+    # For now, return None
+    return None
+
+# API Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Crypto Burn Agent API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
+@api_router.post("/validate-token", response_model=TokenValidationResponse)
+async def validate_token(request: TokenValidationRequest):
+    """Validate if a token can be burned"""
+    try:
+        # Basic address validation
+        if request.chain == "base":
+            if not is_address(request.token_address):
+                return TokenValidationResponse(
+                    is_valid=False,
+                    reason="Invalid token address format"
+                )
+        
+        # Get token info
+        token_info = await get_token_info(request.token_address, request.chain)
+        
+        if not token_info:
+            return TokenValidationResponse(
+                is_valid=False,
+                reason="Could not fetch token information"
+            )
+        
+        # Check if token is blacklisted
+        if is_token_blacklisted(request.token_address, token_info.get("symbol")):
+            return TokenValidationResponse(
+                is_valid=False,
+                reason=f"Token {token_info.get('symbol', 'Unknown')} is not allowed for burning",
+                token_name=token_info.get("name"),
+                token_symbol=token_info.get("symbol")
+            )
+        
+        return TokenValidationResponse(
+            is_valid=True,
+            token_name=token_info.get("name"),
+            token_symbol=token_info.get("symbol")
+        )
+        
+    except Exception as e:
+        logger.error(f"Token validation error: {e}")
+        return TokenValidationResponse(
+            is_valid=False,
+            reason="Token validation failed"
+        )
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
+@api_router.post("/burn", response_model=BurnTransaction)
+async def create_burn_transaction(request: BurnRequest):
+    """Create a burn transaction"""
+    try:
+        # Validate token first
+        validation = await validate_token(TokenValidationRequest(
+            token_address=request.token_address,
+            chain=request.chain
+        ))
+        
+        if not validation.is_valid:
+            raise HTTPException(status_code=400, detail=validation.reason)
+        
+        # Calculate amounts
+        amounts = calculate_amounts(request.amount)
+        
+        # Create transaction record
+        burn_tx = BurnTransaction(
+            wallet_address=request.wallet_address,
+            token_address=request.token_address,
+            amount=request.amount,
+            chain=request.chain,
+            burn_amount=amounts["burn_amount"],
+            drb_swap_amount=amounts["drb_swap_amount"],
+            cbbtc_swap_amount=amounts["cbbtc_swap_amount"]
+        )
+        
+        # Save to database
+        await db.burn_transactions.insert_one(burn_tx.dict())
+        
+        return burn_tx
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Burn transaction creation error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create burn transaction")
+
+@api_router.get("/transactions", response_model=List[BurnTransaction])
+async def get_transactions(wallet_address: Optional[str] = None):
+    """Get burn transactions"""
+    try:
+        query = {}
+        if wallet_address:
+            query["wallet_address"] = wallet_address
+            
+        transactions = await db.burn_transactions.find(query).sort("timestamp", -1).to_list(100)
+        return [BurnTransaction(**tx) for tx in transactions]
+        
+    except Exception as e:
+        logger.error(f"Get transactions error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch transactions")
+
+@api_router.get("/transaction/{transaction_id}", response_model=BurnTransaction)
+async def get_transaction(transaction_id: str):
+    """Get specific transaction"""
+    try:
+        transaction = await db.burn_transactions.find_one({"id": transaction_id})
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
+        return BurnTransaction(**transaction)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get transaction error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch transaction")
 
 # Include the router in the main app
 app.include_router(api_router)
