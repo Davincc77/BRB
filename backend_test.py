@@ -13,8 +13,15 @@ class CryptoBurnAgentTester:
         
         # Constants for testing
         self.valid_base_token = "0x4200000000000000000000000000000000000006"  # Example token on Base
+        self.valid_eth_token = "0xdAC17F958D2ee523a2206206994597C13D831ec7"  # USDT on Ethereum
+        self.valid_polygon_token = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"  # USDC on Polygon
+        self.valid_arbitrum_token = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"  # USDC on Arbitrum
         self.drb_token = "0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2"  # Blacklisted DRB token
         self.test_wallet = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"  # Test wallet address
+        self.test_solana_wallet = "CtFtfe2pYRiJVAUrEZtdFKZVV2UFpdaWBU1Ve7aPC"  # Test Solana wallet
+        
+        # Expected chains
+        self.expected_chains = ["base", "solana", "ethereum", "polygon", "arbitrum"]
         
     def run_test(self, name, method, endpoint, expected_status=200, data=None, params=None):
         """Run a single API test"""
