@@ -73,9 +73,9 @@ function App() {
     }
   };
 
-  const connectWallet = async () => {
+  const connectWallet = async (walletType) => {
     try {
-      if (activeChain === 'base') {
+      if (walletType === 'metamask') {
         if (!window.ethereum) {
           showNotification('MetaMask not detected. Please install MetaMask.', 'error');
           return;
@@ -84,27 +84,30 @@ function App() {
         // Request account access
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         
-        // Switch to Base chain
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: BASE_CHAIN_CONFIG.chainId }],
-          });
-        } catch (switchError) {
-          // Add Base chain if it doesn't exist
-          if (switchError.code === 4902) {
+        // If connecting to Base chain, switch to it
+        if (activeChain === 'base') {
+          try {
             await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [BASE_CHAIN_CONFIG],
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: BASE_CHAIN_CONFIG.chainId }],
             });
+          } catch (switchError) {
+            // Add Base chain if it doesn't exist
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [BASE_CHAIN_CONFIG],
+              });
+            }
           }
         }
 
         setWalletAddress(accounts[0]);
         setIsWalletConnected(true);
-        showNotification('MetaMask connected successfully!', 'success');
+        setConnectedWallet('metamask');
+        showNotification(`MetaMask connected for ${activeChain} chain!`, 'success');
         
-      } else if (activeChain === 'solana') {
+      } else if (walletType === 'phantom') {
         if (!window.solana) {
           showNotification('Phantom wallet not detected. Please install Phantom.', 'error');
           return;
@@ -113,7 +116,8 @@ function App() {
         const response = await window.solana.connect();
         setWalletAddress(response.publicKey.toString());
         setIsWalletConnected(true);
-        showNotification('Phantom wallet connected successfully!', 'success');
+        setConnectedWallet('phantom');
+        showNotification(`Phantom wallet connected for ${activeChain} chain!`, 'success');
       }
     } catch (error) {
       console.error('Wallet connection error:', error);
