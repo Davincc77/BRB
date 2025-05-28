@@ -125,32 +125,14 @@ function App() {
     }
   };
 
-  const handleChainSwitch = async (newChain) => {
-    setActiveChain(newChain);
-    
-    // If MetaMask is connected and switching to Base, ensure correct network
-    if (connectedWallet === 'metamask' && newChain === 'base' && window.ethereum) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: BASE_CHAIN_CONFIG.chainId }],
-        });
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [BASE_CHAIN_CONFIG],
-          });
-        }
-      }
-    }
-    
-    // Clear validation when switching chains
+  const disconnectWallet = () => {
+    setWalletAddress('');
+    setIsWalletConnected(false);
+    setConnectedWallet('');
     setTokenAddress('');
     setAmount('');
     setTokenValidation(null);
-    
-    showNotification(`Switched to ${newChain} chain`, 'info');
+    showNotification('Wallet disconnected', 'info');
   };
 
   const validateToken = async (address) => {
