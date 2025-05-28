@@ -151,6 +151,21 @@ async def get_token_info(token_address: str, chain: str):
 async def root():
     return {"message": "Crypto Burn Agent API"}
 
+@api_router.get("/config")
+async def get_config():
+    """Get current configuration"""
+    return {
+        "burn_address": BURN_ADDRESS,
+        "drb_token_address": DRB_TOKEN_CA,
+        "cbbtc_token_address": CBBTC_TOKEN_CA,
+        "base_recipient_wallet": BASE_RECIPIENT_WALLET,
+        "solana_recipient_wallet": SOLANA_RECIPIENT_WALLET,
+        "supported_chains": ["base", "solana"],
+        "burn_percentage": 88,
+        "drb_swap_percentage": 6,
+        "cbbtc_swap_percentage": 6
+    }
+
 @api_router.post("/validate-token", response_model=TokenValidationResponse)
 async def validate_token(request: TokenValidationRequest):
     """Validate if a token can be burned"""
