@@ -333,8 +333,24 @@ function App() {
     const address = e.target.value;
     setTokenAddress(address);
     
-    // Debounce validation
-    setTimeout(() => validateToken(address), 500);
+    // Debounce validation and price fetching
+    setTimeout(() => {
+      validateToken(address);
+      if (address && amount) {
+        updateSwapQuotes(address, amount);
+        fetchTokenPrice(address, activeChain);
+      }
+    }, 500);
+  };
+
+  const handleAmountChange = (e) => {
+    const newAmount = e.target.value;
+    setAmount(newAmount);
+    
+    // Update swap quotes when amount changes
+    if (tokenAddress && newAmount && tokenValidation?.is_valid) {
+      setTimeout(() => updateSwapQuotes(tokenAddress, newAmount), 300);
+    }
   };
 
   const handleBurn = async () => {
