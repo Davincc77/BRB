@@ -128,6 +128,7 @@ function App() {
   const disconnectWallet = () => {
     setWalletAddress('');
     setIsWalletConnected(false);
+    setConnectedWallet('');
     setTokenAddress('');
     setAmount('');
     setTokenValidation(null);
