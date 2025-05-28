@@ -264,7 +264,7 @@
 }
 
 .tab-inactive {
-  @apply text-gray-300 hover:text-white hover:bg-gray-700 transform transition-all duration-200 hover:scale-102;
+  @apply text-gray-300 hover:text-white hover:bg-gray-700 transform transition-all duration-200 hover:scale-105;
 }
 
 /* Enhanced Progress indicators */
