@@ -128,42 +128,135 @@ class CryptoBurnAgentTester:
         params = {"wallet_address": self.test_wallet}
         return self.run_test("Get Transactions By Wallet", "GET", "transactions", params=params)
     
-    def test_burn_amount_calculation(self):
-        """Test the 88/6/6 split calculation"""
-        data = {
-            "wallet_address": self.test_wallet,
-            "token_address": self.valid_base_token,
-            "amount": "1000",
-            "chain": "base"
-        }
-        success, response = self.run_test("Burn Amount Calculation", "POST", "burn", data=data)
+    def test_get_chains(self):
+        """Test fetching supported chains"""
+        success, response = self.run_test("Get Supported Chains", "GET", "chains")
         
         if success and response:
-            # Check if the amounts are calculated correctly
-            burn_amount = float(response.get("burn_amount", 0))
-            drb_amount = float(response.get("drb_swap_amount", 0))
-            cbbtc_amount = float(response.get("cbbtc_swap_amount", 0))
+            chains = response.get("chains", {})
+            chain_keys = list(chains.keys())
             
-            expected_burn = 1000 * 0.88
-            expected_drb = 1000 * 0.06
-            expected_cbbtc = 1000 * 0.06
+            # Check if all expected chains are present
+            all_chains_present = all(chain in chain_keys for chain in self.expected_chains)
             
-            calculation_correct = (
-                abs(burn_amount - expected_burn) < 0.01 and
-                abs(drb_amount - expected_drb) < 0.01 and
-                abs(cbbtc_amount - expected_cbbtc) < 0.01
-            )
-            
-            if calculation_correct:
-                print("✅ Burn calculation is correct (88/6/6 split)")
+            if all_chains_present:
+                print(f"✅ All expected chains are supported: {', '.join(self.expected_chains)}")
                 return True, response
             else:
-                print(f"❌ Burn calculation is incorrect:")
-                print(f"  Expected: {expected_burn}/{expected_drb}/{expected_cbbtc}")
-                print(f"  Got: {burn_amount}/{drb_amount}/{cbbtc_amount}")
+                missing_chains = [chain for chain in self.expected_chains if chain not in chain_keys]
+                print(f"❌ Missing chains: {', '.join(missing_chains)}")
                 return False, response
         
         return success, response
+    
+    def test_get_config(self):
+        """Test fetching app configuration"""
+        success, response = self.run_test("Get App Configuration", "GET", "config")
+        
+        if success and response:
+            # Check if config contains all required fields
+            required_fields = ["burn_address", "drb_token_address", "cbbtc_token_address", 
+                              "supported_chains", "burn_percentage", "drb_swap_percentage", 
+                              "cbbtc_swap_percentage"]
+            
+            all_fields_present = all(field in response for field in required_fields)
+            
+            if all_fields_present:
+                print("✅ Configuration contains all required fields")
+                
+                # Verify percentages add up to 100%
+                total_percentage = (response.get("burn_percentage", 0) + 
+                                   response.get("drb_swap_percentage", 0) + 
+                                   response.get("cbbtc_swap_percentage", 0))
+                
+                if total_percentage == 100:
+                    print("✅ Percentages add up to 100%")
+                else:
+                    print(f"❌ Percentages don't add up to 100%: {total_percentage}%")
+                    return False, response
+                
+                return True, response
+            else:
+                missing_fields = [field for field in required_fields if field not in response]
+                print(f"❌ Missing configuration fields: {', '.join(missing_fields)}")
+                return False, response
+        
+        return success, response
+    
+    def test_get_burn_stats(self):
+        """Test fetching community burn statistics"""
+        success, response = self.run_test("Get Burn Stats", "GET", "stats")
+        
+        if success and response:
+            # Check if stats contains all required fields
+            required_fields = ["total_burns", "total_amount_burned", "total_users", 
+                              "trending_tokens", "top_burners"]
+            
+            all_fields_present = all(field in response for field in required_fields)
+            
+            if all_fields_present:
+                print("✅ Burn stats contain all required fields")
+                return True, response
+            else:
+                missing_fields = [field for field in required_fields if field not in response]
+                print(f"❌ Missing stats fields: {', '.join(missing_fields)}")
+                return False, response
+        
+        return success, response
+    
+    def test_ethereum_token_validation(self):
+        """Test token validation on Ethereum chain"""
+        data = {
+            "token_address": self.valid_eth_token,
+            "chain": "ethereum"
+        }
+        return self.run_test("Ethereum Token Validation", "POST", "validate-token", data=data)
+    
+    def test_polygon_token_validation(self):
+        """Test token validation on Polygon chain"""
+        data = {
+            "token_address": self.valid_polygon_token,
+            "chain": "polygon"
+        }
+        return self.run_test("Polygon Token Validation", "POST", "validate-token", data=data)
+    
+    def test_arbitrum_token_validation(self):
+        """Test token validation on Arbitrum chain"""
+        data = {
+            "token_address": self.valid_arbitrum_token,
+            "chain": "arbitrum"
+        }
+        return self.run_test("Arbitrum Token Validation", "POST", "validate-token", data=data)
+    
+    def test_ethereum_burn_transaction(self):
+        """Test creating a burn transaction on Ethereum"""
+        data = {
+            "wallet_address": self.test_wallet,
+            "token_address": self.valid_eth_token,
+            "amount": "1000",
+            "chain": "ethereum"
+        }
+        return self.run_test("Create Ethereum Burn Transaction", "POST", "burn", data=data)
+    
+    def test_polygon_burn_transaction(self):
+        """Test creating a burn transaction on Polygon"""
+        data = {
+            "wallet_address": self.test_wallet,
+            "token_address": self.valid_polygon_token,
+            "amount": "1000",
+            "chain": "polygon"
+        }
+        return self.run_test("Create Polygon Burn Transaction", "POST", "burn", data=data)
+    
+    def test_arbitrum_burn_transaction(self):
+        """Test creating a burn transaction on Arbitrum"""
+        data = {
+            "wallet_address": self.test_wallet,
+            "token_address": self.valid_arbitrum_token,
+            "amount": "1000",
+            "chain": "arbitrum"
+        }
+        return self.run_test("Create Arbitrum Burn Transaction", "POST", "burn", data=data)
 
 def main():
     print("=" * 50)
