@@ -6,6 +6,52 @@
   text-align: left;
 }
 
+/* === SILVERISH BLUE THEME ENHANCEMENTS === */
+:root {
+  --silver-primary: #8892A0;
+  --ice-blue: #B8D4E3;
+  --silver-blue: #6B7B8C;
+  --metallic-silver: #A8B4C0;
+  --cool-blue: #4A90E2;
+  --shimmer: #E8F0F5;
+  --silver-glow: rgba(136, 146, 160, 0.3);
+  --ice-glow: rgba(184, 212, 227, 0.2);
+}
+
+/* Enhanced background with silverish blue gradients */
+body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 20%, #2a3441 40%, #1e293b 60%, #0f172a 100%);
+  background-attachment: fixed;
+}
+
+/* Silverish blue gradient overlays */
+.silverish-gradient {
+  background: linear-gradient(135deg, 
+    rgba(136, 146, 160, 0.1) 0%, 
+    rgba(184, 212, 227, 0.05) 25%, 
+    rgba(107, 123, 140, 0.08) 50%, 
+    rgba(184, 212, 227, 0.05) 75%, 
+    rgba(136, 146, 160, 0.1) 100%);
+}
+
+/* Enhanced silver glass effects */
+.silver-glass {
+  background: rgba(136, 146, 160, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(184, 212, 227, 0.15);
+  box-shadow: 
+    0 8px 32px 0 rgba(136, 146, 160, 0.1),
+    inset 0 1px 0 rgba(232, 240, 245, 0.1);
+}
+
+.silver-glass:hover {
+  background: rgba(136, 146, 160, 0.12);
+  border-color: rgba(184, 212, 227, 0.25);
+  box-shadow: 
+    0 12px 40px 0 rgba(136, 146, 160, 0.15),
+    inset 0 1px 0 rgba(232, 240, 245, 0.15);
+}
+
 /* Enhanced Animations & Transitions */
 @keyframes fadeInUp {
   from {
