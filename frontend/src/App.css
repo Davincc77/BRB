@@ -18,9 +18,19 @@
   --ice-glow: rgba(184, 212, 227, 0.2);
 }
 
-/* Enhanced background with silverish blue gradients */
+/* Enhanced background with blueish silverish gradients */
 body {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 20%, #2a3441 40%, #1e293b 60%, #0f172a 100%);
+  background: linear-gradient(135deg, 
+    #0a1628 0%, 
+    #1e3a8a 10%, 
+    #1e40af 20%, 
+    #2563eb 30%,
+    #3b82f6 40%,
+    #1e40af 50%,
+    #1e3a8a 60%,
+    #0f172a 70%,
+    #1e293b 80%,
+    #0a1628 100%);
   background-attachment: fixed;
 }
 
