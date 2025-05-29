@@ -1000,12 +1000,12 @@ function App() {
                           <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-400">3% → $cbBTC (Community):</span>
-                          <span className="text-orange-400">{formatAmount((parseFloat(amount) * 0.03).toString())}</span>
+                          <span className="text-gray-400">1.5% → $BNKR (Banker Club):</span>
+                          <span className="bnkr-highlight">{parseFloat(burnPreview.bnkr_community_amount || 0).toFixed(6)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-400">1% → $cbBTC (Team):</span>
-                          <span className="text-orange-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                          <span className="text-gray-400">1% → $BNKR (Team):</span>
+                          <span className="bnkr-highlight">{parseFloat(burnPreview.bnkr_team_amount || 0).toFixed(6)}</span>
                         </div>
                       </div>
                     </div>
