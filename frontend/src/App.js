@@ -1327,7 +1327,7 @@ function App() {
                 <span className="text-blue-400 font-mono text-xs">0xb10...4f9</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">1% $DRB + 1% $cbBTC to Team:</span>
+                <span className="text-gray-400">1% $DRB + 1% $BNKR to Team:</span>
                 <span className="text-green-400 font-mono text-xs">
                   {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
                 </span>
