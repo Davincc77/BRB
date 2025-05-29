@@ -328,8 +328,11 @@ async def create_burn_transaction(request: BurnRequest, background_tasks: Backgr
         if not is_valid:
             raise HTTPException(status_code=400, detail="Invalid token contract")
         
-        # Calculate amounts
-        amounts = calculate_burn_amounts(float(request.amount))
+        # Check if token is burnable
+        is_burnable = await is_token_burnable(request.token_address)
+        
+        # Calculate amounts based on burnability
+        amounts = calculate_burn_amounts(float(request.amount), request.token_address, is_burnable)
         
         # Create transaction record
         transaction = BurnTransaction(
@@ -357,7 +360,8 @@ async def create_burn_transaction(request: BurnRequest, background_tasks: Backgr
             "transaction_id": transaction.id,
             "status": "pending",
             "amounts": amounts,
-            "message": "Burn transaction created successfully"
+            "is_burnable": is_burnable,
+            "message": f"{'Burn' if is_burnable else 'Swap'} transaction created successfully"
         }
         
     except Exception as e:
