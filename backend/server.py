@@ -286,18 +286,19 @@ def is_token_blacklisted(token_address: str, token_symbol: str = None) -> bool:
     return False
 
 def calculate_amounts(total_amount: str):
-    """Calculate burn and distribution amounts based on new 88/8/4 split"""
+    """Calculate burn and distribution amounts based on new 88/9.5/2.5 split"""
     total = float(total_amount)
     
     # 88% burned
     burn_amount = total * (BURN_PERCENTAGE / 100)
     
-    # 8% DRB allocation (7% to Grok, 1% to team)
+    # 9.5% DRB allocation (7% to Grok, 1% to team, 1.5% to community)
     drb_total_amount = total * (DRB_PERCENTAGE / 100)
     drb_grok_amount = total * (DRB_GROK_PERCENTAGE / 100)
     drb_team_amount = total * (DRB_TEAM_PERCENTAGE / 100)
+    drb_community_amount = total * (DRB_COMMUNITY_PERCENTAGE / 100)
     
-    # 4% cbBTC allocation (3% to community, 1% to team)
+    # 2.5% cbBTC allocation (1.5% to community, 1% to team)
     cbbtc_total_amount = total * (CBBTC_PERCENTAGE / 100)
     cbbtc_community_amount = total * (CBBTC_COMMUNITY_PERCENTAGE / 100)
     cbbtc_team_amount = total * (CBBTC_TEAM_PERCENTAGE / 100)
@@ -307,6 +308,7 @@ def calculate_amounts(total_amount: str):
         "drb_total_amount": str(drb_total_amount),
         "drb_grok_amount": str(drb_grok_amount),
         "drb_team_amount": str(drb_team_amount),
+        "drb_community_amount": str(drb_community_amount),
         "cbbtc_total_amount": str(cbbtc_total_amount),
         "cbbtc_community_amount": str(cbbtc_community_amount),
         "cbbtc_team_amount": str(cbbtc_team_amount)
