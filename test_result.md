@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Continue where it stopped. UI/UX should be enhanced with a silverish blue color scheme."
+user_problem_statement: "Test the updated Burn Relief Bot backend after the Base-only simplification and $BNKR token integration. Focus on: 1. Health Check: Verify /api/health endpoint is working 2. Base Chain Only: Test /api/chains endpoint to confirm only Base chain is returned 3. $BNKR Token Integration: Verify the API returns $BNKR token information instead of cbBTC 4. Token Allocations: Test that burn allocations show correct percentages for $BNKR (1.5% for Banker Club Members, 1% for team) 5. Burn Statistics: Ensure stats endpoint returns correct BNKR allocation data 6. Token Validation: Test that token validation works on Base chain"
 
 backend:
   - task: "Burn Relief Bot Backend API"
