@@ -284,17 +284,62 @@ body {
   border-color: rgba(184, 212, 227, 0.4);
 }
 
-/* Enhanced Card styles */
+/* Enhanced Card styles with silverish blue accents */
 .card {
   @apply bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-lg backdrop-blur-sm bg-opacity-90 transition-all duration-300 hover:shadow-xl hover:border-gray-600;
+  background: linear-gradient(145deg, 
+    rgba(31, 41, 55, 0.9), 
+    rgba(107, 123, 140, 0.1));
+  border: 1px solid rgba(184, 212, 227, 0.15);
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(232, 240, 245, 0.05);
+}
+
+.card:hover {
+  background: linear-gradient(145deg, 
+    rgba(31, 41, 55, 0.95), 
+    rgba(107, 123, 140, 0.15));
+  border-color: rgba(184, 212, 227, 0.25);
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.3),
+    0 5px 15px rgba(136, 146, 160, 0.1),
+    inset 0 1px 0 rgba(232, 240, 245, 0.1);
 }
 
 .card-interactive {
   @apply card transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer;
+  background: linear-gradient(145deg, 
+    rgba(31, 41, 55, 0.9), 
+    rgba(107, 123, 140, 0.1));
+}
+
+.card-interactive:hover {
+  background: linear-gradient(145deg, 
+    rgba(31, 41, 55, 0.95), 
+    rgba(136, 146, 160, 0.12));
+  box-shadow: 
+    0 20px 45px rgba(0, 0, 0, 0.35),
+    0 10px 25px rgba(136, 146, 160, 0.15),
+    inset 0 1px 0 rgba(232, 240, 245, 0.1);
 }
 
 .card-glass {
   @apply bg-white bg-opacity-5 backdrop-blur-md border border-white border-opacity-10 rounded-xl p-6 shadow-xl;
+  background: rgba(136, 146, 160, 0.08);
+  border: 1px solid rgba(184, 212, 227, 0.15);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.37),
+    inset 0 1px 0 rgba(232, 240, 245, 0.1);
+}
+
+.card-glass:hover {
+  background: rgba(136, 146, 160, 0.12);
+  border-color: rgba(184, 212, 227, 0.25);
+  box-shadow: 
+    0 12px 40px 0 rgba(31, 38, 135, 0.45),
+    0 5px 15px rgba(136, 146, 160, 0.2),
+    inset 0 1px 0 rgba(232, 240, 245, 0.15);
 }
 
 /* Enhanced Input styles */
