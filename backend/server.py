@@ -98,11 +98,12 @@ COMMUNITY_WALLET = "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7"  # Community pool
 
 # New allocation percentages
 BURN_PERCENTAGE = 88.0  # 88% burned
-DRB_PERCENTAGE = 8.0    # 8% total DRB allocation
-DRB_GROK_PERCENTAGE = 7.0    # 7% DRB to Grok's wallet  
-DRB_TEAM_PERCENTAGE = 1.0    # 1% DRB to team
-CBBTC_PERCENTAGE = 4.0       # 4% total cbBTC allocation
-CBBTC_COMMUNITY_PERCENTAGE = 3.0  # 3% cbBTC for community pools/contests
+DRB_PERCENTAGE = 9.5    # 9.5% total DRB allocation (7% Grok + 1% team + 1.5% community)
+DRB_GROK_PERCENTAGE = 7.0      # 7% DRB to Grok's wallet  
+DRB_TEAM_PERCENTAGE = 1.0      # 1% DRB to team
+DRB_COMMUNITY_PERCENTAGE = 1.5 # 1.5% DRB to community
+CBBTC_PERCENTAGE = 2.5         # 2.5% total cbBTC allocation (1.5% community + 1% team)
+CBBTC_COMMUNITY_PERCENTAGE = 1.5  # 1.5% cbBTC for community pools/contests
 CBBTC_TEAM_PERCENTAGE = 1.0       # 1% cbBTC to team
 
 # Legacy constants for backward compatibility
