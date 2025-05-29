@@ -107,11 +107,11 @@ user_problem_statement: "Test the updated Burn Relief Bot backend after the Base
 backend:
   - task: "Burn Relief Bot Backend API"
     implemented: true
-    working: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "main"
@@ -119,66 +119,84 @@ backend:
         - working: true
           agent: "testing"
           comment: "Comprehensive backend API testing completed. All endpoints are functioning correctly. Health check, config, stats, chains, and cross-chain routing endpoints all return proper responses. The backend successfully handles token validation, gas estimates, swap quotes, and cross-chain burn execution."
+        - working: "NA"
+          agent: "main"
+          comment: "Updated backend to Base-only chain and integrated $BNKR token instead of cbBTC. Simplified the application to focus only on Base chain and $BNKR token."
 
   - task: "Health Check Endpoint"
     implemented: true
-    working: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "testing"
           comment: "The /api/ health check endpoint returns status code 200 with correct version (1.0.0) and active status. Endpoint is working as expected."
+        - working: "NA"
+          agent: "main"
+          comment: "Health check endpoint should still be working after Base-only simplification."
 
-  - task: "Stats Endpoint"
+  - task: "Base Chain Only"
     implemented: true
-    working: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: true
-          agent: "testing"
-          comment: "The /api/stats endpoint returns proper burn statistics with correct data structure. All required fields (total_burns, total_amount_burned, total_users, trending_tokens, top_burners) are present with correct data types."
+        - working: "NA"
+          agent: "main"
+          comment: "Updated /api/chains endpoint to return only Base chain information instead of multiple chains."
 
-  - task: "Community Stats"
+  - task: "$BNKR Token Integration"
     implemented: true
-    working: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: true
-          agent: "testing"
-          comment: "Community statistics are correctly returned through the /api/stats endpoint. The endpoint provides trending tokens and top burners data, which are essential community metrics."
+        - working: "NA"
+          agent: "main"
+          comment: "Integrated $BNKR token information instead of cbBTC in all relevant endpoints."
 
-  - task: "Chain Information"
+  - task: "Token Allocations"
     implemented: true
-    working: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: true
-          agent: "testing"
-          comment: "The /api/chains endpoint returns information for all 6 supported chains (Base, Solana, Ethereum, Polygon, Sui, Bitcoin). Each chain entry contains the required fields: name, chain_id, rpc_url, explorer, recipient_wallet, and currency."
+        - working: "NA"
+          agent: "main"
+          comment: "Updated burn allocations to show correct percentages for $BNKR (1.5% for Banker Club Members, 1% for team)."
 
-  - task: "Cross-chain Routing"
+  - task: "Burn Statistics"
     implemented: true
-    working: true
+    working: "NA"
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: true
-          agent: "testing"
-          comment: "The /api/cross-chain/optimal-routes endpoint returns proper cross-chain routing information. The endpoint correctly identifies optimal chains for DRB (Base) and cbBTC (Ethereum), and provides supported bridges, chains, and routing strategy."
+        - working: "NA"
+          agent: "main"
+          comment: "Updated stats endpoint to return correct BNKR allocation data."
+
+  - task: "Token Validation"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Updated token validation to work on Base chain for $BNKR token."
 
 frontend:
   - task: "Burn Relief Bot Frontend Interface"
