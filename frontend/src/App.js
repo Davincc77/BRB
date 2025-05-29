@@ -1084,34 +1084,83 @@ function App() {
 
                   {/* Regular Burn Summary */}
                   {!crossChainMode && amount && tokenValidation?.is_valid && (
-                    <div className="bg-gray-700 rounded-lg p-4 space-y-2">
-                      <h4 className="text-sm font-medium text-gray-300">Burn Summary</h4>
+                    <div className="silver-glass rounded-lg p-4 space-y-2">
+                      <h4 className="text-sm font-medium text-gray-300 flex items-center">
+                        Allocation Preview
+                        {tokenBurnability && (
+                          <span className={`ml-2 px-2 py-1 rounded text-xs ${
+                            tokenBurnability.is_burnable 
+                              ? 'bg-red-500 bg-opacity-20 text-red-300' 
+                              : 'bg-blue-500 bg-opacity-20 text-blue-300'
+                          }`}>
+                            {tokenBurnability.is_burnable ? 'BURNABLE' : 'SWAP ONLY'}
+                          </span>
+                        )}
+                      </h4>
                       <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">88% Burned:</span>
-                          <span className="text-red-400">{formatAmount((parseFloat(amount) * 0.88).toString())}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">7% → $DRB (Grok):</span>
-                          <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.07).toString())}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">1.5% → $DRB (Community):</span>
-                          <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">1% → $DRB (Team):</span>
-                          <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">1.5% → $BNKR (Banker Club):</span>
-                          <span className="bnkr-highlight">{parseFloat(burnPreview.bnkr_community_amount || 0).toFixed(6)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">1% → $BNKR (Team):</span>
-                          <span className="bnkr-highlight">{parseFloat(burnPreview.bnkr_team_amount || 0).toFixed(6)}</span>
-                        </div>
+                        {tokenBurnability?.is_burnable ? (
+                          // Burnable token allocations
+                          <>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">88% Burned:</span>
+                              <span className="text-red-400">{formatAmount((parseFloat(amount) * 0.88).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">7% → $DRB (Grok):</span>
+                              <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.07).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1.5% → $DRB (Community):</span>
+                              <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1% → $DRB (Team):</span>
+                              <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1.5% → $BNKR (Banker Club):</span>
+                              <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1% → $BNKR (Team):</span>
+                              <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                            </div>
+                          </>
+                        ) : (
+                          // Non-burnable token allocations (no burning)
+                          <>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">0% Burned:</span>
+                              <span className="text-gray-500">Protected Token</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">95% → $DRB (Grok):</span>
+                              <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.95).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1.5% → $DRB (Community):</span>
+                              <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1% → $DRB (Team):</span>
+                              <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1.5% → $BNKR (Banker Club):</span>
+                              <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1% → $BNKR (Team):</span>
+                              <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                            </div>
+                          </>
+                        )}
                       </div>
+                      {tokenBurnability && (
+                        <div className="mt-3 text-xs text-gray-400 bg-black bg-opacity-30 rounded p-2">
+                          💡 {tokenBurnability.message}
+                        </div>
+                      )}
                     </div>
                   )}
 
