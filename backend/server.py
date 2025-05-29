@@ -207,18 +207,33 @@ async def validate_token_contract(token_address: str, chain: str = "base") -> bo
         logger.error(f"Token validation failed: {e}")
         return False
 
-def calculate_burn_amounts(total_amount: float) -> Dict[str, str]:
+def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burnable: bool = True) -> Dict[str, str]:
     """Calculate distribution amounts for burn transaction"""
     total = float(total_amount)
     
-    burn_amount = total * (BURN_PERCENTAGE / 100)
-    drb_total_amount = total * (DRB_PERCENTAGE / 100)
-    drb_grok_amount = total * (DRB_GROK_PERCENTAGE / 100)
-    drb_team_amount = total * (DRB_TEAM_PERCENTAGE / 100)
-    drb_community_amount = total * (DRB_COMMUNITY_PERCENTAGE / 100)
-    bnkr_total_amount = total * (BNKR_PERCENTAGE / 100)
-    bnkr_community_amount = total * (BNKR_COMMUNITY_PERCENTAGE / 100)
-    bnkr_team_amount = total * (BNKR_TEAM_PERCENTAGE / 100)
+    # Check if token should be burned
+    if not is_burnable or token_address.lower() in [t.lower() for t in NON_BURNABLE_TOKENS]:
+        # For non-burnable tokens: no burning, all goes to swaps
+        # 95% (88% + 7%) DRB to Grok, 1.5% DRB to community, 1% DRB to team
+        # 1.5% BNKR to Banker Club, 1% BNKR to team
+        burn_amount = 0.0  # No burning for these tokens
+        drb_grok_amount = total * ((BURN_PERCENTAGE + DRB_GROK_PERCENTAGE) / 100)  # 95%
+        drb_community_amount = total * (DRB_COMMUNITY_PERCENTAGE / 100)  # 1.5%
+        drb_team_amount = total * (DRB_TEAM_PERCENTAGE / 100)  # 1%
+        drb_total_amount = drb_grok_amount + drb_community_amount + drb_team_amount
+        bnkr_community_amount = total * (BNKR_COMMUNITY_PERCENTAGE / 100)  # 1.5%
+        bnkr_team_amount = total * (BNKR_TEAM_PERCENTAGE / 100)  # 1%
+        bnkr_total_amount = bnkr_community_amount + bnkr_team_amount
+    else:
+        # For burnable tokens: standard allocation
+        burn_amount = total * (BURN_PERCENTAGE / 100)  # 88%
+        drb_grok_amount = total * (DRB_GROK_PERCENTAGE / 100)  # 7%
+        drb_community_amount = total * (DRB_COMMUNITY_PERCENTAGE / 100)  # 1.5%
+        drb_team_amount = total * (DRB_TEAM_PERCENTAGE / 100)  # 1%
+        drb_total_amount = drb_grok_amount + drb_community_amount + drb_team_amount
+        bnkr_community_amount = total * (BNKR_COMMUNITY_PERCENTAGE / 100)  # 1.5%
+        bnkr_team_amount = total * (BNKR_TEAM_PERCENTAGE / 100)  # 1%
+        bnkr_total_amount = bnkr_community_amount + bnkr_team_amount
     
     return {
         "burn_amount": str(burn_amount),
@@ -228,7 +243,8 @@ def calculate_burn_amounts(total_amount: float) -> Dict[str, str]:
         "drb_community_amount": str(drb_community_amount),
         "bnkr_total_amount": str(bnkr_total_amount),
         "bnkr_community_amount": str(bnkr_community_amount),
-        "bnkr_team_amount": str(bnkr_team_amount)
+        "bnkr_team_amount": str(bnkr_team_amount),
+        "is_burnable": is_burnable
     }
 
 # API Endpoints
