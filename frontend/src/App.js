@@ -877,7 +877,7 @@ function App() {
                     {crossChainMode && optimalRoutes && (
                       <div className="mt-3 bg-black bg-opacity-30 rounded p-3 text-xs">
                         <p className="text-blue-200">
-                          🎯 Optimal: $DRB on {optimalRoutes.optimal_chains.DRB}, $cbBTC on {optimalRoutes.optimal_chains.cbBTC}
+                          🎯 Optimal: $DRB on {optimalRoutes.optimal_chains.DRB}, $BNKR on {optimalRoutes.optimal_chains.BNKR}
                         </p>
                       </div>
                     )}
