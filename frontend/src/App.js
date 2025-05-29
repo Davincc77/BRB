@@ -857,7 +857,7 @@ function App() {
               ) : (
                 <div className="space-y-4">
                   {/* Cross-Chain Mode Toggle */}
-                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 mb-4">
+                  <div className="silver-glass rounded-lg p-4 mb-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="text-white font-medium">🌉 Cross-Chain Mode</h4>
@@ -892,7 +892,7 @@ function App() {
                       value={tokenAddress}
                       onChange={handleTokenAddressChange}
                       placeholder={`Enter ${activeChain} token address...`}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                      className="input-primary"
                     />
                     
                     {/* Token Validation Status */}
