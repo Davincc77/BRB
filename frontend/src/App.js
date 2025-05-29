@@ -1051,9 +1051,9 @@ function App() {
                         <span>Burn Progress</span>
                         <span>{Math.round(burnProgress)}%</span>
                       </div>
-                      <div className="progress-bar">
+                      <div className="progress-container">
                         <div 
-                          className="progress-fill" 
+                          className="progress-bar" 
                           style={{width: `${burnProgress}%`}}
                         ></div>
                       </div>
