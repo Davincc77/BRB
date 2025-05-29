@@ -834,7 +834,7 @@ function App() {
                       <span className="text-blue-400 text-sm font-medium">Cross-Chain Tip</span>
                     </div>
                     <p className="text-blue-300 text-xs">
-                      For tokens on other chains, bridge to {activeChain} first for optimal $DRB and $cbBTC swaps
+                      For tokens on other chains, bridge to {activeChain} first for optimal $DRB and $BNKR swaps
                     </p>
                   </div>
                   <div className="flex justify-center space-x-4">
