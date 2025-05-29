@@ -479,6 +479,37 @@ function App() {
     }
   };
 
+  // Check token burnability
+  const checkTokenBurnability = async (address) => {
+    if (!address) {
+      setTokenBurnability(null);
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/check-burnable`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token_address: address,
+          chain: activeChain
+        })
+      });
+      
+      if (response.ok) {
+        const burnabilityData = await response.json();
+        setTokenBurnability(burnabilityData);
+      } else {
+        setTokenBurnability(null);
+      }
+    } catch (error) {
+      console.error('Failed to check token burnability:', error);
+      setTokenBurnability(null);
+    }
+  };
+
   const handleTokenAddressChange = (e) => {
     const address = e.target.value;
     setTokenAddress(address);
@@ -486,6 +517,7 @@ function App() {
     // Debounce validation and price fetching
     setTimeout(() => {
       validateToken(address);
+      checkTokenBurnability(address); // Add burnability check
       if (address && amount) {
         if (crossChainMode) {
           analyzeCrossChainRoute(activeChain, address, amount);
