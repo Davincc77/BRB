@@ -241,9 +241,29 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
-agent_communication:
-    - agent: "main"
-      message: "Burn Relief Bot application is fully functional. Backend API is running with comprehensive multi-chain burning capabilities. Frontend has existing dark theme that needs enhancement with silverish blue color scheme. Ready to implement UI/UX improvements."
+  - task: "Token Burn Exceptions"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Successfully implemented burn exceptions for $BNKR and cbBTC tokens. Non-burnable tokens are swapped entirely (95% DRB to Grok, 1.5% DRB community, 1% DRB team, 1.5% BNKR to Banker Club, 1% BNKR team). Added /api/check-burnable endpoint to verify token burnability."
+
+  - task: "Correct Token Allocations"
+    implemented: true
+    working: true
+    file: "server.py, App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Updated allocations per user requirements: 88% burn, 7% DRB to Grok, 1.5% DRB to community, 1% DRB to team, 1.5% BNKR to Banker Club Members, 1% BNKR to team. Frontend displays correct percentages and calculations."
     - agent: "testing"
       message: "Completed comprehensive testing of all backend API endpoints. All endpoints are functioning correctly with proper responses. The health check, stats, community stats, chain information, and cross-chain routing endpoints all work as expected. The backend is fully functional and ready for the UI/UX enhancements. No issues were found during testing."
     - agent: "main"
