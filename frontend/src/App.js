@@ -861,7 +861,7 @@ function App() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="text-white font-medium">🌉 Cross-Chain Mode</h4>
-                        <p className="text-purple-100 text-sm">Auto-route to optimal chains for best $DRB & $cbBTC liquidity</p>
+                        <p className="text-purple-100 text-sm">Auto-route to optimal chains for best $DRB & $BNKR liquidity</p>
                       </div>
                       <button
                         onClick={() => setCrossChainMode(!crossChainMode)}
