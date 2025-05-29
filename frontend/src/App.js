@@ -813,7 +813,7 @@ function App() {
         {activeTab === 'burn' && (
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Burn Interface */}
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="card silverish-gradient">
               <h2 className="text-xl font-bold text-white mb-6 flex items-center">
                 <Flame className="w-6 h-6 text-orange-500 mr-2" />
                 Burn Tokens
@@ -828,7 +828,7 @@ function App() {
                   </p>
                   
                   {/* Cross-chain Bridge Recommendation */}
-                  <div className="bg-blue-600 bg-opacity-20 border border-blue-500 rounded-lg p-4 mb-6">
+                  <div className="silver-glass border border-blue-500 rounded-lg p-4 mb-6">
                     <div className="flex items-center justify-center mb-2">
                       <Info className="w-4 h-4 text-blue-400 mr-2" />
                       <span className="text-blue-400 text-sm font-medium">Cross-Chain Tip</span>
@@ -840,14 +840,14 @@ function App() {
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={() => connectWallet('metamask')}
-                      className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+                      className="wallet-btn bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
                     >
                       <Wallet className="w-5 h-5" />
                       <span>Connect MetaMask</span>
                     </button>
                     <button
                       onClick={() => connectWallet('phantom')}
-                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+                      className="wallet-btn bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
                     >
                       <Wallet className="w-5 h-5" />
                       <span>Connect Phantom</span>
