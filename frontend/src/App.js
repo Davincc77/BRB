@@ -34,7 +34,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [tokenBurnability, setTokenBurnability] = useState(null); // New state for burn check
-  const [tokenBurnability, setTokenBurnability] = useState(null); // New state for burn check
   const [burnStats, setBurnStats] = useState(null);
   const [activeTab, setActiveTab] = useState('burn'); // 'burn', 'community', 'leaderboard'
   
