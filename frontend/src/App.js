@@ -690,6 +690,42 @@ function App() {
           🔥 BURN
         </div>
       </div>
+      {/* Retro TV decorative elements */}
+      <div className="retro-tv retro-tv-1">
+        <div style={{
+          width: '120px',
+          height: '90px',
+          background: 'linear-gradient(135deg, #2a3441, #1e293b)',
+          borderRadius: '8px',
+          border: '2px solid rgba(184, 212, 227, 0.1)',
+          padding: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '8px',
+          color: 'rgba(184, 212, 227, 0.5)'
+        }}>
+          📺 DRB
+        </div>
+      </div>
+      
+      <div className="retro-tv retro-tv-2">
+        <div style={{
+          width: '140px',
+          height: '105px',
+          background: 'linear-gradient(135deg, #1e3a8a, #2563eb)',
+          borderRadius: '8px',
+          border: '2px solid rgba(184, 212, 227, 0.1)',
+          padding: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '10px',
+          color: 'rgba(184, 212, 227, 0.6)'
+        }}>
+          🔥 BURN
+        </div>
+      </div>
       {/* Notification */}
       {notification && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
