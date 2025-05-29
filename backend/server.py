@@ -48,15 +48,24 @@ GROK_WALLET = "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1a"
 TEAM_WALLET = "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1b"
 COMMUNITY_WALLET = "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1c"
 
-# Percentage allocations (simplified for Base chain only)
+# Percentage allocations (updated per user requirements)
 BURN_PERCENTAGE = 88.0
-DRB_PERCENTAGE = 9.5
+DRB_PERCENTAGE = 10.0          # Total DRB: 7% + 1.5% + 1% = 9.5%
 DRB_GROK_PERCENTAGE = 7.0      # 7% DRB to Grok
-DRB_TEAM_PERCENTAGE = 1.0      # 1% DRB to team
 DRB_COMMUNITY_PERCENTAGE = 1.5 # 1.5% DRB to community
+DRB_TEAM_PERCENTAGE = 1.0      # 1% DRB to team
 BNKR_PERCENTAGE = 2.5         # 2.5% total BNKR allocation (1.5% community + 1% team)
-BNKR_COMMUNITY_PERCENTAGE = 1.5  # 1.5% BNKR for Banker Club Members and OK Computers holders
+BNKR_COMMUNITY_PERCENTAGE = 1.5  # 1.5% BNKR for Banker Club Members
 BNKR_TEAM_PERCENTAGE = 1.0       # 1% BNKR to team
+
+# Tokens that should NOT be burned (exceptions)
+NON_BURNABLE_TOKENS = [
+    "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # $BNKR token
+    "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",  # cbBTC token  
+    BNKR_TOKEN_CA.lower(),  # $BNKR token (lowercase)
+    "banker", "bnkr",  # Common names
+    "cbbtc", "coinbase bitcoin"  # cbBTC variations
+]
 
 # Supported token types
 SUPPORTED_TOKEN_TYPES = [
