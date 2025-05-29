@@ -1064,7 +1064,7 @@ function App() {
             </div>
 
             {/* Transaction History */}
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="card silverish-gradient">
               <h2 className="text-xl font-bold text-white mb-6">Recent Transactions</h2>
               
               {transactions.length === 0 ? (
@@ -1075,7 +1075,7 @@ function App() {
               ) : (
                 <div className="space-y-3">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="bg-gray-700 rounded-lg p-4">
+                    <div key={tx.id} className="silver-glass rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(tx.status)}
