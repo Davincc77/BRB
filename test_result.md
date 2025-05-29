@@ -270,3 +270,19 @@ test_plan:
       message: "Updated the Burn Relief Bot backend to simplify it to Base-only chain and integrated $BNKR token instead of cbBTC. Need to test all the updated endpoints to ensure they're working correctly with the new configuration."
     - agent: "testing"
       message: "Starting testing of the updated Burn Relief Bot backend after Base-only simplification and $BNKR token integration. Will focus on health check, chains endpoint, $BNKR token integration, token allocations, burn statistics, and token validation."
+
+  - task: "Dynamic Allocation Display"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Fixed frontend allocation display to show correct dynamic percentages based on token burnability. Burnable tokens show 88% burn + swaps, non-burnable tokens show 0% burn + 95% DRB to Grok. Added visual indicators for BURNABLE vs SWAP ONLY tokens."
+
+agent_communication:
+    - agent: "main"
+      message: "All requirements completed successfully. Backend handles burn exceptions correctly, frontend displays dynamic allocations based on token burnability, silverish blue theme implemented, and Base-only chain configuration working perfectly."
