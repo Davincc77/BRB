@@ -246,3 +246,7 @@ agent_communication:
       message: "Burn Relief Bot application is fully functional. Backend API is running with comprehensive multi-chain burning capabilities. Frontend has existing dark theme that needs enhancement with silverish blue color scheme. Ready to implement UI/UX improvements."
     - agent: "testing"
       message: "Completed comprehensive testing of all backend API endpoints. All endpoints are functioning correctly with proper responses. The health check, stats, community stats, chain information, and cross-chain routing endpoints all work as expected. The backend is fully functional and ready for the UI/UX enhancements. No issues were found during testing."
+    - agent: "main"
+      message: "Updated the Burn Relief Bot backend to simplify it to Base-only chain and integrated $BNKR token instead of cbBTC. Need to test all the updated endpoints to ensure they're working correctly with the new configuration."
+    - agent: "testing"
+      message: "Starting testing of the updated Burn Relief Bot backend after Base-only simplification and $BNKR token integration. Will focus on health check, chains endpoint, $BNKR token integration, token allocations, burn statistics, and token validation."
