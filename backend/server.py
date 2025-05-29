@@ -137,11 +137,12 @@ class BurnTransaction(BaseModel):
     amount: str
     chain: str
     burn_amount: str  # 88%
-    drb_total_amount: str  # 8% total DRB
+    drb_total_amount: str  # 9.5% total DRB
     drb_grok_amount: str   # 7% DRB to Grok's wallet
     drb_team_amount: str   # 1% DRB to team
-    cbbtc_total_amount: str    # 4% total cbBTC
-    cbbtc_community_amount: str # 3% cbBTC for community
+    drb_community_amount: str  # 1.5% DRB to community
+    cbbtc_total_amount: str    # 2.5% total cbBTC
+    cbbtc_community_amount: str # 1.5% cbBTC for community
     cbbtc_team_amount: str      # 1% cbBTC to team
     burn_wallet: str = BURN_ADDRESS
     grok_wallet: str = GROK_WALLET
