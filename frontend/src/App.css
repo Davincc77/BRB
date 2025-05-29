@@ -140,6 +140,60 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+/* Retro TV styling for decorative elements */
+.retro-tv {
+  position: fixed;
+  z-index: 1;
+  opacity: 0.1;
+  animation: float 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.retro-tv-1 {
+  top: 10%;
+  right: 5%;
+  width: 120px;
+  height: auto;
+  animation-delay: 0s;
+}
+
+.retro-tv-2 {
+  bottom: 10%;
+  left: 5%;
+  width: 140px;
+  height: auto;
+  animation-delay: 3s;
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.05;
+  }
+  25% { 
+    transform: translateY(-10px) rotate(1deg);
+    opacity: 0.1;
+  }
+  50% { 
+    transform: translateY(-5px) rotate(-1deg);
+    opacity: 0.08;
+  }
+  75% { 
+    transform: translateY(-15px) rotate(0.5deg);
+    opacity: 0.12;
+  }
+}
+
+/* Enhanced BNKR token styling */
+.bnkr-highlight {
+  background: linear-gradient(135deg, var(--cool-blue), var(--ice-blue));
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+}
+
 /* Enhanced Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
