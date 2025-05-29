@@ -13,12 +13,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import IndexModel, ASCENDING, DESCENDING
 import time
 from web3 import Web3
-from solana.rpc.async_api import AsyncClient
-from solana.publickey import PublicKey
-from solders.pubkey import Pubkey
-from solders.transaction import Transaction
-from solders.system_program import TransferParams, transfer
-from solders.rpc.responses import SendTransactionResp
 import websockets
 import traceback
 
