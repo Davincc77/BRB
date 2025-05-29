@@ -773,12 +773,12 @@ function App() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto p-6">
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-gray-800 rounded-lg p-1 mb-6">
+        <div className="flex space-x-1 silver-glass rounded-lg p-1 mb-6">
           <button
             onClick={() => setActiveTab('burn')}
-            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+            className={`nav-link flex-1 py-2 px-4 rounded-md transition-colors ${
               activeTab === 'burn' 
-                ? 'bg-orange-600 text-white' 
+                ? 'bg-orange-600 text-white active' 
                 : 'text-gray-300 hover:text-white'
             }`}
           >
@@ -787,9 +787,9 @@ function App() {
           </button>
           <button
             onClick={() => setActiveTab('community')}
-            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+            className={`nav-link flex-1 py-2 px-4 rounded-md transition-colors ${
               activeTab === 'community' 
-                ? 'bg-blue-600 text-white' 
+                ? 'bg-blue-600 text-white active' 
                 : 'text-gray-300 hover:text-white'
             }`}
           >
@@ -798,9 +798,9 @@ function App() {
           </button>
           <button
             onClick={() => setActiveTab('leaderboard')}
-            className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+            className={`nav-link flex-1 py-2 px-4 rounded-md transition-colors ${
               activeTab === 'leaderboard' 
-                ? 'bg-purple-600 text-white' 
+                ? 'bg-purple-600 text-white active' 
                 : 'text-gray-300 hover:text-white'
             }`}
           >
