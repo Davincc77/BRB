@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 
 class BurnReliefBotPhase3Tester:
-    def __init__(self, base_url="https://1af30e40-7884-4105-ba09-e96103d2ddbc.preview.emergentagent.com"):
+    def __init__(self, base_url="https://3a95f327-f436-45cf-b1c0-6652d03679be.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
