@@ -231,7 +231,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "UI/UX Enhancement - Silverish Blue Theme"
+    - "Health Check Endpoint"
+    - "Base Chain Only"
+    - "$BNKR Token Integration"
+    - "Token Allocations"
+    - "Burn Statistics"
+    - "Token Validation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
