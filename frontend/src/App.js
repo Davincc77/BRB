@@ -750,7 +750,7 @@ function App() {
               <div className="flex items-center space-x-2 animate-slideInRight">
                 <button
                   onClick={() => connectWallet('metamask')}
-                  className="wallet-button wallet-metamask flex items-center space-x-2"
+                  className="wallet-btn wallet-button wallet-metamask flex items-center space-x-2"
                   title="Connect MetaMask wallet"
                 >
                   <Wallet className="w-4 h-4" />
@@ -758,7 +758,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => connectWallet('phantom')}
-                  className="wallet-button wallet-phantom flex items-center space-x-2"
+                  className="wallet-btn wallet-button wallet-phantom flex items-center space-x-2"
                   title="Connect Phantom wallet"
                 >
                   <Wallet className="w-4 h-4" />
