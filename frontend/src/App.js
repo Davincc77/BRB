@@ -665,7 +665,7 @@ function App() {
       )}
 
       {/* Header */}
-      <header className="p-6 border-b border-gray-700 backdrop-blur-md bg-gray-900 bg-opacity-50">
+      <header className="nav-header p-6 border-b border-gray-700 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3 animate-fadeInUp">
             <div className="relative">
@@ -687,7 +687,7 @@ function App() {
                 className={`p-2 rounded-lg transition-all duration-300 ${
                   isRefreshing 
                     ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
-                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transform hover:scale-105'
+                    : 'silver-glass text-gray-300 hover:text-white transform hover:scale-105'
                 }`}
                 title="Refresh data"
               >
@@ -698,8 +698,8 @@ function App() {
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 className={`p-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${
                   soundEnabled 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                    ? 'btn-primary' 
+                    : 'silver-glass text-gray-300'
                 }`}
                 title={soundEnabled ? 'Disable sounds' : 'Enable sounds'}
               >
@@ -713,8 +713,8 @@ function App() {
                 <button
                   key={chainKey}
                   onClick={() => handleChainSwitch(chainKey)}
-                  className={`chain-option ${
-                    activeChain === chainKey ? 'chain-option-active' : 'chain-option-inactive'
+                  className={`nav-link chain-option ${
+                    activeChain === chainKey ? 'chain-option-active active' : 'chain-option-inactive'
                   }`}
                   title={`Switch to ${chainConfig.name}`}
                 >
@@ -726,7 +726,7 @@ function App() {
             {/* Wallet Connection */}
             {isWalletConnected ? (
               <div className="flex items-center space-x-2 animate-slideInRight">
-                <div className="glass-card px-3 py-2 text-sm flex items-center space-x-2">
+                <div className="silver-glass px-3 py-2 text-sm flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-soft"></div>
                   <span 
                     className="text-white cursor-pointer hover:text-green-400 transition-colors"
