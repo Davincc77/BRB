@@ -1032,6 +1032,10 @@ function App() {
                           <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.07).toString())}</span>
                         </div>
                         <div className="flex justify-between">
+                          <span className="text-gray-400">1.5% → $DRB (Community):</span>
+                          <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
+                        </div>
+                        <div className="flex justify-between">
                           <span className="text-gray-400">1% → $DRB (Team):</span>
                           <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
                         </div>
