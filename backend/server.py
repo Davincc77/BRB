@@ -319,6 +319,34 @@ async def validate_token(request: TokenValidationRequest):
         logger.error(f"Token validation error: {e}")
         raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
 
+@api_router.post("/check-burnable")
+async def check_token_burnable(request: TokenValidationRequest):
+    """Check if a token is burnable or should be swapped entirely"""
+    try:
+        is_burnable = await is_token_burnable(request.token_address)
+        
+        # Get preview of allocations
+        preview_amounts = calculate_burn_amounts(1000000.0, request.token_address, is_burnable)
+        
+        return {
+            "token_address": request.token_address,
+            "is_burnable": is_burnable,
+            "allocation_type": "burn_and_swap" if is_burnable else "swap_only",
+            "preview_allocations": {
+                "burn_percentage": float(preview_amounts["burn_amount"]) / 10000.0 if is_burnable else 0,
+                "drb_grok_percentage": float(preview_amounts["drb_grok_amount"]) / 10000.0,
+                "drb_community_percentage": float(preview_amounts["drb_community_amount"]) / 10000.0,
+                "drb_team_percentage": float(preview_amounts["drb_team_amount"]) / 10000.0,
+                "bnkr_community_percentage": float(preview_amounts["bnkr_community_amount"]) / 10000.0,
+                "bnkr_team_percentage": float(preview_amounts["bnkr_team_amount"]) / 10000.0
+            },
+            "message": f"Token will be {'burned (88%) and swapped' if is_burnable else 'swapped entirely (no burning)'}"
+        }
+        
+    except Exception as e:
+        logger.error(f"Burnability check error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to check burnability: {str(e)}")
+
 @api_router.post("/burn")
 async def create_burn_transaction(request: BurnRequest, background_tasks: BackgroundTasks):
     """Create a new burn transaction"""
