@@ -1579,47 +1579,8 @@ function App() {
 
         {/* Info Section */}
         <div className="mt-8 bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-lg font-bold text-white mb-4">How It Works</h3>
+          <h3 className="text-lg font-bold text-white mb-6 text-center">How It Works</h3>
           
-          {/* Token Flow Information */}
-          <div className="mb-6 bg-gray-700 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-300 mb-3">Token Distribution</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">88% Burned to:</span>
-                <span className="text-red-400 font-mono text-xs">0x000...dEaD</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">7% $DRB sent to Grok:</span>
-                <span className="text-blue-400 font-mono text-xs">0xb10...4f9</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">1.5% $DRB to Community:</span>
-                <span className="text-blue-300 font-mono text-xs">
-                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">1% $DRB to Team:</span>
-                <span className="text-blue-300 font-mono text-xs">
-                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">1.5% $BNKR for BANKR Club:</span>
-                <span className="text-purple-400 font-mono text-xs">
-                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">1% $BNKR to Team:</span>
-                <span className="text-purple-300 font-mono text-xs">
-                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
-                </span>
-              </div>
-            </div>
-          </div>
-
           <div className="grid md:grid-cols-6 gap-3 text-sm">
             <div className="text-center">
               <div className="bg-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
