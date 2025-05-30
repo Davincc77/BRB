@@ -1451,7 +1451,7 @@ function App() {
                       </div>
                       <div className="text-right">
                         <div className="stat-value stat-value-danger">
-                          {parseFloat(burnStats.total_amount_burned).toLocaleString()}
+                          {parseFloat(burnStats.total_tokens_burned || 0).toLocaleString()}
                         </div>
                         <div className="text-gray-400 text-sm">Tokens Burned</div>
                       </div>
