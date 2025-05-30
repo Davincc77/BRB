@@ -479,9 +479,17 @@ test_plan:
           agent: "main + testing"
           comment: "✅ ALL BUGS FIXED! Added missing API endpoints: /api/cross-chain/optimal-routes, /api/gas-estimates/{chain}, /api/token-price/{token}/{chain}, /api/swap-quote, /api/execute-burn, /api/transactions. ✅ Fixed Community tab API integration (fetchCommunityStats URL format). ✅ Relaxed token validation for testing. ✅ Fixed leaderboard data source (communityStats.top_burners). ✅ All tabs now working perfectly without errors."
 
-agent_communication:
-    - agent: "main"
-      message: "🎯 ALL BUGS COMPLETELY RESOLVED! ✅ All API endpoints working ✅ All tabs (Burn/Community/Leaderboard) functional ✅ Token allocation display perfect ✅ DRB direct allocation logic ✅ 30+ protected tokens ✅ Enhanced UI with proper badges ✅ Clean visual grid ✅ Base-focused branding ✅ Silverish blue theme ✅ TV positioning perfect. The Burn Relief Bot is now 100% functional and production-ready!"
+  - task: "Community Contest Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Verified all community contest endpoints are working correctly. /api/community/contest returns proper voting period, projects, vote requirements, and contest allocations with correct percentages (0.5% DRB, 0.5% BNKR). /api/community/project successfully accepts project submissions. /api/community/vote correctly processes votes. /api/community/votes/{wallet} returns user votes. All endpoints handle error cases appropriately."
     - agent: "testing"
       message: "Completed comprehensive testing of the Burn Relief Bot backend after Base-only simplification and $BNKR token integration. All endpoints are working correctly: ✅ Health Check: /api/health returns 200 with 'healthy' status ✅ Chain Configuration: /api/chains correctly shows Base-only setup with proper allocations ✅ Token Protection: /api/check-burnable correctly identifies regular tokens as burnable, $BNKR as swap-only, DRB as direct allocation, and stablecoins as swap-only ✅ Stats Endpoint: /api/stats returns proper property names with correct percentages ✅ Community Stats: /api/community/stats shows correct chain distribution (100% Base) ✅ Token Validation: /api/validate-token works correctly ⚠️ Burn Endpoint: Skipped due to requiring valid token contracts, but API structure is correct. The backend is fully functional and ready for use."
     - agent: "testing"
