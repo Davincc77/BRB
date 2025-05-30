@@ -137,6 +137,9 @@ backend:
         - working: true
           agent: "main"
           comment: "Health check endpoint working perfectly after Base-only simplification. Returns status 'healthy' with timestamp."
+        - working: true
+          agent: "testing"
+          comment: "Verified /api/health endpoint returns 200 status code with 'healthy' status and timestamp. Endpoint is working correctly."
 
   - task: "Base Chain Only"
     implemented: true
