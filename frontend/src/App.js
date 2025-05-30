@@ -86,10 +86,9 @@ function App() {
   // Fetch community statistics
   const fetchCommunityStats = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/community/stats`);
-      if (response.ok) {
-        const stats = await response.json();
-        setCommunityStats(stats);
+      const response = await axios.get(`${API}/community/stats`);
+      if (response.data) {
+        setCommunityStats(response.data);
       }
     } catch (error) {
       console.error('Failed to fetch community stats:', error);
