@@ -883,7 +883,7 @@ function App() {
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3 animate-fadeInUp">
             <div className="relative">
-              <Flame className="w-8 h-8 text-orange-500 animate-pulse-soft" />
+              <Flame className="w-8 h-8 text-blue-500 animate-pulse-soft" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-bounce-soft"></div>
             </div>
             <div>
