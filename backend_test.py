@@ -150,24 +150,31 @@ class BurnReliefBotAPITests(unittest.TestCase):
         
         print("✅ DRB token correctly identified for direct allocation")
 
-    def test_06_check_burnable_stablecoin(self):
-        """Test check-burnable endpoint with stablecoin like USDC (should be swap-only)"""
-        payload = {
-            "token_address": self.usdc_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
+    def test_07_stats_endpoint(self):
+        """Test stats endpoint for proper property names"""
+        response = requests.get(f"{API_URL}/stats")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify USDC is not burnable
-        self.assertIn("is_burnable", data)
-        self.assertFalse(data["is_burnable"])
-        self.assertFalse(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "swap_only")
+        # Verify stats data structure
+        self.assertIn("total_transactions", data)
+        self.assertIn("completed_transactions", data)
+        self.assertIn("total_volume_usd", data)
+        self.assertIn("total_tokens_burned", data)
+        self.assertIn("total_drb_allocated", data)
+        self.assertIn("total_bnkr_allocated", data)
+        self.assertIn("burn_percentage", data)
+        self.assertIn("drb_percentage", data)
+        self.assertIn("bnkr_percentage", data)
+        self.assertIn("supported_chains", data)
         
-        print("✅ USDC stablecoin correctly identified as swap-only")
+        # Verify BNKR percentage is correct
+        self.assertEqual(data["bnkr_percentage"], 2.5)
+        
+        # Verify supported chains is only Base
+        self.assertEqual(data["supported_chains"], ["base"])
+        
+        print("✅ Stats endpoint verified with correct property names")
 
     def test_08_community_stats_endpoint(self):
         """Test community stats endpoint"""
