@@ -1437,101 +1437,162 @@ function App() {
           </div>
         )}
 
-        {/* Community Tab */}
+        {/* Community Contest Tab */}
         {activeTab === 'community' && (
-          <div className="animate-fadeInUp">
-            <div className="grid lg:grid-cols-3 gap-6 mb-8">
-              {/* Enhanced Stats Cards */}
-              {burnStats ? (
-                <>
-                  <div className="stat-card group">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-blue-600 bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform">
-                        <Activity className="w-6 h-6 text-blue-400" />
-                      </div>
-                      <div className="text-right">
-                        <div className="stat-value stat-value-primary">{burnStats.total_transactions || 0}</div>
-                        <div className="text-gray-400 text-sm">Total Transactions</div>
-                      </div>
+          <div className="space-y-6">
+            {/* Contest Header */}
+            <div className="card silverish-gradient text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">🏆 Community Contest</h2>
+              <p className="text-gray-300 mb-6">
+                Vote for Base ecosystem projects to receive community allocation! 
+                <br/>Burn <span className="bnkr-highlight">1000 $DRB</span> or <span className="bnkr-highlight">100 $BNKR</span> to cast your vote.
+              </p>
+              
+              {/* Contest Info */}
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                <div className="silver-glass rounded-lg p-4">
+                  <div className="text-2xl font-bold text-blue-400">0.5%</div>
+                  <div className="text-gray-400">$DRB to Winner</div>
+                </div>
+                <div className="silver-glass rounded-lg p-4">
+                  <div className="text-2xl font-bold text-purple-400">0.5%</div>
+                  <div className="text-gray-400">$BNKR to Winner</div>
+                </div>
+                <div className="silver-glass rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-400">
+                    {contestData?.projects?.length || 0}
+                  </div>
+                  <div className="text-gray-400">Active Projects</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Winner */}
+            {contestData?.current_winner && (
+              <div className="card silverish-gradient">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                  <Trophy className="w-6 h-6 text-yellow-500 mr-2" />
+                  Current Winner
+                </h3>
+                <div className="silver-glass rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="text-lg font-bold text-white">{contestData.current_winner.name}</h4>
+                      <p className="text-gray-400">{contestData.current_winner.description}</p>
                     </div>
-                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-pulse-soft"></div>
+                    <div className="text-right">
+                      <div className="text-yellow-400 font-bold">{contestData.current_winner.total_votes} votes</div>
+                      <div className="text-gray-400 text-sm">Receiving community allocation</div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
 
-                  <div className="stat-card group">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-green-600 bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform">
-                        <Users className="w-6 h-6 text-green-400" />
-                      </div>
-                      <div className="text-right">
-                        <div className="stat-value stat-value-success">{burnStats.completed_transactions || 0}</div>
-                        <div className="text-gray-400 text-sm">Completed</div>
-                      </div>
-                    </div>
-                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full animate-pulse-soft"></div>
-                    </div>
-                  </div>
+            {/* Project List */}
+            <div className="card silverish-gradient">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-white">Active Projects</h3>
+                <button className="btn-primary">
+                  + Submit Project
+                </button>
+              </div>
 
-                  <div className="stat-card group">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-3 bg-red-600 bg-opacity-20 rounded-lg group-hover:scale-110 transition-transform">
-                        <Flame className="w-6 h-6 text-red-400" />
-                      </div>
-                      <div className="text-right">
-                        <div className="stat-value stat-value-danger">
-                          {parseFloat(burnStats.total_tokens_burned || 0).toLocaleString()}
+              {contestData?.projects && contestData.projects.length > 0 ? (
+                <div className="space-y-4">
+                  {contestData.projects.map((project, index) => (
+                    <div key={project.id} className="silver-glass rounded-lg p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                              index === 0 ? 'bg-yellow-600' : index === 1 ? 'bg-gray-500' : index === 2 ? 'bg-orange-600' : 'bg-gray-600'
+                            }`}>
+                              {index + 1}
+                            </div>
+                            <h4 className="text-lg font-bold text-white">{project.name}</h4>
+                          </div>
+                          <p className="text-gray-400 mb-3">{project.description}</p>
+                          <div className="flex items-center space-x-4 text-sm">
+                            {project.website && (
+                              <a href={project.website} target="_blank" rel="noopener noreferrer" 
+                                 className="text-blue-400 hover:text-blue-300">
+                                🌐 Website
+                              </a>
+                            )}
+                            {project.twitter && (
+                              <a href={project.twitter} target="_blank" rel="noopener noreferrer"
+                                 className="text-blue-400 hover:text-blue-300">
+                                🐦 Twitter
+                              </a>
+                            )}
+                            <span className="text-gray-500">
+                              By: {formatAddress(project.submitted_by)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-gray-400 text-sm">Tokens Burned</div>
+                        
+                        <div className="text-right ml-6">
+                          <div className="text-white font-bold text-lg">{project.total_votes}</div>
+                          <div className="text-gray-400 text-sm">votes</div>
+                          <div className="mt-2 space-y-1 text-xs">
+                            <div className="text-blue-300">{project.total_drb_votes} $DRB</div>
+                            <div className="text-purple-300">{project.total_bnkr_votes} $BNKR</div>
+                          </div>
+                          
+                          {isWalletConnected && (
+                            <button 
+                              className="btn-secondary mt-3 text-sm px-4 py-2"
+                              onClick={() => {
+                                // TODO: Implement vote modal
+                                showNotification('Voting interface coming soon!', 'info');
+                              }}
+                            >
+                              Vote
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full animate-pulse-soft"></div>
-                    </div>
-                  </div>
-                </>
+                  ))}
+                </div>
               ) : (
-                // Loading skeletons
-                Array(3).fill(0).map((_, i) => (
-                  <div key={i} className="stat-card loading-shimmer">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="skeleton w-12 h-12 rounded-lg"></div>
-                      <div className="text-right">
-                        <div className="skeleton-text w-16 h-8"></div>
-                        <div className="skeleton-text w-20 h-4"></div>
-                      </div>
-                    </div>
-                    <div className="skeleton h-2 rounded-full"></div>
-                  </div>
-                ))
+                <div className="text-center py-12">
+                  <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">No active projects yet</p>
+                  <p className="text-gray-500 text-sm">Be the first to submit a Base ecosystem project!</p>
+                </div>
               )}
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="card">
-                <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-                  <TrendingUp className="w-6 h-6 text-green-500 mr-2" />
-                  Trending Tokens
-                </h2>
-                {burnStats && burnStats.trending_tokens && burnStats.trending_tokens.length > 0 ? (
-                  <div className="space-y-3">
-                    {burnStats.trending_tokens.map((token, index) => (
-                      <div key={index} className="transaction-item group">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <span 
-                                className="font-mono text-sm text-white cursor-pointer hover:text-blue-400 transition-colors"
-                                onClick={() => copyToClipboard(token.token_address, 'Token address')}
-                                title="Click to copy address"
-                              >
-                                {formatAddress(token.token_address)}
-                              </span>
-                              <div className="text-xs text-gray-400 mt-1">
+            {/* Voting Rules */}
+            <div className="card silverish-gradient">
+              <h3 className="text-xl font-bold text-white mb-4">📋 Voting Rules</h3>
+              <div className="space-y-3 text-gray-300">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>Burn <strong>1000 $DRB</strong> or <strong>100 $BNKR</strong> to vote</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>One vote per project per wallet</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>Winner receives <strong>0.5% $DRB + 0.5% $BNKR</strong> allocation</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>Voting continues until next community vote period</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>Only Base ecosystem projects eligible</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
                                 {token.burn_count} burns • {parseFloat(token.total_burned).toLocaleString()} tokens
                               </div>
                             </div>
