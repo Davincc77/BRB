@@ -63,6 +63,7 @@ function App() {
     fetchTransactions();
     fetchBurnStats();
     fetchOptimalRoutes();
+    fetchContestData();
     fetchCommunityStats();
   }, []);
 
