@@ -399,6 +399,9 @@ test_plan:
         - working: true
           agent: "main"
           comment: "✅ Fixed Community tab JavaScript errors caused by missing API properties. ✅ Updated burnStats.total_users → burnStats.total_transactions. ✅ Updated burnStats.total_burns → burnStats.completed_transactions. ✅ Fixed burnStats.total_amount_burned → burnStats.total_tokens_burned with fallback. ✅ Added null check for burnStats.trending_tokens. Community tab now works without errors."
+        - working: true
+          agent: "testing"
+          comment: "Verified /api/community/stats endpoint returns correct data structure with total_burns, total_volume_usd, total_tokens_burned, active_wallets, chain_distribution, top_burners, and recent_burns. Community stats are working correctly with Base-only chain distribution (100%)."
 
 agent_communication:
     - agent: "main"
