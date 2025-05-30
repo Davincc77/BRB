@@ -1023,7 +1023,7 @@ function App() {
             }`}
           >
             <Users className="w-4 h-4 inline mr-2" />
-            Community
+            Community Contest
           </button>
           <button
             onClick={() => setActiveTab('leaderboard')}
