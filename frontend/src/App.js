@@ -1497,7 +1497,7 @@ function App() {
               </div>
               <h4 className="font-medium text-white mb-2">3% → Community</h4>
               <p className="text-gray-400">
-                $cbBTC for pools and contests
+                $BNKR for Banker Club Members and OK Computers holders
               </p>
             </div>
           </div>
