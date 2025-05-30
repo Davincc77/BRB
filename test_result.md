@@ -343,6 +343,18 @@ test_plan:
           agent: "main"
           comment: "✅ Updated tagline from 'Automated multi-chain token burning protocol' to 'Token burning protocol it's based!' for better Base-focused branding and more concise messaging that emphasizes the Base blockchain foundation."
 
+  - task: "Expanded Burn Exception List"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ Massively expanded NON_BURNABLE_TOKENS list to include: All major stablecoins (USDC, USDT, DAI, BUSD, FRAX, etc.), Major cryptocurrencies (BTC, ETH, SOL, SUI), Base chain contract addresses for popular tokens. Now protects 30+ valuable token types from burning. All protected tokens get swap-only treatment (95% DRB to Grok + other allocations)."
+
 agent_communication:
     - agent: "main"
-      message: "🎯 BRANDING PERFECTED! ✅ Updated tagline to Base-focused messaging ✅ Removed repetitive text panel ✅ Clean icon-only 'How It Works' ✅ Blue burn symbol ✅ TV icons positioned perfectly ✅ All allocations in visual grid ✅ BANKR Club terminology ✅ Silverish blue theme. The Burn Relief Bot is now perfectly polished and production-ready!"
+      message: "🎯 PROTECTION EXPANDED! ✅ 30+ valuable tokens protected from burning ✅ All stablecoins safe ✅ BTC/ETH/SOL/SUI protected ✅ Base-focused branding ✅ Clean UI without repetitive text ✅ Blue burn symbol ✅ Perfect TV icon positioning ✅ Complete visual allocation grid ✅ BANKR Club terminology ✅ Silverish blue theme. Ultimate token protection with beautiful UI!"
