@@ -96,6 +96,18 @@ function App() {
     }
   };
 
+  // Fetch contest data
+  const fetchContestData = async () => {
+    try {
+      const response = await axios.get(`${API}/community/contest`);
+      if (response.data) {
+        setContestData(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch contest data:', error);
+    }
+  };
+
   // Fetch gas estimates for current chain
   const fetchGasEstimates = async (chain) => {
     try {
