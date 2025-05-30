@@ -1420,8 +1420,8 @@ function App() {
                         <Activity className="w-6 h-6 text-blue-400" />
                       </div>
                       <div className="text-right">
-                        <div className="stat-value stat-value-primary">{burnStats.total_burns}</div>
-                        <div className="text-gray-400 text-sm">Total Burns</div>
+                        <div className="stat-value stat-value-primary">{burnStats.total_transactions || 0}</div>
+                        <div className="text-gray-400 text-sm">Total Transactions</div>
                       </div>
                     </div>
                     <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -1435,8 +1435,8 @@ function App() {
                         <Users className="w-6 h-6 text-green-400" />
                       </div>
                       <div className="text-right">
-                        <div className="stat-value stat-value-success">{burnStats.total_users}</div>
-                        <div className="text-gray-400 text-sm">Active Users</div>
+                        <div className="stat-value stat-value-success">{burnStats.completed_transactions || 0}</div>
+                        <div className="text-gray-400 text-sm">Completed</div>
                       </div>
                     </div>
                     <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
