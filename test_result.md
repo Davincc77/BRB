@@ -212,6 +212,9 @@ backend:
         - working: true
           agent: "main"
           comment: "Token validation working correctly on Base chain. Successfully validates $BNKR token address and returns proper token information with decimals, supply, etc."
+        - working: true
+          agent: "testing"
+          comment: "Verified /api/validate-token endpoint correctly validates token addresses on Base chain. Returns proper token information including symbol, name, decimals, and total supply. Token validation is working correctly."
 
 frontend:
   - task: "Burn Relief Bot Frontend Interface"
