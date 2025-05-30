@@ -326,6 +326,7 @@ function App() {
         fetchAvailableChains(),
         fetchBurnStats(),
         fetchCommunityStats(),
+        fetchContestData(),
         fetchTransactions()
       ]);
       showNotification('Data refreshed successfully!', 'success');
