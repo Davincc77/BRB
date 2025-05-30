@@ -82,6 +82,19 @@ function App() {
     }
   };
 
+  // Fetch community statistics
+  const fetchCommunityStats = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/community/stats`);
+      if (response.ok) {
+        const stats = await response.json();
+        setCommunityStats(stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch community stats:', error);
+    }
+  };
+
   // Fetch gas estimates for current chain
   const fetchGasEstimates = async (chain) => {
     try {
