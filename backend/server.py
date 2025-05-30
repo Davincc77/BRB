@@ -398,23 +398,35 @@ async def check_token_burnable(request: TokenValidationRequest):
     """Check if a token is burnable or should be swapped entirely"""
     try:
         is_burnable = await is_token_burnable(request.token_address)
+        is_drb = await is_drb_token(request.token_address)
         
         # Get preview of allocations
-        preview_amounts = calculate_burn_amounts(1000000.0, request.token_address, is_burnable)
+        preview_amounts = calculate_burn_amounts(1000000.0, request.token_address, is_burnable, is_drb)
+        
+        if is_drb:
+            allocation_type = "drb_direct_allocation"
+            message = "DRB tokens will be directly allocated (97.5%) with minimal swapping (2.5% to BNKR)"
+        elif is_burnable:
+            allocation_type = "burn_and_swap"
+            message = "Token will be burned (88%) and swapped"
+        else:
+            allocation_type = "swap_only"
+            message = "Token will be swapped entirely (no burning)"
         
         return {
             "token_address": request.token_address,
             "is_burnable": is_burnable,
-            "allocation_type": "burn_and_swap" if is_burnable else "swap_only",
+            "is_drb": is_drb,
+            "allocation_type": allocation_type,
             "preview_allocations": {
-                "burn_percentage": float(preview_amounts["burn_amount"]) / 10000.0 if is_burnable else 0,
+                "burn_percentage": float(preview_amounts["burn_amount"]) / 10000.0,
                 "drb_grok_percentage": float(preview_amounts["drb_grok_amount"]) / 10000.0,
                 "drb_community_percentage": float(preview_amounts["drb_community_amount"]) / 10000.0,
                 "drb_team_percentage": float(preview_amounts["drb_team_amount"]) / 10000.0,
                 "bnkr_community_percentage": float(preview_amounts["bnkr_community_amount"]) / 10000.0,
                 "bnkr_team_percentage": float(preview_amounts["bnkr_team_amount"]) / 10000.0
             },
-            "message": f"Token will be {'burned (88%) and swapped' if is_burnable else 'swapped entirely (no burning)'}"
+            "message": message
         }
         
     except Exception as e:
@@ -430,11 +442,12 @@ async def create_burn_transaction(request: BurnRequest, background_tasks: Backgr
         if not is_valid:
             raise HTTPException(status_code=400, detail="Invalid token contract")
         
-        # Check if token is burnable
+        # Check if token is burnable and if it's DRB
         is_burnable = await is_token_burnable(request.token_address)
+        is_drb = await is_drb_token(request.token_address)
         
-        # Calculate amounts based on burnability
-        amounts = calculate_burn_amounts(float(request.amount), request.token_address, is_burnable)
+        # Calculate amounts based on token type
+        amounts = calculate_burn_amounts(float(request.amount), request.token_address, is_burnable, is_drb)
         
         # Create transaction record
         transaction = BurnTransaction(
@@ -458,12 +471,16 @@ async def create_burn_transaction(request: BurnRequest, background_tasks: Backgr
         # Process burn in background
         background_tasks.add_task(process_burn_transaction, transaction.id)
         
+        transaction_type = "DRB Direct Allocation" if is_drb else ("Burn" if is_burnable else "Swap")
+        
         return {
             "transaction_id": transaction.id,
             "status": "pending",
             "amounts": amounts,
             "is_burnable": is_burnable,
-            "message": f"{'Burn' if is_burnable else 'Swap'} transaction created successfully"
+            "is_drb": is_drb,
+            "allocation_type": amounts["allocation_type"],
+            "message": f"{transaction_type} transaction created successfully"
         }
         
     except Exception as e:
