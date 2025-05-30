@@ -367,6 +367,18 @@ test_plan:
           agent: "main"
           comment: "✅ Added special DRB token handling with direct allocation logic. ✅ DRB tokens are NOT burned - 97.5% directly allocated as DRB tokens, only 2.5% swapped to BNKR. ✅ Added is_drb_token() function and updated calculate_burn_amounts() with DRB case. ✅ Frontend shows 'DRB DIRECT' badge and proper allocation breakdown. ✅ DRB gets: 95% to Grok, 1.5% community, 1% team (all as DRB tokens), minimal 2.5% swapped to BNKR."
 
+  - task: "Community Tab Error Fix"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ Fixed Community tab JavaScript errors caused by missing API properties. ✅ Updated burnStats.total_users → burnStats.total_transactions. ✅ Updated burnStats.total_burns → burnStats.completed_transactions. ✅ Fixed burnStats.total_amount_burned → burnStats.total_tokens_burned with fallback. ✅ Added null check for burnStats.trending_tokens. Community tab now works without errors."
+
 agent_communication:
     - agent: "main"
-      message: "🎯 DRB DIRECT ALLOCATION PERFECTED! ✅ DRB tokens get special treatment (97.5% direct, 2.5% swap) ✅ 30+ protected tokens (stablecoins, BTC, ETH, SOL, SUI) ✅ Enhanced UI with DRB DIRECT badges ✅ Clean visual allocation grid ✅ Base-focused branding ✅ Silverish blue theme ✅ Perfect TV positioning. Ultimate token protection with intelligent allocation logic!"
+      message: "🎯 COMMUNITY TAB FIXED! ✅ No more frontend errors when clicking Community ✅ All API property names aligned ✅ DRB direct allocation logic ✅ 30+ protected tokens ✅ Enhanced UI with proper badges ✅ Clean visual allocation grid ✅ Base-focused branding ✅ Silverish blue theme ✅ Perfect TV positioning. All tabs working perfectly!"
