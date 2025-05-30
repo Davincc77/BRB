@@ -708,6 +708,183 @@ async def get_optimal_routes():
         logger.error(f"Optimal routes error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get optimal routes: {str(e)}")
 
+@api_router.get("/community/contest")
+async def get_community_contest():
+    """Get current community contest information"""
+    try:
+        # Get current voting period
+        current_period = await voting_periods_collection.find_one(
+            {"status": "active"},
+            sort=[("created_at", DESCENDING)]
+        )
+        
+        # Get all active projects
+        projects = []
+        cursor = projects_collection.find({"status": "active"}).sort("total_votes", DESCENDING)
+        async for project in cursor:
+            project["_id"] = str(project["_id"])
+            projects.append(project)
+        
+        # Get voting requirements
+        vote_requirements = {
+            "drb_amount": VOTE_REQUIREMENT_DRB,
+            "bnkr_amount": VOTE_REQUIREMENT_BNKR
+        }
+        
+        # Get current winner
+        current_winner = None
+        if current_period and current_period.get("winning_project_id"):
+            current_winner = await projects_collection.find_one(
+                {"id": current_period["winning_project_id"]}
+            )
+            if current_winner:
+                current_winner["_id"] = str(current_winner["_id"])
+        
+        return {
+            "voting_period": current_period,
+            "projects": projects,
+            "vote_requirements": vote_requirements,
+            "current_winner": current_winner,
+            "contest_allocations": {
+                "drb_percentage": COMMUNITY_PROJECT_DRB_PERCENTAGE,
+                "bnkr_percentage": COMMUNITY_PROJECT_BNKR_PERCENTAGE
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Community contest error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get contest info: {str(e)}")
+
+@api_router.post("/community/project")
+async def submit_project(project_data: dict):
+    """Submit a new project for community voting"""
+    try:
+        # Validate required fields
+        required_fields = ["name", "description", "base_address", "submitted_by"]
+        for field in required_fields:
+            if field not in project_data:
+                raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+        
+        # Create new project
+        project = CommunityProject(
+            name=project_data["name"],
+            description=project_data["description"],
+            base_address=project_data["base_address"],
+            website=project_data.get("website"),
+            twitter=project_data.get("twitter"),
+            logo_url=project_data.get("logo_url"),
+            submitted_by=project_data["submitted_by"]
+        )
+        
+        # Store in database
+        result = await projects_collection.insert_one(project.dict())
+        
+        return {
+            "project_id": project.id,
+            "status": "submitted",
+            "message": "Project submitted successfully for community voting"
+        }
+        
+    except Exception as e:
+        logger.error(f"Project submission error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to submit project: {str(e)}")
+
+@api_router.post("/community/vote")
+async def cast_vote(vote_data: dict):
+    """Cast a vote by burning DRB or BNKR tokens"""
+    try:
+        # Validate required fields
+        required_fields = ["voter_wallet", "project_id", "vote_token", "vote_amount", "burn_tx_hash"]
+        for field in required_fields:
+            if field not in vote_data:
+                raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+        
+        vote_token = vote_data["vote_token"].upper()
+        vote_amount = float(vote_data["vote_amount"])
+        
+        # Validate vote amount meets requirements
+        if vote_token == "DRB" and vote_amount < VOTE_REQUIREMENT_DRB:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Minimum {VOTE_REQUIREMENT_DRB} DRB required to vote"
+            )
+        elif vote_token == "BNKR" and vote_amount < VOTE_REQUIREMENT_BNKR:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Minimum {VOTE_REQUIREMENT_BNKR} BNKR required to vote"
+            )
+        
+        # Check if project exists
+        project = await projects_collection.find_one({"id": vote_data["project_id"]})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        # Check if voter already voted for this project
+        existing_vote = await votes_collection.find_one({
+            "voter_wallet": vote_data["voter_wallet"],
+            "project_id": vote_data["project_id"]
+        })
+        if existing_vote:
+            raise HTTPException(status_code=400, detail="You have already voted for this project")
+        
+        # Create vote record
+        vote = Vote(
+            voter_wallet=vote_data["voter_wallet"],
+            project_id=vote_data["project_id"],
+            vote_token=vote_token,
+            vote_amount=vote_amount,
+            burn_tx_hash=vote_data["burn_tx_hash"],
+            verified=True  # In production, this should verify the burn transaction
+        )
+        
+        # Store vote
+        await votes_collection.insert_one(vote.dict())
+        
+        # Update project vote counts
+        update_data = {"$inc": {"total_votes": 1}}
+        if vote_token == "DRB":
+            update_data["$inc"]["total_drb_votes"] = vote_amount
+        else:
+            update_data["$inc"]["total_bnkr_votes"] = vote_amount
+            
+        await projects_collection.update_one(
+            {"id": vote_data["project_id"]},
+            update_data
+        )
+        
+        return {
+            "vote_id": vote.id,
+            "status": "success",
+            "message": f"Vote cast successfully with {vote_amount} {vote_token}"
+        }
+        
+    except Exception as e:
+        logger.error(f"Voting error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to cast vote: {str(e)}")
+
+@api_router.get("/community/votes/{wallet_address}")
+async def get_user_votes(wallet_address: str):
+    """Get voting history for a wallet"""
+    try:
+        votes = []
+        cursor = votes_collection.find(
+            {"voter_wallet": wallet_address}
+        ).sort("timestamp", DESCENDING)
+        
+        async for vote in cursor:
+            vote["_id"] = str(vote["_id"])
+            # Get project info
+            project = await projects_collection.find_one({"id": vote["project_id"]})
+            if project:
+                vote["project_name"] = project["name"]
+            votes.append(vote)
+        
+        return {"votes": votes}
+        
+    except Exception as e:
+        logger.error(f"User votes error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get user votes: {str(e)}")
+
 @api_router.get("/community/stats")
 async def get_community_stats():
     """Get community statistics and leaderboard"""
