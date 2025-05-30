@@ -53,7 +53,7 @@ class BurnReliefBotAPITests(unittest.TestCase):
         print("✅ API health check passed")
 
     def test_02_chains_endpoint(self):
-        """Test chains endpoint for Base-only setup"""
+        """Test chains endpoint for Base-only setup with updated allocations"""
         response = requests.get(f"{API_URL}/chains")
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -80,16 +80,19 @@ class BurnReliefBotAPITests(unittest.TestCase):
         self.assertIn("bnkr_token_address", data)
         self.assertEqual(data["bnkr_token_address"], "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b")
         
-        # Verify allocations
+        # Verify allocations with updated percentages
         self.assertIn("allocations", data)
         allocations = data["allocations"]
         self.assertEqual(allocations["burn_percentage"], 88.0)
         self.assertEqual(allocations["drb_total_percentage"], 10.0)
+        self.assertEqual(allocations["drb_grok_percentage"], 7.0)
+        self.assertEqual(allocations["drb_community_percentage"], 1.5)
+        self.assertEqual(allocations["drb_team_percentage"], 0.5)  # Reduced from 1%
         self.assertEqual(allocations["bnkr_total_percentage"], 2.5)
         self.assertEqual(allocations["bnkr_community_percentage"], 1.5)
-        self.assertEqual(allocations["bnkr_team_percentage"], 1.0)
+        self.assertEqual(allocations["bnkr_team_percentage"], 0.5)  # Reduced from 1%
         
-        print("✅ Chains endpoint verified - Base-only setup confirmed")
+        print("✅ Chains endpoint verified - Base-only setup with updated allocations confirmed")
 
     def test_03_check_burnable_regular_token(self):
         """Test check-burnable endpoint with regular token (should be burnable)"""
