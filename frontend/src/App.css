@@ -159,14 +159,14 @@ body {
 }
 
 .retro-tv-smiley {
-  top: 20px;
-  left: 20px;
+  top: 100px;
+  left: 30px;
   animation-delay: 0s;
 }
 
 .retro-tv-drb {
-  top: 20px;
-  right: 20px;
+  top: 100px;
+  right: 30px;
   animation-delay: 4s;
 }
 
