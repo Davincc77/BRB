@@ -1260,7 +1260,7 @@ function App() {
                               <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">1.5% → $BNKR (Banker Club):</span>
+                              <span className="text-gray-400">1.5% → $BNKR (BANKR Club):</span>
                               <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
                             </div>
                             <div className="flex justify-between">
