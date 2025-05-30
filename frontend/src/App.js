@@ -565,7 +565,7 @@ function App() {
         }),
         axios.post(`${API}/swap-quote`, {
           input_token: tokenAddress,
-          output_token: availableChains[activeChain]?.cbbtc_token || '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf',
+          output_token: availableChains[activeChain]?.bnkr_token || '0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b',
           amount: (parseFloat(amount) * 0.06).toString(),
           chain: activeChain
         })
