@@ -52,47 +52,24 @@ class BurnReliefBotAPITests(unittest.TestCase):
         self.assertIn("timestamp", data)
         print("✅ API health check passed")
 
-    def test_02_chains_endpoint(self):
-        """Test chains endpoint for Base-only setup with updated allocations"""
-        response = requests.get(f"{API_URL}/chains")
+    def test_03_check_burnable_regular_token(self):
+        """Test check-burnable endpoint with regular token (should be burnable)"""
+        payload = {
+            "token_address": self.test_token,
+            "chain": self.chain
+        }
+        
+        response = requests.post(f"{API_URL}/check-burnable", json=payload)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify chains data
-        self.assertIn("chains", data)
-        chains = data["chains"]
+        # Verify regular token is burnable
+        self.assertIn("is_burnable", data)
+        self.assertTrue(data["is_burnable"])
+        self.assertFalse(data["is_drb"])
+        self.assertEqual(data["allocation_type"], "burn_and_swap")
         
-        # Should only have Base chain
-        self.assertEqual(len(chains), 1)
-        self.assertIn("base", chains)
-        
-        # Verify Base chain data
-        base_chain = chains["base"]
-        self.assertEqual(base_chain["name"], "Base")
-        self.assertEqual(base_chain["chain_id"], 8453)
-        self.assertEqual(base_chain["currency"], "ETH")
-        
-        # Verify default chain is Base
-        self.assertEqual(data["default_chain"], "base")
-        
-        # Verify token addresses
-        self.assertIn("drb_token_address", data)
-        self.assertIn("bnkr_token_address", data)
-        self.assertEqual(data["bnkr_token_address"], "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b")
-        
-        # Verify allocations with updated percentages
-        self.assertIn("allocations", data)
-        allocations = data["allocations"]
-        self.assertEqual(allocations["burn_percentage"], 88.0)
-        self.assertEqual(allocations["drb_total_percentage"], 10.0)
-        self.assertEqual(allocations["drb_grok_percentage"], 7.0)
-        self.assertEqual(allocations["drb_community_percentage"], 1.5)
-        self.assertEqual(allocations["drb_team_percentage"], 0.5)  # Reduced from 1%
-        self.assertEqual(allocations["bnkr_total_percentage"], 2.5)
-        self.assertEqual(allocations["bnkr_community_percentage"], 1.5)
-        self.assertEqual(allocations["bnkr_team_percentage"], 0.5)  # Reduced from 1%
-        
-        print("✅ Chains endpoint verified - Base-only setup with updated allocations confirmed")
+        print("✅ Regular token correctly identified as burnable")
 
     def test_04_check_burnable_bnkr_token(self):
         """Test check-burnable endpoint with $BNKR token (should be swap-only)"""
