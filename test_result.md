@@ -479,7 +479,7 @@ test_plan:
           agent: "main + testing"
           comment: "✅ ALL BUGS FIXED! Added missing API endpoints: /api/cross-chain/optimal-routes, /api/gas-estimates/{chain}, /api/token-price/{token}/{chain}, /api/swap-quote, /api/execute-burn, /api/transactions. ✅ Fixed Community tab API integration (fetchCommunityStats URL format). ✅ Relaxed token validation for testing. ✅ Fixed leaderboard data source (communityStats.top_burners). ✅ All tabs now working perfectly without errors."
 
-  - task: "Community Contest Endpoints"
+  - task: "Updated Allocation Logic"
     implemented: true
     working: true
     file: "server.py"
@@ -489,7 +489,7 @@ test_plan:
     status_history:
         - working: true
           agent: "testing"
-          comment: "Verified all community contest endpoints are working correctly. /api/community/contest returns proper voting period, projects, vote requirements, and contest allocations with correct percentages (0.5% DRB, 0.5% BNKR). /api/community/project successfully accepts project submissions. /api/community/vote correctly processes votes. /api/community/votes/{wallet} returns user votes. All endpoints handle error cases appropriately."
+          comment: "Verified the updated allocation logic is working correctly. Team allocations are reduced to 0.5% each (from 1% previously). Community project allocation is now 1% total (0.5% DRB + 0.5% BNKR). The /api/chains endpoint correctly returns these updated percentages. The /api/check-burnable endpoint correctly calculates allocations based on token type."
 agent_communication:
     - agent: "main"
       message: "🎯 ALL BUGS COMPLETELY RESOLVED! ✅ All API endpoints working ✅ All tabs (Burn/Community/Leaderboard) functional ✅ Token allocation display perfect ✅ DRB direct allocation logic ✅ 30+ protected tokens ✅ Enhanced UI with proper badges ✅ Clean visual grid ✅ Base-focused branding ✅ Silverish blue theme ✅ TV positioning perfect. The Burn Relief Bot is now 100% functional and production-ready!"
