@@ -12,35 +12,15 @@ API_URL = f"{BACKEND_URL}/api"
 class BurnReliefBotAPITests(unittest.TestCase):
     """Test suite for Burn Relief Bot API endpoints after Community Contest upgrade"""
 
-    def setUp(self):
-        """Setup for each test"""
-        self.test_wallet = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-        self.test_token = "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd"  # AERO token
-        self.bnkr_token = "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b"  # $BNKR token
-        self.drb_token = "0x1234567890123456789012345678901234567890"  # DRB token
-        self.usdc_token = "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913"  # USDC on Base
-        self.test_amount = "1000"
-        self.chain = "base"  # Only Base chain is supported now
-        
-        # Test project data
-        self.test_project = {
-            "name": "Test Community Project",
-            "description": "A test project for the community contest",
-            "base_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44f",
-            "submitted_by": self.test_wallet,
-            "website": "https://example.com",
-            "twitter": "@testproject",
-            "logo_url": "https://example.com/logo.png"
-        }
-        
-        # Test vote data
-        self.test_vote = {
-            "voter_wallet": self.test_wallet,
-            "project_id": "",  # Will be filled after project creation
-            "vote_token": "DRB",
-            "vote_amount": "1000",
-            "burn_tx_hash": "0x" + "a" * 64
-        }
+    def test_01_health_check(self):
+        """Test API health endpoint"""
+        response = requests.get(f"{API_URL}/health")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("status", data)
+        self.assertEqual(data["status"], "healthy")
+        self.assertIn("timestamp", data)
+        print("✅ API health check passed")
 
     def test_02_chains_endpoint(self):
         """Test chains endpoint for Base-only setup with updated allocations"""
