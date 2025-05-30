@@ -1203,11 +1203,13 @@ function App() {
                         Allocation Preview
                         {tokenBurnability && (
                           <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                            tokenBurnability.is_burnable 
-                              ? 'bg-red-500 bg-opacity-20 text-red-300' 
-                              : 'bg-blue-500 bg-opacity-20 text-blue-300'
+                            tokenBurnability.is_drb
+                              ? 'bg-blue-500 bg-opacity-20 text-blue-300'
+                              : tokenBurnability.is_burnable 
+                                ? 'bg-red-500 bg-opacity-20 text-red-300' 
+                                : 'bg-purple-500 bg-opacity-20 text-purple-300'
                           }`}>
-                            {tokenBurnability.is_burnable ? 'BURNABLE' : 'SWAP ONLY'}
+                            {tokenBurnability.is_drb ? 'DRB DIRECT' : (tokenBurnability.is_burnable ? 'BURNABLE' : 'SWAP ONLY')}
                           </span>
                         )}
                       </h4>
