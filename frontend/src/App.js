@@ -65,6 +65,7 @@ function App() {
     fetchOptimalRoutes();
     fetchContestData();
     fetchCommunityStats();
+    fetchCommunityStats();
   }, []);
 
   const fetchAvailableChains = async () => {
