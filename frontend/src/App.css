@@ -140,6 +140,51 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+/* Retro TV floating icons */
+.retro-tv-icon {
+  position: fixed;
+  z-index: 1000;
+  width: 60px;
+  height: auto;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: gentle-float 8s ease-in-out infinite;
+}
+
+.retro-tv-icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  filter: drop-shadow(0 6px 12px rgba(136, 146, 160, 0.4));
+}
+
+.retro-tv-smiley {
+  top: 20px;
+  left: 20px;
+  animation-delay: 0s;
+}
+
+.retro-tv-drb {
+  top: 20px;
+  right: 20px;
+  animation-delay: 4s;
+}
+
+@keyframes gentle-float {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg);
+  }
+  25% { 
+    transform: translateY(-5px) rotate(1deg);
+  }
+  50% { 
+    transform: translateY(-3px) rotate(-0.5deg);
+  }
+  75% { 
+    transform: translateY(-7px) rotate(0.5deg);
+  }
+}
+
 /* Retro TV styling for decorative elements */
 .retro-tv {
   position: fixed;
