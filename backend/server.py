@@ -550,6 +550,36 @@ async def get_burn_statistics():
         logger.error(f"Stats error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
 
+@api_router.get("/cross-chain/optimal-routes")
+async def get_optimal_routes():
+    """Get optimal routes for cross-chain operations (simplified for Base-only)"""
+    try:
+        # Since we're Base-only now, return simple Base chain recommendation
+        return {
+            "optimal_chains": {
+                "DRB": "base",
+                "BNKR": "base"
+            },
+            "recommended_chain": "base",
+            "gas_estimates": {
+                "base": {
+                    "slow": "0.001",
+                    "standard": "0.002", 
+                    "fast": "0.003"
+                }
+            },
+            "liquidity_analysis": {
+                "base": {
+                    "DRB_liquidity": "high",
+                    "BNKR_liquidity": "high"
+                }
+            },
+            "message": "Base chain is optimal for all token operations"
+        }
+    except Exception as e:
+        logger.error(f"Optimal routes error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get optimal routes: {str(e)}")
+
 @api_router.get("/community/stats")
 async def get_community_stats():
     """Get community statistics and leaderboard"""
