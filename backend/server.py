@@ -278,16 +278,30 @@ async def is_token_burnable(token_address: str, token_name: str = "", token_symb
     
     return True
 
-def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burnable: bool = True) -> Dict[str, str]:
+def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burnable: bool = True, is_drb: bool = False) -> Dict[str, str]:
     """Calculate distribution amounts for burn transaction"""
     total = float(total_amount)
     
-    # Check if token should be burned
-    if not is_burnable or token_address.lower() in [t.lower() for t in NON_BURNABLE_TOKENS]:
+    if is_drb:
+        # Special handling for DRB tokens - direct allocation with minimal swapping
+        # 0% burned (DRB is valuable, direct allocation)
+        # 88% + 7% = 95% goes directly to Grok (as DRB tokens)
+        # 1.5% goes directly to community (as DRB tokens)  
+        # 1% goes directly to team (as DRB tokens)
+        # Only 2.5% total needs to be swapped to BNKR (1.5% + 1%)
+        burn_amount = 0.0
+        drb_grok_amount = total * ((BURN_PERCENTAGE + DRB_GROK_PERCENTAGE) / 100)  # 95%
+        drb_community_amount = total * (DRB_COMMUNITY_PERCENTAGE / 100)  # 1.5%
+        drb_team_amount = total * (DRB_TEAM_PERCENTAGE / 100)  # 1%
+        drb_total_amount = drb_grok_amount + drb_community_amount + drb_team_amount
+        # Only swap what's needed for BNKR allocation
+        bnkr_community_amount = total * (BNKR_COMMUNITY_PERCENTAGE / 100)  # 1.5%
+        bnkr_team_amount = total * (BNKR_TEAM_PERCENTAGE / 100)  # 1%
+        bnkr_total_amount = bnkr_community_amount + bnkr_team_amount
+        allocation_type = "drb_direct_allocation"
+    elif not is_burnable or token_address.lower() in [t.lower() for t in NON_BURNABLE_TOKENS]:
         # For non-burnable tokens: no burning, all goes to swaps
-        # 95% (88% + 7%) DRB to Grok, 1.5% DRB to community, 1% DRB to team
-        # 1.5% BNKR to Banker Club, 1% BNKR to team
-        burn_amount = 0.0  # No burning for these tokens
+        burn_amount = 0.0
         drb_grok_amount = total * ((BURN_PERCENTAGE + DRB_GROK_PERCENTAGE) / 100)  # 95%
         drb_community_amount = total * (DRB_COMMUNITY_PERCENTAGE / 100)  # 1.5%
         drb_team_amount = total * (DRB_TEAM_PERCENTAGE / 100)  # 1%
@@ -295,6 +309,7 @@ def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burn
         bnkr_community_amount = total * (BNKR_COMMUNITY_PERCENTAGE / 100)  # 1.5%
         bnkr_team_amount = total * (BNKR_TEAM_PERCENTAGE / 100)  # 1%
         bnkr_total_amount = bnkr_community_amount + bnkr_team_amount
+        allocation_type = "swap_only"
     else:
         # For burnable tokens: standard allocation
         burn_amount = total * (BURN_PERCENTAGE / 100)  # 88%
@@ -305,6 +320,7 @@ def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burn
         bnkr_community_amount = total * (BNKR_COMMUNITY_PERCENTAGE / 100)  # 1.5%
         bnkr_team_amount = total * (BNKR_TEAM_PERCENTAGE / 100)  # 1%
         bnkr_total_amount = bnkr_community_amount + bnkr_team_amount
+        allocation_type = "burn_and_swap"
     
     return {
         "burn_amount": str(burn_amount),
@@ -315,7 +331,9 @@ def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burn
         "bnkr_total_amount": str(bnkr_total_amount),
         "bnkr_community_amount": str(bnkr_community_amount),
         "bnkr_team_amount": str(bnkr_team_amount),
-        "is_burnable": is_burnable
+        "is_burnable": is_burnable,
+        "is_drb": is_drb,
+        "allocation_type": allocation_type
     }
 
 # API Endpoints
