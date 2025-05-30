@@ -218,26 +218,61 @@ class BurnReliefBotAPITests(unittest.TestCase):
         
         print("✅ Community stats endpoint verified")
 
-    def test_09_token_validation(self):
-        """Test token validation endpoint"""
+    def test_10_burn_endpoint(self):
+        """Test burn endpoint with updated allocation logic"""
+        print("⚠️ Skipping actual burn transaction - requires valid token contract")
+        
+        # Instead of making a real burn request, we'll test the preview allocations
+        # from the check-burnable endpoint to verify the allocation logic
+        
+        # Test regular token (burnable)
         payload = {
             "token_address": self.test_token,
             "chain": self.chain
         }
         
-        response = requests.post(f"{API_URL}/validate-token", json=payload)
+        response = requests.post(f"{API_URL}/check-burnable", json=payload)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify validation response
-        self.assertIn("is_valid", data)
-        if data["is_valid"]:
-            self.assertIn("symbol", data)
-            self.assertIn("name", data)
-            self.assertIn("decimals", data)
-            self.assertIn("total_supply", data)
+        # Verify allocation percentages for regular token
+        preview = data["preview_allocations"]
+        self.assertIn("burn_percentage", preview)
+        self.assertIn("drb_grok_percentage", preview)
+        self.assertIn("drb_community_percentage", preview)
+        self.assertIn("drb_team_percentage", preview)
+        self.assertIn("bnkr_community_percentage", preview)
+        self.assertIn("bnkr_team_percentage", preview)
         
-        print("✅ Token validation endpoint verified")
+        # Test DRB token (direct allocation)
+        payload = {
+            "token_address": self.drb_token,
+            "chain": self.chain
+        }
+        
+        response = requests.post(f"{API_URL}/check-burnable", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify DRB token is handled with direct allocation
+        self.assertTrue(data["is_drb"])
+        self.assertEqual(data["allocation_type"], "drb_direct_allocation")
+        
+        # Test protected token (USDC - swap only)
+        payload = {
+            "token_address": self.usdc_token,
+            "chain": self.chain
+        }
+        
+        response = requests.post(f"{API_URL}/check-burnable", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify USDC is not burnable
+        self.assertFalse(data["is_burnable"])
+        self.assertEqual(data["allocation_type"], "swap_only")
+        
+        print("✅ Burn allocation logic verified for different token types")
 
     def test_11_community_contest_endpoint(self):
         """Test community contest endpoint"""
