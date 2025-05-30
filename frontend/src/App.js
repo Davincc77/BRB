@@ -106,7 +106,7 @@ function App() {
     if (!tokenAddr || !amt || !availableChains[activeChain]) return;
     
     try {
-      const [drbQuote, cbbtcQuote] = await Promise.all([
+      const [drbQuote, bnkrQuote] = await Promise.all([
         axios.post(`${API}/swap-quote`, {
           input_token: tokenAddr,
           output_token: availableChains[activeChain]?.drb_token || '0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2',
