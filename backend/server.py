@@ -64,8 +64,10 @@ NON_BURNABLE_TOKENS = [
     "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # $BNKR token
     "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",  # cbBTC token  
     BNKR_TOKEN_CA.lower(),  # $BNKR token (lowercase)
+    DRB_TOKEN_CA.lower(),  # $DRB token (should be allocated directly)
     "banker", "bnkr",  # Common names
     "cbbtc", "coinbase bitcoin",  # cbBTC variations
+    "drb", "$drb", "drb token",  # DRB variations
     
     # Major cryptocurrencies
     "btc", "bitcoin", "wbtc", "bitcoin",
