@@ -60,11 +60,46 @@ BNKR_TEAM_PERCENTAGE = 1.0       # 1% BNKR to team
 
 # Tokens that should NOT be burned (exceptions)
 NON_BURNABLE_TOKENS = [
+    # Project tokens
     "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # $BNKR token
     "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",  # cbBTC token  
     BNKR_TOKEN_CA.lower(),  # $BNKR token (lowercase)
     "banker", "bnkr",  # Common names
-    "cbbtc", "coinbase bitcoin"  # cbBTC variations
+    "cbbtc", "coinbase bitcoin",  # cbBTC variations
+    
+    # Major cryptocurrencies
+    "btc", "bitcoin", "wbtc", "bitcoin",
+    "eth", "ethereum", "weth",
+    "sol", "solana", 
+    "sui",
+    
+    # Stablecoins
+    "usdc", "usd coin", "usdc.e",
+    "usdt", "tether", "usdt.e", 
+    "dai", "dai stablecoin",
+    "busd", "binance usd",
+    "frax", "frax share",
+    "tusd", "trueusd",
+    "lusd", "liquity usd",
+    "mim", "magic internet money",
+    "fei", "fei protocol",
+    "tribe", "tribe dao",
+    "ust", "terrausd",
+    "ousd", "origin dollar",
+    "usdp", "paxos standard",
+    "gusd", "gemini dollar",
+    "husd", "husd",
+    "susd", "synth susd",
+    "cusd", "celo dollar",
+    "usdk", "usdk",
+    "usdx", "usdx stablecoin",
+    "vai", "venus",
+    "ustc", "terra classic usd",
+    
+    # Major stablecoin contract addresses (Base chain)
+    "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",  # USDC on Base
+    "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",  # DEGEN on Base (popular)
+    "0x50c5725949a6f0c72e6c4a641f24049a917db0cb",  # DAI on Base
 ]
 
 # Supported token types
