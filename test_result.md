@@ -167,6 +167,9 @@ backend:
         - working: true
           agent: "main"
           comment: "Successfully integrated $BNKR token (CA: 0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b) in all relevant endpoints. API now returns BNKR token information instead of cbBTC."
+        - working: true
+          agent: "testing"
+          comment: "Verified $BNKR token integration with address 0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b. Confirmed /api/check-burnable correctly identifies $BNKR as swap-only. Integration is working correctly."
 
   - task: "Token Allocations"
     implemented: true
