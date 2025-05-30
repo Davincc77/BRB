@@ -169,31 +169,28 @@ class BurnReliefBotAPITests(unittest.TestCase):
         
         print("✅ USDC stablecoin correctly identified as swap-only")
 
-    def test_07_stats_endpoint(self):
-        """Test stats endpoint for proper property names"""
-        response = requests.get(f"{API_URL}/stats")
+    def test_08_community_stats_endpoint(self):
+        """Test community stats endpoint"""
+        response = requests.get(f"{API_URL}/community/stats")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify stats data structure
-        self.assertIn("total_transactions", data)
-        self.assertIn("completed_transactions", data)
+        # Verify community stats data structure
+        self.assertIn("total_burns", data)
         self.assertIn("total_volume_usd", data)
         self.assertIn("total_tokens_burned", data)
-        self.assertIn("total_drb_allocated", data)
-        self.assertIn("total_bnkr_allocated", data)
-        self.assertIn("burn_percentage", data)
-        self.assertIn("drb_percentage", data)
-        self.assertIn("bnkr_percentage", data)
-        self.assertIn("supported_chains", data)
+        self.assertIn("active_wallets", data)
+        self.assertIn("chain_distribution", data)
+        self.assertIn("top_burners", data)
+        self.assertIn("recent_burns", data)
         
-        # Verify BNKR percentage is correct
-        self.assertEqual(data["bnkr_percentage"], 2.5)
+        # Verify chain distribution is only Base
+        chain_distribution = data["chain_distribution"]
+        self.assertEqual(len(chain_distribution), 1)
+        self.assertIn("base", chain_distribution)
+        self.assertEqual(chain_distribution["base"], 100.0)
         
-        # Verify supported chains is only Base
-        self.assertEqual(data["supported_chains"], ["base"])
-        
-        print("✅ Stats endpoint verified with correct property names")
+        print("✅ Community stats endpoint verified")
 
     def test_09_token_validation(self):
         """Test token validation endpoint"""
