@@ -248,13 +248,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Health Check Endpoint"
-    - "Base Chain Only"
-    - "$BNKR Token Integration"
-    - "Token Allocations"
-    - "Burn Statistics"
-    - "Token Validation"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
