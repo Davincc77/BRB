@@ -312,6 +312,7 @@ function App() {
       await Promise.all([
         fetchAvailableChains(),
         fetchBurnStats(),
+        fetchCommunityStats(),
         fetchTransactions()
       ]);
       showNotification('Data refreshed successfully!', 'success');
