@@ -1484,7 +1484,7 @@ function App() {
                   <TrendingUp className="w-6 h-6 text-green-500 mr-2" />
                   Trending Tokens
                 </h2>
-                {burnStats && burnStats.trending_tokens.length > 0 ? (
+                {burnStats && burnStats.trending_tokens && burnStats.trending_tokens.length > 0 ? (
                   <div className="space-y-3">
                     {burnStats.trending_tokens.map((token, index) => (
                       <div key={index} className="transaction-item group">
