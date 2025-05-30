@@ -1212,7 +1212,35 @@ function App() {
                         )}
                       </h4>
                       <div className="space-y-1 text-sm">
-                        {tokenBurnability?.is_burnable ? (
+                        {tokenBurnability?.is_drb ? (
+                          // DRB token allocations (direct allocation with minimal swapping)
+                          <>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">0% Burned:</span>
+                              <span className="text-blue-500">DRB Direct Allocation</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">95% → DRB (Grok):</span>
+                              <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.95).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1.5% → DRB (Community):</span>
+                              <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1% → DRB (Team):</span>
+                              <span className="text-blue-300">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1.5% DRB→BNKR (BANKR Club):</span>
+                              <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.015).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">1% DRB→BNKR (Team):</span>
+                              <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.01).toString())}</span>
+                            </div>
+                          </>
+                        ) : tokenBurnability?.is_burnable ? (
                           // Burnable token allocations
                           <>
                             <div className="flex justify-between">
