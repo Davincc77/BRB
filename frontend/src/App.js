@@ -1702,7 +1702,7 @@ function App() {
         <div className="mt-8 bg-gray-800 rounded-xl p-6 border border-gray-700">
           <h3 className="text-lg font-bold text-white mb-6 text-center">How It Works</h3>
           
-          <div className="grid md:grid-cols-6 gap-3 text-sm">
+          <div className="grid md:grid-cols-7 gap-3 text-sm">
             <div className="text-center">
               <div className="bg-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Flame className="w-6 h-6 text-white" />
