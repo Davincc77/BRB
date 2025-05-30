@@ -1488,7 +1488,7 @@ function App() {
               </div>
               <h4 className="font-medium text-white mb-2">2% → Team</h4>
               <p className="text-gray-400">
-                1% $DRB + 1% $cbBTC to team wallet
+                1% $DRB + 1% $BNKR to Team:
               </p>
             </div>
             <div className="text-center">
