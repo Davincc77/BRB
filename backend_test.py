@@ -113,10 +113,10 @@ class BurnReliefBotAPITests(unittest.TestCase):
         
         print("✅ Regular token correctly identified as burnable")
 
-    def test_04_check_burnable_bnkr_token(self):
-        """Test check-burnable endpoint with $BNKR token (should be swap-only)"""
+    def test_05_check_burnable_drb_token(self):
+        """Test check-burnable endpoint with DRB token (should be direct allocation)"""
         payload = {
-            "token_address": self.bnkr_token,
+            "token_address": self.drb_token,
             "chain": self.chain
         }
         
@@ -124,13 +124,12 @@ class BurnReliefBotAPITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify BNKR token is not burnable
-        self.assertIn("is_burnable", data)
-        self.assertFalse(data["is_burnable"])
-        self.assertFalse(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "swap_only")
+        # Verify DRB token is handled with direct allocation
+        self.assertIn("is_drb", data)
+        self.assertTrue(data["is_drb"])
+        self.assertEqual(data["allocation_type"], "drb_direct_allocation")
         
-        print("✅ $BNKR token correctly identified as swap-only")
+        print("✅ DRB token correctly identified for direct allocation")
 
     def test_06_check_burnable_stablecoin(self):
         """Test check-burnable endpoint with stablecoin like USDC (should be swap-only)"""
