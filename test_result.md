@@ -197,6 +197,9 @@ backend:
         - working: true
           agent: "main"
           comment: "/api/stats endpoint correctly returns BNKR allocation data with total_bnkr_allocated field and bnkr_percentage: 2.5%. Stats properly track BNKR distribution."
+        - working: true
+          agent: "testing"
+          comment: "Verified /api/stats endpoint returns correct property names including total_bnkr_allocated and bnkr_percentage (2.5%). Stats endpoint is working correctly with proper BNKR allocation data."
 
   - task: "Token Validation"
     implemented: true
