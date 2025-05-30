@@ -239,42 +239,238 @@ class BurnReliefBotAPITests(unittest.TestCase):
         
         print("✅ Token validation endpoint verified")
 
-    def test_10_burn_endpoint(self):
-        """Test burn endpoint"""
-        print("⚠️ Skipping burn endpoint test - requires valid token contract")
-        return  # Skip this test
-        
-        payload = {
-            "wallet_address": self.test_wallet,
-            "token_address": self.test_token,
-            "amount": self.test_amount,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/burn", json=payload)
+    def test_11_community_contest_endpoint(self):
+        """Test community contest endpoint"""
+        response = requests.get(f"{API_URL}/community/contest")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify burn response
-        self.assertIn("transaction_id", data)
+        # Verify contest data structure
+        self.assertIn("voting_period", data)
+        self.assertIn("projects", data)
+        self.assertIn("vote_requirements", data)
+        self.assertIn("contest_allocations", data)
+        
+        # Verify vote requirements
+        vote_requirements = data["vote_requirements"]
+        self.assertIn("drb_amount", vote_requirements)
+        self.assertIn("bnkr_amount", vote_requirements)
+        
+        # Verify contest allocations
+        contest_allocations = data["contest_allocations"]
+        self.assertIn("drb_percentage", contest_allocations)
+        self.assertIn("bnkr_percentage", contest_allocations)
+        self.assertEqual(contest_allocations["drb_percentage"], 0.5)
+        self.assertEqual(contest_allocations["bnkr_percentage"], 0.5)
+        
+        print("✅ Community contest endpoint verified")
+    
+    def test_12_community_project_submission(self):
+        """Test community project submission endpoint"""
+        response = requests.post(f"{API_URL}/community/project", json=self.test_project)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify project submission response
+        self.assertIn("project_id", data)
         self.assertIn("status", data)
-        self.assertEqual(data["status"], "pending")
-        self.assertIn("amounts", data)
-        self.assertIn("is_burnable", data)
-        self.assertIn("allocation_type", data)
+        self.assertEqual(data["status"], "submitted")
         
-        # Verify amounts
-        amounts = data["amounts"]
-        self.assertIn("burn_amount", amounts)
-        self.assertIn("drb_total_amount", amounts)
-        self.assertIn("drb_grok_amount", amounts)
-        self.assertIn("drb_team_amount", amounts)
-        self.assertIn("drb_community_amount", amounts)
-        self.assertIn("bnkr_total_amount", amounts)
-        self.assertIn("bnkr_community_amount", amounts)
-        self.assertIn("bnkr_team_amount", amounts)
+        # Save project ID for voting test
+        self.test_vote["project_id"] = data["project_id"]
         
-        print("✅ Burn endpoint verified")
+        print("✅ Community project submission endpoint verified")
+    
+    def test_13_community_vote_endpoint(self):
+        """Test community vote endpoint"""
+        # Skip if no project ID
+        if not self.test_vote["project_id"]:
+            print("⚠️ Skipping vote test - no project ID available")
+            return
+            
+        response = requests.post(f"{API_URL}/community/vote", json=self.test_vote)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify vote response
+        self.assertIn("vote_id", data)
+        self.assertIn("status", data)
+        self.assertEqual(data["status"], "success")
+        
+        print("✅ Community vote endpoint verified")
+    
+    def test_14_user_votes_endpoint(self):
+        """Test user votes endpoint"""
+        response = requests.get(f"{API_URL}/community/votes/{self.test_wallet}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify votes data structure
+        self.assertIn("votes", data)
+        
+        # If we successfully voted in the previous test, we should have at least one vote
+        if self.test_vote["project_id"]:
+            if len(data["votes"]) > 0:
+                vote = data["votes"][0]
+                self.assertIn("voter_wallet", vote)
+                self.assertIn("project_id", vote)
+                self.assertIn("vote_token", vote)
+                self.assertIn("vote_amount", vote)
+        
+        print("✅ User votes endpoint verified")
+    
+    def test_15_error_handling_missing_params(self):
+        """Test error handling for missing parameters"""
+        # Test project submission with missing required fields
+        incomplete_project = {
+            "name": "Incomplete Project"
+            # Missing other required fields
+        }
+        
+        response = requests.post(f"{API_URL}/community/project", json=incomplete_project)
+        self.assertEqual(response.status_code, 400)  # Should return 400 Bad Request
+        
+        # Test vote submission with missing required fields
+        incomplete_vote = {
+            "voter_wallet": self.test_wallet
+            # Missing other required fields
+        }
+        
+        response = requests.post(f"{API_URL}/community/vote", json=incomplete_vote)
+        self.assertEqual(response.status_code, 400)  # Should return 400 Bad Request
+        
+        print("✅ Error handling for missing parameters verified")
+    
+    def test_16_error_handling_invalid_requests(self):
+        """Test error handling for invalid requests"""
+        # Test with invalid token address format
+        payload = {
+            "token_address": "invalid-address",  # Not a valid Ethereum address
+            "chain": self.chain
+        }
+        
+        response = requests.post(f"{API_URL}/validate-token", json=payload)
+        # Should either return 400 Bad Request or 200 with is_valid=False
+        if response.status_code == 200:
+            data = response.json()
+            self.assertIn("is_valid", data)
+            self.assertFalse(data["is_valid"])
+        else:
+            self.assertEqual(response.status_code, 400)
+        
+        # Test with invalid chain
+        payload = {
+            "token_address": self.test_token,
+            "chain": "invalid-chain"  # Not a supported chain
+        }
+        
+        response = requests.get(f"{API_URL}/gas-estimates/invalid-chain")
+        self.assertEqual(response.status_code, 400)  # Should return 400 Bad Request
+        
+        print("✅ Error handling for invalid requests verified")
+    
+    def test_17_cross_chain_optimal_routes(self):
+        """Test cross-chain optimal routes endpoint"""
+        response = requests.get(f"{API_URL}/cross-chain/optimal-routes")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify optimal routes data structure
+        self.assertIn("optimal_chains", data)
+        self.assertIn("recommended_chain", data)
+        self.assertIn("gas_estimates", data)
+        self.assertIn("liquidity_analysis", data)
+        
+        # Verify Base is the recommended chain
+        self.assertEqual(data["recommended_chain"], "base")
+        
+        # Verify optimal chains for tokens
+        optimal_chains = data["optimal_chains"]
+        self.assertIn("DRB", optimal_chains)
+        self.assertIn("BNKR", optimal_chains)
+        self.assertEqual(optimal_chains["DRB"], "base")
+        self.assertEqual(optimal_chains["BNKR"], "base")
+        
+        print("✅ Cross-chain optimal routes endpoint verified")
+    
+    def test_18_gas_estimates_endpoint(self):
+        """Test gas estimates endpoint"""
+        response = requests.get(f"{API_URL}/gas-estimates/{self.chain}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify gas estimates data structure
+        self.assertIn("slow", data)
+        self.assertIn("standard", data)
+        self.assertIn("fast", data)
+        
+        # Verify each estimate has required fields
+        for speed in ["slow", "standard", "fast"]:
+            self.assertIn("gwei", data[speed])
+            self.assertIn("usd", data[speed])
+            self.assertIn("time", data[speed])
+        
+        print("✅ Gas estimates endpoint verified")
+    
+    def test_19_token_price_endpoint(self):
+        """Test token price endpoint"""
+        response = requests.get(f"{API_URL}/token-price/{self.test_token}/{self.chain}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify token price data structure
+        self.assertIn("price", data)
+        self.assertIn("currency", data)
+        self.assertEqual(data["currency"], "USD")
+        
+        print("✅ Token price endpoint verified")
+    
+    def test_20_swap_quote_endpoint(self):
+        """Test swap quote endpoint"""
+        payload = {
+            "token_address": self.test_token,
+            "amount": "1000",
+            "chain": self.chain
+        }
+        
+        response = requests.post(f"{API_URL}/swap-quote", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify swap quote data structure
+        self.assertIn("status", data)
+        self.assertEqual(data["status"], "success")
+        self.assertIn("data", data)
+        
+        quote_data = data["data"]
+        self.assertIn("input_amount", quote_data)
+        self.assertIn("output_amount", quote_data)
+        self.assertIn("price_impact", quote_data)
+        self.assertIn("gas_estimate", quote_data)
+        
+        print("✅ Swap quote endpoint verified")
+    
+    def test_21_transactions_endpoint(self):
+        """Test transactions endpoint"""
+        response = requests.get(f"{API_URL}/transactions")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify transactions data structure
+        self.assertIn("transactions", data)
+        
+        print("✅ Transactions endpoint verified")
+    
+    def test_22_wallet_transactions_endpoint(self):
+        """Test wallet transactions endpoint"""
+        response = requests.get(f"{API_URL}/transactions/{self.test_wallet}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        # Verify wallet transactions data structure
+        self.assertIn("transactions", data)
+        
+        print("✅ Wallet transactions endpoint verified")
 
 def run_tests():
     """Run all tests"""
