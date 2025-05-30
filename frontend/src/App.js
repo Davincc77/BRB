@@ -1595,21 +1595,21 @@ function App() {
               <Trophy className="w-6 h-6 text-yellow-500 mr-2" />
               Top Burners
             </h2>
-            {burnStats && burnStats.top_burners.length > 0 ? (
+            {communityStats && communityStats.top_burners && communityStats.top_burners.length > 0 ? (
               <div className="space-y-3">
-                {burnStats.top_burners.map((burner, index) => (
-                  <div key={index} className="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
+                {communityStats.top_burners.map((burner, index) => (
+                  <div key={index} className="silver-glass rounded-lg p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         index === 0 ? 'bg-yellow-600' : index === 1 ? 'bg-gray-500' : index === 2 ? 'bg-orange-600' : 'bg-gray-600'
                       }`}>
                         {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
                       </div>
-                      <span className="font-mono text-white">{formatAddress(burner.wallet_address)}</span>
+                      <span className="font-mono text-white">{formatAddress(burner.wallet || burner.wallet_address)}</span>
                     </div>
                     <div className="text-right">
-                      <div className="text-white font-medium">{parseFloat(burner.total_amount).toLocaleString()}</div>
-                      <div className="text-gray-400 text-sm">{burner.total_burns} burns</div>
+                      <div className="text-white font-medium">{parseFloat(burner.total_burned || burner.total_amount || 0).toLocaleString()}</div>
+                      <div className="text-gray-400 text-sm">{burner.transaction_count || burner.total_burns || 0} burns</div>
                     </div>
                   </div>
                 ))}
