@@ -573,7 +573,7 @@ function App() {
 
       // Show quotes to user
       showNotification(
-        `Swap rates: 6% → ${parseFloat(drbQuote.data.output_amount).toFixed(2)} $DRB, 6% → ${parseFloat(cbbtcQuote.data.output_amount).toFixed(2)} $cbBTC`,
+        `Swap rates: 6% → ${parseFloat(drbQuote.data.output_amount).toFixed(2)} $DRB, 6% → ${parseFloat(bnkrQuote.data.output_amount).toFixed(2)} $BNKR`,
         'info'
       );
 
