@@ -244,6 +244,25 @@ async def validate_token_contract(token_address: str, chain: str = "base") -> bo
         logger.error(f"Token validation failed: {e}")
         return False
 
+async def is_drb_token(token_address: str, token_name: str = "", token_symbol: str = "") -> bool:
+    """Check if token is DRB (requires special direct allocation)"""
+    check_values = [
+        token_address.lower(),
+        token_name.lower(),
+        token_symbol.lower()
+    ]
+    
+    drb_identifiers = [
+        DRB_TOKEN_CA.lower(),
+        "drb", "$drb", "drb token"
+    ]
+    
+    for value in check_values:
+        if value in drb_identifiers:
+            return True
+    
+    return False
+
 async def is_token_burnable(token_address: str, token_name: str = "", token_symbol: str = "") -> bool:
     """Check if token should be burned or swapped entirely"""
     # Check against non-burnable token list
