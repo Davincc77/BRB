@@ -152,6 +152,9 @@ backend:
         - working: true
           agent: "main"
           comment: "/api/chains endpoint now returns only Base chain (chain_id: 8453) with correct configuration. Successfully simplified from multi-chain to Base-only."
+        - working: true
+          agent: "testing"
+          comment: "Verified /api/chains endpoint returns only Base chain with chain_id 8453. Confirmed correct allocations: 88% burn, 10% DRB, 2.5% BNKR (1.5% community, 1% team). Base-only setup is working correctly."
 
   - task: "$BNKR Token Integration"
     implemented: true
