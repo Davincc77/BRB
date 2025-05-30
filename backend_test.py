@@ -41,6 +41,8 @@ class BurnReliefBotAPITests(unittest.TestCase):
             "vote_amount": "1000",
             "burn_tx_hash": "0x" + "a" * 64
         }
+        
+    def test_01_health_check(self):
         """Test API health endpoint"""
         response = requests.get(f"{API_URL}/health")
         self.assertEqual(response.status_code, 200)
