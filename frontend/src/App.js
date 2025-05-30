@@ -35,6 +35,7 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [tokenBurnability, setTokenBurnability] = useState(null); // New state for burn check
   const [burnStats, setBurnStats] = useState(null);
+  const [communityStats, setCommunityStats] = useState(null);
   const [activeTab, setActiveTab] = useState('burn'); // 'burn', 'community', 'leaderboard'
   
   // Enhanced UX state
