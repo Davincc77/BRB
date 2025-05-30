@@ -324,6 +324,9 @@ test_plan:
         - working: true
           agent: "main"
           comment: "Successfully added retro TV floating icons as requested. Top Left: Smiley face TV (friendly/welcoming) with orange screen and emoji. Top Right: $DRB Lightning TV (branding) with dark screen showing lightning bolt and DRB text. Added gentle floating animations and hover effects. Icons are 60px wide, positioned fixed, with subtle animations and silverish blue theme integration."
+        - working: true
+          agent: "testing"
+          comment: "Verified the retro TV floating icons are present and correctly positioned. The icons are visible on both sides of the header and do not interfere with the logo. The animations and styling are working as expected."
 
   - task: "UI/UX Final Polish"
     implemented: true
