@@ -213,6 +213,43 @@ class WebSocketMessage(BaseModel):
     data: Dict[str, Any]
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
+# Community Contest Models
+class CommunityProject(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    base_address: str  # Project's wallet address on Base
+    website: Optional[str] = None
+    twitter: Optional[str] = None
+    logo_url: Optional[str] = None
+    submitted_by: str  # Wallet address of submitter
+    status: str = "active"  # active, winner, ended
+    total_votes: int = 0
+    total_drb_votes: float = 0.0
+    total_bnkr_votes: float = 0.0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    voting_end_date: Optional[datetime] = None
+
+class Vote(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    voter_wallet: str
+    project_id: str
+    vote_token: str  # "DRB" or "BNKR"
+    vote_amount: float  # Amount burned to vote
+    burn_tx_hash: str  # Transaction hash of the burn
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    verified: bool = False
+
+class VotingPeriod(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    period_number: int
+    start_date: datetime
+    end_date: datetime
+    winning_project_id: Optional[str] = None
+    status: str = "active"  # active, ended
+    total_participants: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 # Database setup
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/burn_relief_bot')
 client = AsyncIOMotorClient(MONGO_URL)
