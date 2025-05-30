@@ -94,10 +94,10 @@ class BurnReliefBotAPITests(unittest.TestCase):
         
         print("✅ Chains endpoint verified - Base-only setup with updated allocations confirmed")
 
-    def test_03_check_burnable_regular_token(self):
-        """Test check-burnable endpoint with regular token (should be burnable)"""
+    def test_04_check_burnable_bnkr_token(self):
+        """Test check-burnable endpoint with $BNKR token (should be swap-only)"""
         payload = {
-            "token_address": self.test_token,
+            "token_address": self.bnkr_token,
             "chain": self.chain
         }
         
@@ -105,13 +105,13 @@ class BurnReliefBotAPITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify regular token is burnable
+        # Verify BNKR token is not burnable
         self.assertIn("is_burnable", data)
-        self.assertTrue(data["is_burnable"])
+        self.assertFalse(data["is_burnable"])
         self.assertFalse(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "burn_and_swap")
+        self.assertEqual(data["allocation_type"], "swap_only")
         
-        print("✅ Regular token correctly identified as burnable")
+        print("✅ $BNKR token correctly identified as swap-only")
 
     def test_05_check_burnable_drb_token(self):
         """Test check-burnable endpoint with DRB token (should be direct allocation)"""
