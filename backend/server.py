@@ -263,6 +263,11 @@ leaderboard_collection = db.leaderboard
 crosschain_collection = db.crosschain
 websocket_collection = db.websockets
 
+# Community Contest Collections
+projects_collection = db.projects
+votes_collection = db.votes
+voting_periods_collection = db.voting_periods
+
 # WebSocket connections storage
 active_connections: List[Dict[str, Any]] = []
 
