@@ -548,6 +548,83 @@ async def get_burn_statistics():
         logger.error(f"Stats error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
 
+@api_router.get("/gas-estimates/{chain}")
+async def get_gas_estimates(chain: str):
+    """Get gas estimates for chain operations"""
+    try:
+        if chain == "base":
+            return {
+                "slow": {"gwei": "1", "usd": "0.001", "time": "30s"},
+                "standard": {"gwei": "2", "usd": "0.002", "time": "15s"},
+                "fast": {"gwei": "3", "usd": "0.003", "time": "5s"}
+            }
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported chain")
+    except Exception as e:
+        logger.error(f"Gas estimates error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get gas estimates: {str(e)}")
+
+@api_router.get("/token-price/{token_address}/{chain}")
+async def get_token_price_endpoint(token_address: str, chain: str):
+    """Get token price"""
+    try:
+        price = await get_token_price(token_address, chain)
+        return {"price": price, "currency": "USD"}
+    except Exception as e:
+        logger.error(f"Token price error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get token price: {str(e)}")
+
+@api_router.post("/swap-quote")
+async def get_swap_quote(request: dict):
+    """Get swap quote for tokens"""
+    try:
+        # Simplified swap quote response
+        return {
+            "status": "success",
+            "data": {
+                "input_amount": request.get("amount", "0"),
+                "output_amount": str(float(request.get("amount", "0")) * 0.95),  # 5% slippage
+                "price_impact": "5%",
+                "gas_estimate": "0.002"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Swap quote error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get swap quote: {str(e)}")
+
+@api_router.post("/execute-burn")
+async def execute_burn_deprecated(request: dict):
+    """Legacy execute burn endpoint - redirect to new burn endpoint"""
+    try:
+        # Convert old format to new format
+        burn_request = BurnRequest(
+            wallet_address=request.get("wallet_address", ""),
+            token_address=request.get("token_address", ""),
+            amount=request.get("amount", "0"),
+            chain=request.get("chain", "base")
+        )
+        # Call the main burn endpoint logic
+        return await create_burn_transaction(burn_request, BackgroundTasks())
+    except Exception as e:
+        logger.error(f"Execute burn error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to execute burn: {str(e)}")
+
+@api_router.get("/transactions")
+async def get_all_transactions():
+    """Get all recent transactions"""
+    try:
+        transactions = []
+        cursor = burns_collection.find({}).sort("timestamp", DESCENDING).limit(20)
+        
+        async for doc in cursor:
+            doc["_id"] = str(doc["_id"])
+            transactions.append(doc)
+        
+        return {"transactions": transactions}
+    except Exception as e:
+        logger.error(f"Transactions fetch error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch transactions: {str(e)}")
+
 @api_router.get("/cross-chain/optimal-routes")
 async def get_optimal_routes():
     """Get optimal routes for cross-chain operations (simplified for Base-only)"""
