@@ -355,6 +355,18 @@ test_plan:
           agent: "main"
           comment: "✅ Massively expanded NON_BURNABLE_TOKENS list to include: All major stablecoins (USDC, USDT, DAI, BUSD, FRAX, etc.), Major cryptocurrencies (BTC, ETH, SOL, SUI), Base chain contract addresses for popular tokens. Now protects 30+ valuable token types from burning. All protected tokens get swap-only treatment (95% DRB to Grok + other allocations)."
 
+  - task: "DRB Direct Allocation Logic"
+    implemented: true
+    working: true
+    file: "server.py, App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ Added special DRB token handling with direct allocation logic. ✅ DRB tokens are NOT burned - 97.5% directly allocated as DRB tokens, only 2.5% swapped to BNKR. ✅ Added is_drb_token() function and updated calculate_burn_amounts() with DRB case. ✅ Frontend shows 'DRB DIRECT' badge and proper allocation breakdown. ✅ DRB gets: 95% to Grok, 1.5% community, 1% team (all as DRB tokens), minimal 2.5% swapped to BNKR."
+
 agent_communication:
     - agent: "main"
-      message: "🎯 PROTECTION EXPANDED! ✅ 30+ valuable tokens protected from burning ✅ All stablecoins safe ✅ BTC/ETH/SOL/SUI protected ✅ Base-focused branding ✅ Clean UI without repetitive text ✅ Blue burn symbol ✅ Perfect TV icon positioning ✅ Complete visual allocation grid ✅ BANKR Club terminology ✅ Silverish blue theme. Ultimate token protection with beautiful UI!"
+      message: "🎯 DRB DIRECT ALLOCATION PERFECTED! ✅ DRB tokens get special treatment (97.5% direct, 2.5% swap) ✅ 30+ protected tokens (stablecoins, BTC, ETH, SOL, SUI) ✅ Enhanced UI with DRB DIRECT badges ✅ Clean visual allocation grid ✅ Base-focused branding ✅ Silverish blue theme ✅ Perfect TV positioning. Ultimate token protection with intelligent allocation logic!"
