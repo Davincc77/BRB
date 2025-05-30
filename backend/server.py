@@ -48,15 +48,23 @@ GROK_WALLET = "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1a"
 TEAM_WALLET = "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1b"
 COMMUNITY_WALLET = "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1c"
 
-# Percentage allocations (updated per user requirements)
+# Percentage allocations (updated for community contest)
 BURN_PERCENTAGE = 88.0
-DRB_PERCENTAGE = 10.0          # Total DRB: 7% + 1.5% + 1% = 9.5%
+DRB_PERCENTAGE = 10.0          # Total DRB: 7% + 1.5% + 0.5% = 9.0%
 DRB_GROK_PERCENTAGE = 7.0      # 7% DRB to Grok
 DRB_COMMUNITY_PERCENTAGE = 1.5 # 1.5% DRB to community
-DRB_TEAM_PERCENTAGE = 1.0      # 1% DRB to team
-BNKR_PERCENTAGE = 2.5         # 2.5% total BNKR allocation (1.5% community + 1% team)
-BNKR_COMMUNITY_PERCENTAGE = 1.5  # 1.5% BNKR for Banker Club Members
-BNKR_TEAM_PERCENTAGE = 1.0       # 1% BNKR to team
+DRB_TEAM_PERCENTAGE = 0.5      # 0.5% DRB to team (reduced from 1%)
+BNKR_PERCENTAGE = 2.5         # 2.5% total BNKR allocation
+BNKR_COMMUNITY_PERCENTAGE = 1.5  # 1.5% BNKR for BANKR Club Members
+BNKR_TEAM_PERCENTAGE = 0.5       # 0.5% BNKR to team (reduced from 1%)
+
+# Community Contest Allocations (extra 1% from team reduction)
+COMMUNITY_PROJECT_DRB_PERCENTAGE = 0.5  # 0.5% DRB for winning project
+COMMUNITY_PROJECT_BNKR_PERCENTAGE = 0.5  # 0.5% BNKR for winning project
+
+# Voting Requirements (configurable)
+VOTE_REQUIREMENT_DRB = 1000.0    # 1000 $DRB to vote
+VOTE_REQUIREMENT_BNKR = 100.0    # 100 $BNKR to vote
 
 # Tokens that should NOT be burned (exceptions)
 NON_BURNABLE_TOKENS = [
