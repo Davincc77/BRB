@@ -687,6 +687,151 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
+      {/* Retro TV Floating Icons */}
+      <div className="retro-tv-icon retro-tv-smiley">
+        <div style={{
+          width: '60px',
+          height: '45px',
+          background: 'linear-gradient(135deg, #8B7355, #A0845C)',
+          borderRadius: '8px',
+          border: '2px solid #5D4E42',
+          position: 'relative',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)'
+        }}>
+          {/* Screen */}
+          <div style={{
+            position: 'absolute',
+            top: '6px',
+            left: '6px',
+            width: '35px',
+            height: '25px',
+            background: '#E67E22',
+            borderRadius: '4px',
+            border: '1px solid #D35400',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '8px',
+            color: '#F39C12'
+          }}>
+            😊
+          </div>
+          {/* Controls */}
+          <div style={{
+            position: 'absolute',
+            right: '4px',
+            top: '8px',
+            width: '8px',
+            height: '20px',
+            background: '#34495E',
+            borderRadius: '2px'
+          }}>
+            <div style={{
+              width: '6px',
+              height: '2px',
+              background: '#E74C3C',
+              margin: '2px 1px',
+              borderRadius: '1px'
+            }}></div>
+            <div style={{
+              width: '6px',
+              height: '2px',
+              background: '#27AE60',
+              margin: '2px 1px',
+              borderRadius: '1px'
+            }}></div>
+          </div>
+          {/* Bottom buttons */}
+          <div style={{
+            position: 'absolute',
+            bottom: '4px',
+            left: '8px',
+            display: 'flex',
+            gap: '2px'
+          }}>
+            <div style={{ width: '4px', height: '3px', background: '#E67E22', borderRadius: '1px' }}></div>
+            <div style={{ width: '4px', height: '3px', background: '#E67E22', borderRadius: '1px' }}></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="retro-tv-icon retro-tv-drb">
+        <div style={{
+          width: '60px',
+          height: '45px',
+          background: 'linear-gradient(135deg, #BDC3C7, #95A5A6)',
+          borderRadius: '8px',
+          border: '2px solid #7F8C8D',
+          position: 'relative',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)'
+        }}>
+          {/* Screen */}
+          <div style={{
+            position: 'absolute',
+            top: '6px',
+            left: '6px',
+            width: '35px',
+            height: '25px',
+            background: '#2C3E50',
+            borderRadius: '4px',
+            border: '1px solid #34495E',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column'
+          }}>
+            {/* Lightning bolt */}
+            <div style={{
+              fontSize: '8px',
+              color: '#F39C12',
+              fontWeight: 'bold',
+              lineHeight: '8px'
+            }}>⚡</div>
+            <div style={{
+              fontSize: '6px',
+              color: '#ECF0F1',
+              fontWeight: 'bold',
+              marginTop: '1px'
+            }}>DRB</div>
+          </div>
+          {/* Controls */}
+          <div style={{
+            position: 'absolute',
+            right: '4px',
+            top: '8px',
+            width: '8px',
+            height: '20px',
+            background: '#34495E',
+            borderRadius: '2px'
+          }}>
+            <div style={{
+              width: '6px',
+              height: '2px',
+              background: '#3498DB',
+              margin: '2px 1px',
+              borderRadius: '1px'
+            }}></div>
+            <div style={{
+              width: '6px',
+              height: '2px',
+              background: '#3498DB',
+              margin: '2px 1px',
+              borderRadius: '1px'
+            }}></div>
+          </div>
+          {/* Bottom buttons */}
+          <div style={{
+            position: 'absolute',
+            bottom: '4px',
+            left: '8px',
+            display: 'flex',
+            gap: '2px'
+          }}>
+            <div style={{ width: '4px', height: '3px', background: '#E67E22', borderRadius: '1px' }}></div>
+            <div style={{ width: '4px', height: '3px', background: '#E74C3C', borderRadius: '1px' }}></div>
+          </div>
+        </div>
+      </div>
       {/* Retro TV decorative elements */}
       <div className="retro-tv retro-tv-1">
         <div style={{
