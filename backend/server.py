@@ -474,8 +474,10 @@ async def check_token_burnable(request: TokenValidationRequest):
                 "drb_grok_percentage": float(preview_amounts["drb_grok_amount"]) / 10000.0,
                 "drb_community_percentage": float(preview_amounts["drb_community_amount"]) / 10000.0,
                 "drb_team_percentage": float(preview_amounts["drb_team_amount"]) / 10000.0,
+                "drb_project_percentage": float(preview_amounts["drb_project_amount"]) / 10000.0,
                 "bnkr_community_percentage": float(preview_amounts["bnkr_community_amount"]) / 10000.0,
-                "bnkr_team_percentage": float(preview_amounts["bnkr_team_amount"]) / 10000.0
+                "bnkr_team_percentage": float(preview_amounts["bnkr_team_amount"]) / 10000.0,
+                "bnkr_project_percentage": float(preview_amounts["bnkr_project_amount"]) / 10000.0
             },
             "message": message
         }
