@@ -1766,15 +1766,6 @@ function App() {
                 0.5% $DRB + 0.5% $BNKR to winning project
               </p>
             </div>
-            <div className="text-center">
-              <div className="bg-yellow-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Trophy className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-medium text-white mb-2">1% → Contest Winner</h4>
-              <p className="text-gray-400">
-                0.5% $DRB + 0.5% $BNKR to winning project
-              </p>
-            </div>
           </div>
         </div>
       </main>
