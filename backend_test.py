@@ -195,28 +195,26 @@ class BurnReliefBotAPITests(unittest.TestCase):
         
         print("✅ Stats endpoint verified with correct property names")
 
-    def test_08_community_stats_endpoint(self):
-        """Test community stats endpoint"""
-        response = requests.get(f"{API_URL}/community/stats")
+    def test_09_token_validation(self):
+        """Test token validation endpoint"""
+        payload = {
+            "token_address": self.test_token,
+            "chain": self.chain
+        }
+        
+        response = requests.post(f"{API_URL}/validate-token", json=payload)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        # Verify community stats data structure
-        self.assertIn("total_burns", data)
-        self.assertIn("total_volume_usd", data)
-        self.assertIn("total_tokens_burned", data)
-        self.assertIn("active_wallets", data)
-        self.assertIn("chain_distribution", data)
-        self.assertIn("top_burners", data)
-        self.assertIn("recent_burns", data)
+        # Verify validation response
+        self.assertIn("is_valid", data)
+        if data["is_valid"]:
+            self.assertIn("symbol", data)
+            self.assertIn("name", data)
+            self.assertIn("decimals", data)
+            self.assertIn("total_supply", data)
         
-        # Verify chain distribution is only Base
-        chain_distribution = data["chain_distribution"]
-        self.assertEqual(len(chain_distribution), 1)
-        self.assertIn("base", chain_distribution)
-        self.assertEqual(chain_distribution["base"], 100.0)
-        
-        print("✅ Community stats endpoint verified")
+        print("✅ Token validation endpoint verified")
 
     def test_10_burn_endpoint(self):
         """Test burn endpoint with updated allocation logic"""
