@@ -15,10 +15,10 @@ class BurnReliefBotAPITests(unittest.TestCase):
     def setUp(self):
         """Setup for each test"""
         self.test_wallet = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-        self.test_token = "0xA0b86A33E6441838c1f8B8Dd52B0B8b37c5Bc75F"  # Regular token
+        self.test_token = "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd"  # AERO token
         self.bnkr_token = "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b"  # $BNKR token
         self.drb_token = "0x1234567890123456789012345678901234567890"  # DRB token
-        self.usdc_token = "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913"  # USDC on Base
+        self.usdc_token = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"  # USDC
         self.test_amount = "1000"
         self.chain = "base"  # Only Base chain is supported now
 
