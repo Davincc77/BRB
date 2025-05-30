@@ -123,7 +123,7 @@ function App() {
       
       setSwapQuotes({
         drb: drbQuote.data,
-        cbbtc: cbbtcQuote.data
+        cbbtc: bnkrQuote.data
       });
     } catch (error) {
       console.error('Failed to fetch swap quotes:', error);
