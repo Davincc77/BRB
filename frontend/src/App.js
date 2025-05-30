@@ -1594,14 +1594,26 @@ function App() {
                 <span className="text-blue-400 font-mono text-xs">0xb10...4f9</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">1% $DRB + 1% $BNKR to Team:</span>
-                <span className="text-green-400 font-mono text-xs">
+                <span className="text-gray-400">1.5% $DRB to Community:</span>
+                <span className="text-blue-300 font-mono text-xs">
                   {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">1.5% $BNKR for Banker Club:</span>
+                <span className="text-gray-400">1% $DRB to Team:</span>
+                <span className="text-blue-300 font-mono text-xs">
+                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">1.5% $BNKR for BANKR Club:</span>
                 <span className="text-purple-400 font-mono text-xs">
+                  {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">1% $BNKR to Team:</span>
+                <span className="text-purple-300 font-mono text-xs">
                   {availableChains[activeChain] ? formatAddress(availableChains[activeChain].recipient_wallet) : 'Loading...'}
                 </span>
               </div>
