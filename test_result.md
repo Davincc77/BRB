@@ -270,6 +270,9 @@ test_plan:
         - working: true
           agent: "main"
           comment: "Successfully implemented burn exceptions for $BNKR and cbBTC tokens. Non-burnable tokens are swapped entirely (95% DRB to Grok, 1.5% DRB community, 1% DRB team, 1.5% BNKR to Banker Club, 1% BNKR team). Added /api/check-burnable endpoint to verify token burnability."
+        - working: true
+          agent: "testing"
+          comment: "Verified /api/check-burnable endpoint correctly identifies token types: regular tokens as burnable, $BNKR as swap-only, DRB as direct allocation, and stablecoins as swap-only. Token burn exceptions are working correctly."
 
   - task: "Correct Token Allocations"
     implemented: true
