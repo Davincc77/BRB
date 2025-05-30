@@ -10,7 +10,7 @@ BACKEND_URL = "https://3a95f327-f436-45cf-b1c0-6652d03679be.preview.emergentagen
 API_URL = f"{BACKEND_URL}/api"
 
 class BurnReliefBotAPITests(unittest.TestCase):
-    """Test suite for Burn Relief Bot API endpoints after Base-only simplification"""
+    """Test suite for Burn Relief Bot API endpoints after Community Contest upgrade"""
 
     def setUp(self):
         """Setup for each test"""
@@ -21,6 +21,26 @@ class BurnReliefBotAPITests(unittest.TestCase):
         self.usdc_token = "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913"  # USDC on Base
         self.test_amount = "1000"
         self.chain = "base"  # Only Base chain is supported now
+        
+        # Test project data
+        self.test_project = {
+            "name": "Test Community Project",
+            "description": "A test project for the community contest",
+            "base_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44f",
+            "submitted_by": self.test_wallet,
+            "website": "https://example.com",
+            "twitter": "@testproject",
+            "logo_url": "https://example.com/logo.png"
+        }
+        
+        # Test vote data
+        self.test_vote = {
+            "voter_wallet": self.test_wallet,
+            "project_id": "",  # Will be filled after project creation
+            "vote_token": "DRB",
+            "vote_amount": "1000",
+            "burn_tx_hash": "0x" + "a" * 64
+        }
 
     def test_01_health_check(self):
         """Test API health endpoint"""
