@@ -1620,7 +1620,7 @@ function App() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-4 text-sm">
+          <div className="grid md:grid-cols-6 gap-3 text-sm">
             <div className="text-center">
               <div className="bg-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Flame className="w-6 h-6 text-white" />
@@ -1636,25 +1636,43 @@ function App() {
               </div>
               <h4 className="font-medium text-white mb-2">7% → Grok</h4>
               <p className="text-gray-400">
-                $DRB tokens sent to Grok's wallet
+                $DRB tokens to Grok's wallet
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-medium text-white mb-2">1.5% → DRB Community</h4>
+              <p className="text-gray-400">
+                $DRB tokens for community
               </p>
             </div>
             <div className="text-center">
               <div className="bg-green-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <ArrowRight className="w-6 h-6 text-white" />
               </div>
-              <h4 className="font-medium text-white mb-2">2% → Team</h4>
+              <h4 className="font-medium text-white mb-2">1% → DRB Team</h4>
               <p className="text-gray-400">
-                1% $DRB + 1% $BNKR to Team:
+                $DRB tokens to team
               </p>
             </div>
             <div className="text-center">
               <div className="bg-purple-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Star className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-medium text-white mb-2">1.5% → BANKR Club</h4>
+              <p className="text-gray-400">
+                $BNKR for BANKR Club Members
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-purple-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <ArrowRight className="w-6 h-6 text-white" />
               </div>
-              <h4 className="font-medium text-white mb-2">3% → Community</h4>
+              <h4 className="font-medium text-white mb-2">1% → BNKR Team</h4>
               <p className="text-gray-400">
-                $BNKR for Banker Club Members and OK Computers holders
+                $BNKR tokens to team
               </p>
             </div>
           </div>
