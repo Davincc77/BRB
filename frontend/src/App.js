@@ -1042,48 +1042,56 @@ function App() {
             </div>
 
             {/* Wallet Connection */}
+          <div className="flex items-center gap-4">
+            {/* Admin Button */}
+            {adminToken ? (
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setAdminPanelOpen(true)}
+                  className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
+                >
+                  Admin Panel
+                </button>
+                <button 
+                  onClick={handleAdminLogout}
+                  className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={handleAdminLogin}
+                className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
+              >
+                Admin
+              </button>
+            )}
+            
+            {/* Wallet Connection */}
             {isWalletConnected ? (
-              <div className="flex items-center space-x-2 animate-slideInRight">
-                <div className="silver-glass px-3 py-2 text-sm flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse-soft"></div>
-                  <span 
-                    className="text-white cursor-pointer hover:text-green-400 transition-colors"
-                    onClick={() => copyToClipboard(walletAddress, 'Wallet address')}
-                    title="Click to copy address"
-                  >
-                    {formatAddress(walletAddress)}
-                  </span>
-                  <span className="text-green-200 text-xs">
-                    ({connectedWallet === 'metamask' ? '🦊 MetaMask' : '👻 Phantom'})
-                  </span>
-                </div>
-                <button
-                  onClick={disconnectWallet}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105"
+              <div className="flex items-center gap-3">
+                <span className="text-green-400 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                </span>
+                <button 
+                  onClick={disconnectWallet} 
+                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                 >
                   Disconnect
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2 animate-slideInRight">
-                <button
-                  onClick={() => connectWallet('metamask')}
-                  className="wallet-btn wallet-button wallet-metamask flex items-center space-x-2"
-                  title="Connect MetaMask wallet"
-                >
-                  <Wallet className="w-4 h-4" />
-                  <span>MetaMask</span>
-                </button>
-                <button
-                  onClick={() => connectWallet('phantom')}
-                  className="wallet-btn wallet-button wallet-phantom flex items-center space-x-2"
-                  title="Connect Phantom wallet"
-                >
-                  <Wallet className="w-4 h-4" />
-                  <span>Phantom</span>
-                </button>
-              </div>
+              <button 
+                onClick={connectWallet} 
+                className="btn-primary flex items-center gap-2"
+              >
+                <Wallet className="w-4 h-4" />
+                Connect Wallet
+              </button>
             )}
+          </div>
           </div>
         </div>
       </header>
