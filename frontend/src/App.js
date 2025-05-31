@@ -1453,11 +1453,11 @@ function App() {
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 <div className="silver-glass rounded-lg p-4">
                   <div className="text-2xl font-bold text-blue-400">0.5%</div>
-                  <div className="text-gray-400">$DRB to Winner</div>
+                  <div className="text-gray-400">$DRB Allocation</div>
                 </div>
                 <div className="silver-glass rounded-lg p-4">
                   <div className="text-2xl font-bold text-purple-400">0.5%</div>
-                  <div className="text-gray-400">$BNKR to Winner</div>
+                  <div className="text-gray-400">$BNKR Allocation</div>
                 </div>
                 <div className="silver-glass rounded-lg p-4">
                   <div className="text-2xl font-bold text-green-400">
