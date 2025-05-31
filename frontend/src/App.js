@@ -1308,8 +1308,8 @@ function App() {
                               <span className="text-gray-500">Protected Token</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">95% → $DRB (Grok):</span>
-                              <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.95).toString())}</span>
+                              <span className="text-gray-400">96% → $DRB (Grok):</span>
+                              <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.96).toString())}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">1.5% → $DRB (Community):</span>
