@@ -4,9 +4,17 @@ import unittest
 import json
 import time
 from datetime import datetime
+import os
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com"
+with open('/app/frontend/.env', 'r') as f:
+    for line in f:
+        if line.startswith('REACT_APP_BACKEND_URL='):
+            BACKEND_URL = line.strip().split('=')[1]
+            break
+    else:
+        BACKEND_URL = "https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com"
+
 API_URL = f"{BACKEND_URL}/api"
 
 class BurnReliefBotAPITests(unittest.TestCase):
