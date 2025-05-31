@@ -345,7 +345,7 @@ function App() {
     try {
       const projectData = {
         ...newProject,
-        submitted_by: account
+        submitted_by: walletAddress
       };
 
       const response = await axios.post(`${API}/community/project`, projectData);
