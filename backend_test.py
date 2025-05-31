@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://3a95f327-f436-45cf-b1c0-6652d03679be.preview.emergentagent.com"
+BACKEND_URL = "https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com"
 API_URL = f"{BACKEND_URL}/api"
 
 class BurnReliefBotAPITests(unittest.TestCase):
