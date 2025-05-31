@@ -692,7 +692,7 @@ function App() {
   const fetchTransactions = async () => {
     try {
       const response = await axios.get(`${API}/transactions`);
-      setTransactions(response.data.slice(0, 10)); // Show last 10 transactions
+      setTransactions(response.data.transactions?.slice(0, 10) || []); // Show last 10 transactions
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
     }
