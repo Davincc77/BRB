@@ -834,5 +834,5 @@ if __name__ == "__main__":
     # Run the specific tests for the endpoints mentioned in the review request
     test_specific_endpoints()
     
-    # Uncomment to run all tests
-    # run_tests()
+    # Run all tests
+    run_tests()
