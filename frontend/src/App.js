@@ -517,7 +517,7 @@ function App() {
     }
     
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/check-burnable`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/check-burnable`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
