@@ -560,60 +560,271 @@ def test_specific_endpoints():
     print("TESTING SPECIFIC ENDPOINTS FROM REVIEW REQUEST")
     print("=" * 80)
     
-    # 1. Test /api/check-burnable endpoint to ensure it works with POST request
-    print("\n1. Testing /api/check-burnable endpoint")
-    payload = {
+    # 1. Core Burn Functionality
+    print("\n1. CORE BURN FUNCTIONALITY")
+    
+    # 1.1 Test /api/check-burnable endpoint
+    print("\n1.1 Testing /api/check-burnable endpoint")
+    burnable_payload = {
+        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
+        "chain": "base"
+    }
+    
+    non_burnable_payload = {
         "token_address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # $BNKR token
         "chain": "base"
     }
     
-    response = requests.post(f"{API_URL}/check-burnable", json=payload)
+    # Test with regular token (should be burnable)
+    response = requests.post(f"{API_URL}/check-burnable", json=burnable_payload)
     if response.status_code == 200:
-        print("✅ /api/check-burnable endpoint works with POST request")
-        print(f"Response: {json.dumps(response.json(), indent=2)}")
+        data = response.json()
+        if data.get("is_burnable") == True:
+            print("✅ /api/check-burnable correctly identifies burnable tokens")
+        else:
+            print("❌ /api/check-burnable failed to identify burnable token")
     else:
         print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
-        print(f"Response: {response.text}")
     
-    # 2. Test /api/transactions endpoint to verify it returns transactions in the correct format
-    print("\n2. Testing /api/transactions endpoint")
+    # Test with non-burnable token
+    response = requests.post(f"{API_URL}/check-burnable", json=non_burnable_payload)
+    if response.status_code == 200:
+        data = response.json()
+        if data.get("is_burnable") == False:
+            print("✅ /api/check-burnable correctly identifies non-burnable tokens")
+        else:
+            print("❌ /api/check-burnable failed to identify non-burnable token")
+    else:
+        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
+    
+    # 1.2 Test /api/gas-estimates/{chain} endpoint
+    print("\n1.2 Testing /api/gas-estimates/base endpoint")
+    response = requests.get(f"{API_URL}/gas-estimates/base")
+    if response.status_code == 200:
+        data = response.json()
+        if all(key in data for key in ["slow", "standard", "fast"]):
+            print("✅ /api/gas-estimates/base endpoint returns proper gas estimates")
+            print(f"Gas estimates: {json.dumps(data, indent=2)}")
+        else:
+            print("❌ /api/gas-estimates/base endpoint response missing expected keys")
+    else:
+        print(f"❌ /api/gas-estimates/base endpoint failed with status code: {response.status_code}")
+    
+    # 1.3 Test /api/token-price/{token}/{chain} endpoint
+    print("\n1.3 Testing /api/token-price endpoint")
+    test_token = "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd"
+    response = requests.get(f"{API_URL}/token-price/{test_token}/base")
+    if response.status_code == 200:
+        data = response.json()
+        if "price" in data and "currency" in data:
+            print("✅ /api/token-price endpoint returns proper price data")
+            print(f"Price data: {json.dumps(data, indent=2)}")
+        else:
+            print("❌ /api/token-price endpoint response missing expected keys")
+    else:
+        print(f"❌ /api/token-price endpoint failed with status code: {response.status_code}")
+    
+    # 1.4 Test /api/swap-quote endpoint
+    print("\n1.4 Testing /api/swap-quote endpoint")
+    swap_payload = {
+        "token_address": test_token,
+        "amount": "1000",
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/swap-quote", json=swap_payload)
+    if response.status_code == 200:
+        data = response.json()
+        if "status" in data and data["status"] == "success" and "data" in data:
+            quote_data = data["data"]
+            if all(key in quote_data for key in ["input_amount", "output_amount", "price_impact", "gas_estimate"]):
+                print("✅ /api/swap-quote endpoint returns proper swap quote")
+                print(f"Swap quote: {json.dumps(quote_data, indent=2)}")
+            else:
+                print("❌ /api/swap-quote endpoint response missing expected data keys")
+        else:
+            print("❌ /api/swap-quote endpoint response missing expected status or data")
+    else:
+        print(f"❌ /api/swap-quote endpoint failed with status code: {response.status_code}")
+    
+    # 1.5 Test /api/execute-burn endpoint
+    print("\n1.5 Testing /api/execute-burn endpoint (simulation)")
+    burn_payload = {
+        "wallet_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        "token_address": test_token,
+        "amount": "1000",
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/execute-burn", json=burn_payload)
+    if response.status_code == 200:
+        data = response.json()
+        if "transaction_id" in data and "status" in data and data["status"] == "pending":
+            print("✅ /api/execute-burn endpoint successfully creates burn transaction")
+            print(f"Transaction ID: {data['transaction_id']}")
+            print(f"Status: {data['status']}")
+            if "amounts" in data:
+                print(f"Allocation type: {data.get('allocation_type', 'N/A')}")
+        else:
+            print("❌ /api/execute-burn endpoint response missing expected keys")
+    else:
+        print(f"❌ /api/execute-burn endpoint failed with status code: {response.status_code}")
+    
+    # 2. Community Features
+    print("\n2. COMMUNITY FEATURES")
+    
+    # 2.1 Test /api/community/stats endpoint
+    print("\n2.1 Testing /api/community/stats endpoint")
+    response = requests.get(f"{API_URL}/community/stats")
+    if response.status_code == 200:
+        data = response.json()
+        expected_keys = ["total_burns", "total_volume_usd", "total_tokens_burned", 
+                         "active_wallets", "chain_distribution", "top_burners", "recent_burns"]
+        missing_keys = [key for key in expected_keys if key not in data]
+        
+        if not missing_keys:
+            print("✅ /api/community/stats endpoint returns complete community statistics")
+            print(f"Stats keys: {list(data.keys())}")
+            
+            # Check top_burners and recent_burns structure
+            if data["top_burners"] and isinstance(data["top_burners"], list):
+                print(f"Top burners count: {len(data['top_burners'])}")
+            
+            if data["recent_burns"] and isinstance(data["recent_burns"], list):
+                print(f"Recent burns count: {len(data['recent_burns'])}")
+        else:
+            print(f"❌ /api/community/stats endpoint response missing expected keys: {missing_keys}")
+    else:
+        print(f"❌ /api/community/stats endpoint failed with status code: {response.status_code}")
+    
+    # 2.2 Test /api/transactions endpoint
+    print("\n2.2 Testing /api/transactions endpoint")
     response = requests.get(f"{API_URL}/transactions")
     if response.status_code == 200:
         data = response.json()
         if "transactions" in data and isinstance(data["transactions"], list):
-            print("✅ /api/transactions endpoint returns data with 'transactions' key")
+            print("✅ /api/transactions endpoint returns transaction data in correct format")
             print(f"Number of transactions: {len(data['transactions'])}")
             if data["transactions"]:
-                print(f"First transaction keys: {list(data['transactions'][0].keys())}")
+                print(f"Transaction keys: {list(data['transactions'][0].keys())}")
         else:
             print("❌ /api/transactions endpoint response doesn't have expected 'transactions' key")
-            print(f"Response keys: {list(data.keys())}")
     else:
         print(f"❌ /api/transactions endpoint failed with status code: {response.status_code}")
-        print(f"Response: {response.text}")
     
-    # 3. Test /api/transaction-status/{tx_hash}/{chain} endpoint
-    print("\n3. Testing /api/transaction-status endpoint")
+    # 3. Transaction Tracking
+    print("\n3. TRANSACTION TRACKING")
+    
+    # 3.1 Test /api/transaction-status/{tx_hash}/{chain} endpoint
+    print("\n3.1 Testing /api/transaction-status endpoint")
     tx_hash = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
     chain = "base"
     
     response = requests.get(f"{API_URL}/transaction-status/{tx_hash}/{chain}")
     if response.status_code == 200:
-        print("✅ /api/transaction-status endpoint works properly")
-        print(f"Response: {json.dumps(response.json(), indent=2)}")
+        data = response.json()
+        expected_keys = ["status", "confirmations", "tx_hash", "chain"]
+        missing_keys = [key for key in expected_keys if key not in data]
+        
+        if not missing_keys:
+            print("✅ /api/transaction-status endpoint returns transaction status in correct format")
+            print(f"Status: {data['status']}")
+            print(f"Confirmations: {data['confirmations']}")
+        else:
+            print(f"❌ /api/transaction-status endpoint response missing expected keys: {missing_keys}")
     else:
         print(f"❌ /api/transaction-status endpoint failed with status code: {response.status_code}")
-        print(f"Response: {response.text}")
     
-    # 4. Test /api/community/stats endpoint
-    print("\n4. Testing /api/community/stats endpoint")
+    # 4. Cross-chain Operations
+    print("\n4. CROSS-CHAIN OPERATIONS")
+    
+    # 4.1 Test /api/cross-chain/optimal-routes endpoint
+    print("\n4.1 Testing /api/cross-chain/optimal-routes endpoint")
+    response = requests.get(f"{API_URL}/cross-chain/optimal-routes")
+    if response.status_code == 200:
+        data = response.json()
+        expected_keys = ["optimal_chains", "recommended_chain", "gas_estimates", "liquidity_analysis"]
+        missing_keys = [key for key in expected_keys if key not in data]
+        
+        if not missing_keys:
+            print("✅ /api/cross-chain/optimal-routes endpoint returns route optimization data")
+            print(f"Recommended chain: {data['recommended_chain']}")
+            print(f"Optimal chains: {data['optimal_chains']}")
+        else:
+            print(f"❌ /api/cross-chain/optimal-routes endpoint response missing expected keys: {missing_keys}")
+    else:
+        print(f"❌ /api/cross-chain/optimal-routes endpoint failed with status code: {response.status_code}")
+    
+    # 5. Edge Cases
+    print("\n5. EDGE CASES")
+    
+    # 5.1 Test with invalid parameters
+    print("\n5.1 Testing with invalid parameters")
+    
+    # Invalid token address
+    invalid_token_payload = {
+        "token_address": "invalid-address",
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/check-burnable", json=invalid_token_payload)
+    if response.status_code != 200:
+        print("✅ /api/check-burnable properly rejects invalid token address")
+    else:
+        data = response.json()
+        if data.get("is_burnable") == False or "error" in data:
+            print("✅ /api/check-burnable properly handles invalid token address")
+        else:
+            print("❌ /api/check-burnable incorrectly accepts invalid token address")
+    
+    # Invalid chain
+    response = requests.get(f"{API_URL}/gas-estimates/invalid-chain")
+    if response.status_code != 200:
+        print("✅ /api/gas-estimates properly rejects invalid chain")
+    else:
+        print("❌ /api/gas-estimates incorrectly accepts invalid chain")
+    
+    # 5.2 Test error handling
+    print("\n5.2 Testing error handling")
+    
+    # Missing required parameters
+    incomplete_burn_payload = {
+        "wallet_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        # Missing token_address and amount
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/execute-burn", json=incomplete_burn_payload)
+    if response.status_code != 200:
+        print("✅ /api/execute-burn properly rejects incomplete payload")
+    else:
+        print("❌ /api/execute-burn incorrectly accepts incomplete payload")
+    
+    # 5.3 Test response formats
+    print("\n5.3 Testing response formats match frontend expectations")
+    
+    # Check community stats format
     response = requests.get(f"{API_URL}/community/stats")
     if response.status_code == 200:
-        print("✅ /api/community/stats endpoint is accessible")
-        print(f"Response keys: {list(response.json().keys())}")
-    else:
-        print(f"❌ /api/community/stats endpoint failed with status code: {response.status_code}")
-        print(f"Response: {response.text}")
+        data = response.json()
+        # Check if the response has the keys expected by the frontend
+        frontend_keys = ["total_burns", "total_volume_usd", "total_tokens_burned", "active_wallets", 
+                         "chain_distribution", "top_burners", "recent_burns"]
+        missing_keys = [key for key in frontend_keys if key not in data]
+        
+        if not missing_keys:
+            print("✅ /api/community/stats response format matches frontend expectations")
+        else:
+            print(f"❌ /api/community/stats response missing keys expected by frontend: {missing_keys}")
+    
+    # Check transactions format
+    response = requests.get(f"{API_URL}/transactions")
+    if response.status_code == 200:
+        data = response.json()
+        if "transactions" in data and isinstance(data["transactions"], list):
+            print("✅ /api/transactions response format matches frontend expectations")
+        else:
+            print("❌ /api/transactions response format doesn't match frontend expectations")
     
     print("\n" + "=" * 80)
     print("SPECIFIC ENDPOINT TESTING COMPLETE")
