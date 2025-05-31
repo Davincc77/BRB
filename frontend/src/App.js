@@ -1665,7 +1665,7 @@ function App() {
               <div className="bg-green-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <ArrowRight className="w-6 h-6 text-white" />
               </div>
-              <h4 className="font-medium text-white mb-2">1% → DRB Team</h4>
+              <h4 className="font-medium text-white mb-2">0.5% → DRB Team</h4>
               <p className="text-gray-400">
                 $DRB tokens to team
               </p>
