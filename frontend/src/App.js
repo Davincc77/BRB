@@ -38,6 +38,17 @@ function App() {
   const [communityStats, setCommunityStats] = useState(null);
   const [contestData, setContestData] = useState(null);
   const [activeTab, setActiveTab] = useState('burn'); // 'burn', 'community', 'leaderboard'
+  const [transactionStatus, setTransactionStatus] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projectSubmissionModal, setProjectSubmissionModal] = useState(false);
+  const [newProject, setNewProject] = useState({
+    name: '',
+    description: '',
+    base_address: '',
+    website: '',
+    twitter: '',
+    logo_url: ''
+  });
   
   // Enhanced UX state
   const [isRefreshing, setIsRefreshing] = useState(false);
