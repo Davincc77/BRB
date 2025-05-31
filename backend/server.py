@@ -1044,6 +1044,121 @@ app.add_middleware(
 # Include the API router
 app.include_router(api_router)
 
+# Admin router
+admin_router = APIRouter()
+
+@admin_router.get("/projects")
+async def get_admin_projects(admin_user: dict = Depends(verify_admin_token)):
+    """Get all projects for admin management"""
+    try:
+        projects = []
+        cursor = projects_collection.find({})
+        
+        async for doc in cursor:
+            doc["_id"] = str(doc["_id"])
+            projects.append(doc)
+        
+        return {"projects": projects}
+    except Exception as e:
+        logger.error(f"Admin projects fetch error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch projects: {str(e)}")
+
+@admin_router.post("/projects")
+async def create_admin_project(project_data: dict, admin_user: dict = Depends(verify_admin_token)):
+    """Create a new project (admin only)"""
+    try:
+        project = {
+            "id": str(uuid.uuid4()),
+            "name": project_data.get("name"),
+            "description": project_data.get("description"),
+            "base_address": project_data.get("base_address"),
+            "website": project_data.get("website", ""),
+            "twitter": project_data.get("twitter", ""),
+            "logo_url": project_data.get("logo_url", ""),
+            "is_active": False,
+            "votes": 0,
+            "created_at": datetime.utcnow(),
+            "created_by": admin_user["user_id"]
+        }
+        
+        result = await projects_collection.insert_one(project)
+        project["_id"] = str(result.inserted_id)
+        
+        return {"status": "created", "project": project}
+    except Exception as e:
+        logger.error(f"Admin project creation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create project: {str(e)}")
+
+@admin_router.put("/projects/{project_id}")
+async def update_admin_project(project_id: str, project_data: dict, admin_user: dict = Depends(verify_admin_token)):
+    """Update a project (admin only)"""
+    try:
+        update_data = {
+            "name": project_data.get("name"),
+            "description": project_data.get("description"),
+            "base_address": project_data.get("base_address"),
+            "website": project_data.get("website", ""),
+            "twitter": project_data.get("twitter", ""),
+            "logo_url": project_data.get("logo_url", ""),
+            "updated_at": datetime.utcnow(),
+            "updated_by": admin_user["user_id"]
+        }
+        
+        result = await projects_collection.update_one(
+            {"_id": project_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        return {"status": "updated"}
+    except Exception as e:
+        logger.error(f"Admin project update error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update project: {str(e)}")
+
+@admin_router.delete("/projects/{project_id}")
+async def delete_admin_project(project_id: str, admin_user: dict = Depends(verify_admin_token)):
+    """Delete a project (admin only)"""
+    try:
+        result = await projects_collection.delete_one({"_id": project_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        return {"status": "deleted"}
+    except Exception as e:
+        logger.error(f"Admin project deletion error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete project: {str(e)}")
+
+@admin_router.post("/contest/start")
+async def start_contest(contest_data: dict, admin_user: dict = Depends(verify_admin_token)):
+    """Start a contest for a specific project (admin only)"""
+    try:
+        project_id = contest_data.get("project_id")
+        
+        # Deactivate all current contests
+        await projects_collection.update_many(
+            {"is_active": True},
+            {"$set": {"is_active": False}}
+        )
+        
+        # Activate the selected project
+        result = await projects_collection.update_one(
+            {"_id": project_id},
+            {"$set": {"is_active": True, "votes": 0, "contest_started_at": datetime.utcnow()}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        return {"status": "contest_started", "project_id": project_id}
+    except Exception as e:
+        logger.error(f"Contest start error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to start contest: {str(e)}")
+
+app.include_router(admin_router, prefix="/api/admin")
+
 @app.get("/")
 async def root():
     return {"message": "Burn Relief Bot API - Base Chain Only", "version": "2.0", "chains": ["base"]}
