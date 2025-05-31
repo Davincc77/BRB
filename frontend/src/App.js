@@ -1683,7 +1683,7 @@ function App() {
               <div className="bg-purple-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <ArrowRight className="w-6 h-6 text-white" />
               </div>
-              <h4 className="font-medium text-white mb-2">1% → BNKR Team</h4>
+              <h4 className="font-medium text-white mb-2">0.5% → BNKR Team</h4>
               <p className="text-gray-400">
                 $BNKR tokens to team
               </p>
