@@ -251,8 +251,13 @@ class VotingPeriod(BaseModel):
     total_participants: int = 0
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+# Environment variables
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+PRIVY_APP_SECRET = os.getenv("PRIVY_APP_SECRET")
+PRIVY_VERIFICATION_KEY = os.getenv("PRIVY_VERIFICATION_KEY")
+ADMIN_TWITTER_HANDLE = "davincc"  # Your admin Twitter handle
+
 # Database setup
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/burn_relief_bot')
 client = AsyncIOMotorClient(MONGO_URL)
 db = client.burn_relief_bot
 
@@ -268,6 +273,25 @@ websocket_collection = db.websockets
 projects_collection = db.projects
 votes_collection = db.votes
 voting_periods_collection = db.voting_periods
+
+# Admin authentication
+async def verify_admin_token(authorization: str = Header(None)):
+    """Verify admin token and check if user is authorized admin"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+    
+    try:
+        # Extract token from "Bearer <token>" format
+        token = authorization.replace("Bearer ", "")
+        
+        # For now, we'll implement a simple check
+        # In production, you'd verify the Privy JWT token
+        if token == "admin_token_davincc":
+            return {"user_id": "davincc", "is_admin": True}
+        else:
+            raise HTTPException(status_code=403, detail="Admin access required")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 # WebSocket connections storage
 active_connections: List[Dict[str, Any]] = []
