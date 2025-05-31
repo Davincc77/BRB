@@ -1983,6 +1983,11 @@ function App() {
             </div>
           </div>
         )}
+        
+        {/* Admin Panel */}
+        {adminPanelOpen && adminToken && (
+          <AdminPanel onClose={() => setAdminPanelOpen(false)} />
+        )}
       </main>
     </div>
   );
