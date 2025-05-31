@@ -546,5 +546,74 @@ def run_tests():
     
     return result
 
+def test_specific_endpoints():
+    """Test specific endpoints mentioned in the review request"""
+    print("\n" + "=" * 80)
+    print("TESTING SPECIFIC ENDPOINTS FROM REVIEW REQUEST")
+    print("=" * 80)
+    
+    # 1. Test /api/check-burnable endpoint to ensure it works with POST request
+    print("\n1. Testing /api/check-burnable endpoint")
+    payload = {
+        "token_address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # $BNKR token
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/check-burnable", json=payload)
+    if response.status_code == 200:
+        print("✅ /api/check-burnable endpoint works with POST request")
+        print(f"Response: {json.dumps(response.json(), indent=2)}")
+    else:
+        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    # 2. Test /api/transactions endpoint to verify it returns transactions in the correct format
+    print("\n2. Testing /api/transactions endpoint")
+    response = requests.get(f"{API_URL}/transactions")
+    if response.status_code == 200:
+        data = response.json()
+        if "transactions" in data and isinstance(data["transactions"], list):
+            print("✅ /api/transactions endpoint returns data with 'transactions' key")
+            print(f"Number of transactions: {len(data['transactions'])}")
+            if data["transactions"]:
+                print(f"First transaction keys: {list(data['transactions'][0].keys())}")
+        else:
+            print("❌ /api/transactions endpoint response doesn't have expected 'transactions' key")
+            print(f"Response keys: {list(data.keys())}")
+    else:
+        print(f"❌ /api/transactions endpoint failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    # 3. Test /api/transaction-status/{tx_hash}/{chain} endpoint
+    print("\n3. Testing /api/transaction-status endpoint")
+    tx_hash = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    chain = "base"
+    
+    response = requests.get(f"{API_URL}/transaction-status/{tx_hash}/{chain}")
+    if response.status_code == 200:
+        print("✅ /api/transaction-status endpoint works properly")
+        print(f"Response: {json.dumps(response.json(), indent=2)}")
+    else:
+        print(f"❌ /api/transaction-status endpoint failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    # 4. Test /api/community/stats endpoint
+    print("\n4. Testing /api/community/stats endpoint")
+    response = requests.get(f"{API_URL}/community/stats")
+    if response.status_code == 200:
+        print("✅ /api/community/stats endpoint is accessible")
+        print(f"Response keys: {list(response.json().keys())}")
+    else:
+        print(f"❌ /api/community/stats endpoint failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    print("\n" + "=" * 80)
+    print("SPECIFIC ENDPOINT TESTING COMPLETE")
+    print("=" * 80)
+
 if __name__ == "__main__":
-    run_tests()
+    # Run the specific tests for the endpoints mentioned in the review request
+    test_specific_endpoints()
+    
+    # Uncomment to run all tests
+    # run_tests()
