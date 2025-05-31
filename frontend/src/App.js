@@ -1280,8 +1280,8 @@ function App() {
                               <span className="text-red-400">{formatAmount((parseFloat(amount) * 0.88).toString())}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">7% → $DRB (Grok):</span>
-                              <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.07).toString())}</span>
+                              <span className="text-gray-400">8% → $DRB (Grok):</span>
+                              <span className="text-blue-400">{formatAmount((parseFloat(amount) * 0.08).toString())}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">1.5% → $DRB (Community):</span>
