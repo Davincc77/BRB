@@ -1444,7 +1444,7 @@ function App() {
             <div className="card silverish-gradient text-center">
               <h2 className="text-2xl font-bold text-white mb-4">🏆 Community Contest</h2>
               <p className="text-gray-300 mb-6">
-                Vote for Base ecosystem projects to receive community allocation! 
+                Vote for Base ecosystem projects so the team of the featured project receives the allocation!
                 <br/>Burn <span className="bnkr-highlight">1000 $DRB</span> or <span className="bnkr-highlight">100 $BNKR</span> to cast your vote.
               </p>
               
