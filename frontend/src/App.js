@@ -329,22 +329,44 @@ function App() {
     setTimeout(() => setNotification(null), 5000);
   };
 
-  // Enhanced refresh function
-  const refreshData = async () => {
-    setIsRefreshing(true);
+  // Project submission function
+  const submitProject = async () => {
+    if (!isWalletConnected) {
+      showNotification('Please connect your wallet first', 'error');
+      return;
+    }
+
+    // Validate required fields
+    if (!newProject.name || !newProject.description || !newProject.base_address) {
+      showNotification('Please fill in all required fields (Name, Description, Base Address)', 'error');
+      return;
+    }
+
     try {
-      await Promise.all([
-        fetchAvailableChains(),
-        fetchBurnStats(),
-        fetchCommunityStats(),
-        fetchContestData(),
-        fetchTransactions()
-      ]);
-      showNotification('Data refreshed successfully!', 'success');
+      const projectData = {
+        ...newProject,
+        submitted_by: account
+      };
+
+      const response = await axios.post(`${API}/community/project`, projectData);
+      
+      if (response.data.status === 'submitted') {
+        showNotification('Project submitted successfully!', 'success');
+        setProjectSubmissionModal(false);
+        setNewProject({
+          name: '',
+          description: '',
+          base_address: '',
+          website: '',
+          twitter: '',
+          logo_url: ''
+        });
+        // Refresh contest data
+        fetchContestData();
+      }
     } catch (error) {
-      showNotification('Failed to refresh data', 'error');
-    } finally {
-      setIsRefreshing(false);
+      console.error('Project submission error:', error);
+      showNotification('Failed to submit project. Please try again.', 'error');
     }
   };
 
