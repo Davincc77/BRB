@@ -59,6 +59,21 @@ function App() {
       setIsRefreshing(true);
       await Promise.all([
         fetchCommunityStats(),
+        fetchContestData()
+      ]);
+      setIsRefreshing(false);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      setIsRefreshing(false);
+    }
+  };
+  
+  // Function to refresh data
+  const refreshData = async () => {
+    try {
+      setIsRefreshing(true);
+      await Promise.all([
+        fetchCommunityStats(),
         fetchContestData(),
         fetchLeaderboardData()
       ]);
