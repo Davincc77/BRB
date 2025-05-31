@@ -67,9 +67,7 @@ function App() {
       setIsRefreshing(false);
     }
   };
-      setIsRefreshing(false);
-    }
-  };
+  
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [burnProgress, setBurnProgress] = useState(0);
   const [recentActivity, setRecentActivity] = useState([]);
