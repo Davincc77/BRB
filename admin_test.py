@@ -125,7 +125,7 @@ class AdminAPITest(unittest.TestCase):
             print(f"Status code: {response.status_code}")
             print(f"Response: {response.text}")
             
-            self.assertEqual(response.status_code, 403, f"Expected status code 403, got {response.status_code}")
+            self.assertEqual(response.status_code, 401, f"Expected status code 401, got {response.status_code}")
             print("✅ Project creation with invalid authentication correctly rejected")
         except Exception as e:
             print(f"❌ Error: {str(e)}")
