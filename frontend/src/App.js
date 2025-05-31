@@ -1835,6 +1835,105 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* Project Submission Modal */}
+        {projectSubmissionModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="silver-glass rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-white">Submit Project</h3>
+                <button 
+                  onClick={() => setProjectSubmissionModal(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-300 mb-1">Project Name *</label>
+                  <input
+                    type="text"
+                    className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+                    value={newProject.name}
+                    onChange={(e) => setNewProject({...newProject, name: e.target.value})}
+                    placeholder="Enter project name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-300 mb-1">Description *</label>
+                  <textarea
+                    className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600 h-20"
+                    value={newProject.description}
+                    onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                    placeholder="Describe your project"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-300 mb-1">Base Address *</label>
+                  <input
+                    type="text"
+                    className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+                    value={newProject.base_address}
+                    onChange={(e) => setNewProject({...newProject, base_address: e.target.value})}
+                    placeholder="0x..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-300 mb-1">Website</label>
+                  <input
+                    type="url"
+                    className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+                    value={newProject.website}
+                    onChange={(e) => setNewProject({...newProject, website: e.target.value})}
+                    placeholder="https://..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-300 mb-1">Twitter</label>
+                  <input
+                    type="text"
+                    className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+                    value={newProject.twitter}
+                    onChange={(e) => setNewProject({...newProject, twitter: e.target.value})}
+                    placeholder="@username"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-300 mb-1">Logo URL</label>
+                  <input
+                    type="url"
+                    className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+                    value={newProject.logo_url}
+                    onChange={(e) => setNewProject({...newProject, logo_url: e.target.value})}
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button 
+                  onClick={() => setProjectSubmissionModal(false)}
+                  className="flex-1 py-2 px-4 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={submitProject}
+                  className="flex-1 py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  Submit Project
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
