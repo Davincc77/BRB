@@ -1527,7 +1527,10 @@ function App() {
             <div className="card silverish-gradient">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-white">Active Projects</h3>
-                <button className="btn-primary">
+                <button 
+                  className="btn-primary"
+                  onClick={() => setProjectSubmissionModal(true)}
+                >
                   + Submit Project
                 </button>
               </div>
