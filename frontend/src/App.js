@@ -52,6 +52,22 @@ function App() {
   
   // Enhanced UX state
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Function to refresh data
+  const refreshData = async () => {
+    try {
+      setIsRefreshing(true);
+      await Promise.all([
+        fetchCommunityStats(),
+        fetchContestData(),
+        fetchLeaderboardData()
+      ]);
+      setIsRefreshing(false);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      setIsRefreshing(false);
+    }
+  };
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [burnProgress, setBurnProgress] = useState(0);
   const [recentActivity, setRecentActivity] = useState([]);
