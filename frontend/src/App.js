@@ -87,6 +87,27 @@ function App() {
   const [crossChainTransactions, setCrossChainTransactions] = useState([]);
   const [optimalRoutes, setOptimalRoutes] = useState(null);
 
+  // Admin authentication function (simplified for demo)
+  const handleAdminLogin = () => {
+    const password = prompt("Enter admin password:");
+    if (password === "admin123") {  // In production, use proper authentication
+      const token = "admin_token_davincc";
+      setAdminToken(token);
+      localStorage.setItem('admin_token', token);
+      showNotification('Admin access granted!', 'success');
+      setAdminPanelOpen(true);
+    } else {
+      showNotification('Invalid admin credentials', 'error');
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setAdminToken(null);
+    localStorage.removeItem('admin_token');
+    setAdminPanelOpen(false);
+    showNotification('Admin logged out', 'info');
+  };
+
   // Check if wallet is already connected
   useEffect(() => {
     fetchAvailableChains();
