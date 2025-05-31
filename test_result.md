@@ -414,7 +414,6 @@ frontend:
         - working: true
           agent: "testing"
           comment: "Verified the team allocation percentages have been fixed correctly. The UI now shows '0.5% → DRB Team' and '0.5% → BNKR Team' (instead of previous 1% each). The Grok allocations have been properly adjusted to 7% in the main flow diagram, 8% for burnable tokens, and 96% for non-burnable tokens in the allocation calculations. All percentages now add up to 100% correctly for both burnable and non-burnable tokens. The API integration is also working properly with no console errors related to missing endpoints."
-          comment: "Verified the 'How It Works' section is simplified with a clean, visual 6-column grid. The title is centered. The section is visually appealing and user-friendly."
 
   - task: "Branding Update"
     implemented: true
