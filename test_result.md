@@ -261,15 +261,18 @@ frontend:
 
   - task: "API Integration"
     implemented: true
-    working: false
+    working: true
     file: "App.js"
     stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "Found issues with API integration. The frontend is trying to fetch community stats from '/community/stats' instead of '/api/community/stats' (missing the '/api' prefix). This causes SyntaxError: Unexpected token '<', '<!doctype '... is not valid JSON. Also, there's an error in the transactions endpoint: 'response.data.slice is not a function' suggests the response format is not what the frontend expects."
+        - working: true
+          agent: "testing"
+          comment: "Verified that the API integration issues have been fixed. Tested the following endpoints: 1) /api/check-burnable - Works correctly with POST request and returns proper response with token burnability info. 2) /api/transactions - Returns data with 'transactions' key as expected. 3) /api/transaction-status/{tx_hash}/{chain} - Works properly and returns transaction status. 4) /api/community/stats - Accessible and returns proper community statistics. All API endpoints are now working correctly."
 
   - task: "Community Tab"
     implemented: true
