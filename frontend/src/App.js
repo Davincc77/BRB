@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
 import axios from 'axios';
+import { AdminProvider, useAdmin } from './contexts/AdminContext';
+import AdminPanel from './components/AdminPanel';
+import './App.css';
 import { ethers } from 'ethers';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Flame, Wallet, ArrowRight, CheckCircle, XCircle, Clock, Trophy, Users, TrendingUp, Award, RefreshCw, Bell, Activity, BarChart3, Copy, Info, Star } from 'lucide-react';
