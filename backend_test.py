@@ -575,6 +575,16 @@ def test_specific_endpoints():
         "chain": "base"
     }
     
+    drb_payload = {
+        "token_address": "0x1234567890123456789012345678901234567890",  # DRB token
+        "chain": "base"
+    }
+    
+    stablecoin_payload = {
+        "token_address": "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913",  # USDC on Base
+        "chain": "base"
+    }
+    
     # Test with regular token (should be burnable)
     response = requests.post(f"{API_URL}/check-burnable", json=burnable_payload)
     if response.status_code == 200:
@@ -594,6 +604,28 @@ def test_specific_endpoints():
             print("✅ /api/check-burnable correctly identifies non-burnable tokens")
         else:
             print("❌ /api/check-burnable failed to identify non-burnable token")
+    else:
+        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
+    
+    # Test with DRB token
+    response = requests.post(f"{API_URL}/check-burnable", json=drb_payload)
+    if response.status_code == 200:
+        data = response.json()
+        if data.get("is_drb") == True:
+            print("✅ /api/check-burnable correctly identifies DRB token")
+        else:
+            print("❌ /api/check-burnable failed to identify DRB token")
+    else:
+        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
+    
+    # Test with stablecoin
+    response = requests.post(f"{API_URL}/check-burnable", json=stablecoin_payload)
+    if response.status_code == 200:
+        data = response.json()
+        if data.get("is_burnable") == False:
+            print("✅ /api/check-burnable correctly identifies stablecoins as non-burnable")
+        else:
+            print("❌ /api/check-burnable failed to identify stablecoin as non-burnable")
     else:
         print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
     
@@ -712,6 +744,103 @@ def test_specific_endpoints():
     else:
         print(f"❌ /api/transactions endpoint failed with status code: {response.status_code}")
     
+    # 2.3 Test /api/community/project endpoint
+    print("\n2.3 Testing /api/community/project endpoint")
+    project_payload = {
+        "name": "Test Project",
+        "description": "A test project for the community contest",
+        "base_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        "submitted_by": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        "website": "https://example.com",
+        "twitter": "@testproject",
+        "logo_url": "https://example.com/logo.png"
+    }
+    
+    response = requests.post(f"{API_URL}/community/project", json=project_payload)
+    if response.status_code == 200:
+        data = response.json()
+        if "project_id" in data and "status" in data and data["status"] == "submitted":
+            print("✅ /api/community/project endpoint successfully creates community project")
+            print(f"Project ID: {data['project_id']}")
+            print(f"Status: {data['status']}")
+            
+            # Save project ID for vote test
+            project_id = data["project_id"]
+            
+            # Test voting
+            print("\n2.4 Testing /api/community/vote endpoint")
+            vote_payload = {
+                "voter_wallet": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+                "project_id": project_id,
+                "vote_token": "DRB",
+                "vote_amount": "1000",
+                "burn_tx_hash": "0x" + "a" * 64
+            }
+            
+            vote_response = requests.post(f"{API_URL}/community/vote", json=vote_payload)
+            if vote_response.status_code == 200:
+                vote_data = vote_response.json()
+                if "vote_id" in vote_data and "status" in vote_data and vote_data["status"] == "success":
+                    print("✅ /api/community/vote endpoint successfully creates vote")
+                    print(f"Vote ID: {vote_data['vote_id']}")
+                    print(f"Status: {vote_data['status']}")
+                else:
+                    print("❌ /api/community/vote endpoint response missing expected keys")
+            else:
+                print(f"❌ /api/community/vote endpoint failed with status code: {vote_response.status_code}")
+                
+            # Test user votes
+            print("\n2.5 Testing /api/community/votes/{wallet_address} endpoint")
+            wallet = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+            votes_response = requests.get(f"{API_URL}/community/votes/{wallet}")
+            if votes_response.status_code == 200:
+                votes_data = votes_response.json()
+                if "votes" in votes_data and isinstance(votes_data["votes"], list):
+                    print("✅ /api/community/votes endpoint returns user votes")
+                    print(f"Number of votes: {len(votes_data['votes'])}")
+                    if votes_data["votes"]:
+                        print(f"Vote keys: {list(votes_data['votes'][0].keys())}")
+                else:
+                    print("❌ /api/community/votes endpoint response missing expected keys")
+            else:
+                print(f"❌ /api/community/votes endpoint failed with status code: {votes_response.status_code}")
+        else:
+            print("❌ /api/community/project endpoint response missing expected keys")
+    else:
+        print(f"❌ /api/community/project endpoint failed with status code: {response.status_code}")
+    
+    # 2.6 Test /api/community/contest endpoint
+    print("\n2.6 Testing /api/community/contest endpoint")
+    response = requests.get(f"{API_URL}/community/contest")
+    if response.status_code == 200:
+        data = response.json()
+        expected_keys = ["voting_period", "projects", "vote_requirements", "contest_allocations"]
+        missing_keys = [key for key in expected_keys if key not in data]
+        
+        if not missing_keys:
+            print("✅ /api/community/contest endpoint returns complete contest information")
+            print(f"Contest keys: {list(data.keys())}")
+            
+            # Check vote requirements
+            if "vote_requirements" in data:
+                vote_req = data["vote_requirements"]
+                if "drb_amount" in vote_req and "bnkr_amount" in vote_req:
+                    print(f"Vote requirements: DRB={vote_req['drb_amount']}, BNKR={vote_req['bnkr_amount']}")
+                else:
+                    print("❌ Vote requirements missing expected keys")
+            
+            # Check contest allocations
+            if "contest_allocations" in data:
+                allocations = data["contest_allocations"]
+                if "drb_percentage" in allocations and "bnkr_percentage" in allocations:
+                    print(f"Contest allocations: DRB={allocations['drb_percentage']}%, BNKR={allocations['bnkr_percentage']}%")
+                else:
+                    print("❌ Contest allocations missing expected keys")
+        else:
+            print(f"❌ /api/community/contest endpoint response missing expected keys: {missing_keys}")
+    else:
+        print(f"❌ /api/community/contest endpoint failed with status code: {response.status_code}")
+    
     # 3. Transaction Tracking
     print("\n3. TRANSACTION TRACKING")
     
@@ -784,6 +913,20 @@ def test_specific_endpoints():
     else:
         print("❌ /api/gas-estimates incorrectly accepts invalid chain")
     
+    # Invalid wallet address
+    invalid_wallet_payload = {
+        "wallet_address": "invalid-wallet",
+        "token_address": test_token,
+        "amount": "1000",
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/execute-burn", json=invalid_wallet_payload)
+    if response.status_code != 200:
+        print("✅ /api/execute-burn properly rejects invalid wallet address")
+    else:
+        print("❌ /api/execute-burn incorrectly accepts invalid wallet address")
+    
     # 5.2 Test error handling
     print("\n5.2 Testing error handling")
     
@@ -799,6 +942,18 @@ def test_specific_endpoints():
         print("✅ /api/execute-burn properly rejects incomplete payload")
     else:
         print("❌ /api/execute-burn incorrectly accepts incomplete payload")
+    
+    # Missing required parameters for project submission
+    incomplete_project_payload = {
+        "name": "Incomplete Project"
+        # Missing other required fields
+    }
+    
+    response = requests.post(f"{API_URL}/community/project", json=incomplete_project_payload)
+    if response.status_code != 200:
+        print("✅ /api/community/project properly rejects incomplete payload")
+    else:
+        print("❌ /api/community/project incorrectly accepts incomplete payload")
     
     # 5.3 Test response formats
     print("\n5.3 Testing response formats match frontend expectations")
@@ -825,6 +980,92 @@ def test_specific_endpoints():
             print("✅ /api/transactions response format matches frontend expectations")
         else:
             print("❌ /api/transactions response format doesn't match frontend expectations")
+    
+    # 6. Performance and Stability
+    print("\n6. PERFORMANCE AND STABILITY")
+    
+    # 6.1 Test response times
+    print("\n6.1 Testing response times")
+    
+    endpoints = [
+        {"method": "GET", "url": f"{API_URL}/health"},
+        {"method": "GET", "url": f"{API_URL}/chains"},
+        {"method": "GET", "url": f"{API_URL}/stats"},
+        {"method": "GET", "url": f"{API_URL}/community/stats"},
+        {"method": "GET", "url": f"{API_URL}/transactions"}
+    ]
+    
+    for endpoint in endpoints:
+        start_time = time.time()
+        if endpoint["method"] == "GET":
+            response = requests.get(endpoint["url"])
+        else:
+            response = requests.post(endpoint["url"])
+        
+        response_time = time.time() - start_time
+        
+        if response.status_code == 200:
+            print(f"✅ {endpoint['url']} - Response time: {response_time:.4f} seconds")
+        else:
+            print(f"❌ {endpoint['url']} - Failed with status code: {response.status_code}")
+    
+    # 6.2 Test concurrent requests
+    print("\n6.2 Testing concurrent requests")
+    
+    import concurrent.futures
+    
+    def make_request(endpoint):
+        start_time = time.time()
+        if endpoint["method"] == "GET":
+            response = requests.get(endpoint["url"])
+        else:
+            response = requests.post(endpoint["url"], json=endpoint.get("payload", {}))
+        
+        response_time = time.time() - start_time
+        return {
+            "url": endpoint["url"],
+            "status_code": response.status_code,
+            "response_time": response_time
+        }
+    
+    concurrent_endpoints = [
+        {"method": "GET", "url": f"{API_URL}/health"},
+        {"method": "GET", "url": f"{API_URL}/chains"},
+        {"method": "GET", "url": f"{API_URL}/stats"},
+        {"method": "GET", "url": f"{API_URL}/community/stats"},
+        {"method": "GET", "url": f"{API_URL}/transactions"},
+        {"method": "POST", "url": f"{API_URL}/check-burnable", "payload": burnable_payload},
+        {"method": "POST", "url": f"{API_URL}/check-burnable", "payload": non_burnable_payload},
+        {"method": "GET", "url": f"{API_URL}/gas-estimates/base"},
+        {"method": "GET", "url": f"{API_URL}/token-price/{test_token}/base"},
+        {"method": "POST", "url": f"{API_URL}/swap-quote", "payload": swap_payload}
+    ]
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_endpoint = {executor.submit(make_request, endpoint): endpoint for endpoint in concurrent_endpoints}
+        
+        success_count = 0
+        failure_count = 0
+        total_time = 0
+        
+        for future in concurrent.futures.as_completed(future_to_endpoint):
+            result = future.result()
+            if result["status_code"] == 200:
+                success_count += 1
+                total_time += result["response_time"]
+                print(f"✅ Concurrent {result['url']} - Response time: {result['response_time']:.4f} seconds")
+            else:
+                failure_count += 1
+                print(f"❌ Concurrent {result['url']} - Failed with status code: {result['status_code']}")
+        
+        if success_count > 0:
+            avg_time = total_time / success_count
+            print(f"\nConcurrent requests summary:")
+            print(f"Success: {success_count}/{len(concurrent_endpoints)}")
+            print(f"Failures: {failure_count}/{len(concurrent_endpoints)}")
+            print(f"Average response time: {avg_time:.4f} seconds")
+        else:
+            print("\nAll concurrent requests failed")
     
     print("\n" + "=" * 80)
     print("SPECIFIC ENDPOINT TESTING COMPLETE")
