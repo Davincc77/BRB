@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, APIRouter, Depends, BackgroundTasks
+from fastapi import FastAPI, HTTPException, APIRouter, Depends, BackgroundTasks, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
@@ -15,6 +15,7 @@ import time
 from web3 import Web3
 import websockets
 import traceback
+from jose import jwt, JWTError
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
