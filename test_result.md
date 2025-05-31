@@ -398,6 +398,22 @@ frontend:
           comment: "✅ Removed repetitive text-heavy Token Distribution panel from 'How It Works' section. ✅ Kept only the clean, visual icon grid (6 columns) for better user experience. ✅ Centered the 'How It Works' title. ✅ Eliminated redundancy while maintaining all essential information in visual format. Much cleaner and more user-friendly interface."
         - working: true
           agent: "testing"
+          comment: "Verified the UI has been simplified. The 'How It Works' section now only shows the clean visual icon grid with 6 columns. The title is centered. The redundant text-heavy Token Distribution panel has been removed. The UI is much cleaner and more user-friendly."
+
+  - task: "Fix Team Allocation Percentages"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Fixed team allocation percentages in the UI. Updated DRB Team allocation from 1% to 0.5% and BNKR Team allocation from 1% to 0.5%. Increased Grok allocations accordingly (8% for burnable tokens, 96% for non-burnable tokens). Ensured all percentages add up to 100% correctly."
+        - working: true
+          agent: "testing"
+          comment: "Verified the team allocation percentages have been fixed correctly. The UI now shows '0.5% → DRB Team' and '0.5% → BNKR Team' (instead of previous 1% each). The Grok allocations have been properly adjusted to 7% in the main flow diagram, 8% for burnable tokens, and 96% for non-burnable tokens in the allocation calculations. All percentages now add up to 100% correctly for both burnable and non-burnable tokens. The API integration is also working properly with no console errors related to missing endpoints."
           comment: "Verified the 'How It Works' section is simplified with a clean, visual 6-column grid. The title is centered. The section is visually appealing and user-friendly."
 
   - task: "Branding Update"
