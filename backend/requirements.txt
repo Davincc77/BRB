@@ -29,4 +29,11 @@ uniswap-python>=0.7.0
 solana>=0.30.2
 solders>=0.18.1
 aiohttp>=3.9.0
-websockets>=12.0
+websockets>=12.0Requirement already satisfied: python-jose[cryptography] in /root/.venv/lib/python3.11/site-packages (3.4.0)
+Requirement already satisfied: ecdsa!=0.15 in /root/.venv/lib/python3.11/site-packages (from python-jose[cryptography]) (0.19.1)
+Requirement already satisfied: rsa!=4.1.1,!=4.4,<5.0,>=4.0 in /root/.venv/lib/python3.11/site-packages (from python-jose[cryptography]) (4.9.1)
+Requirement already satisfied: pyasn1<0.5.0,>=0.4.1 in /root/.venv/lib/python3.11/site-packages (from python-jose[cryptography]) (0.4.8)
+Requirement already satisfied: cryptography>=3.4.0 in /root/.venv/lib/python3.11/site-packages (from python-jose[cryptography]) (45.0.3)
+Requirement already satisfied: cffi>=1.14 in /root/.venv/lib/python3.11/site-packages (from cryptography>=3.4.0->python-jose[cryptography]) (1.17.1)
+Requirement already satisfied: six>=1.9.0 in /root/.venv/lib/python3.11/site-packages (from ecdsa!=0.15->python-jose[cryptography]) (1.17.0)
+Requirement already satisfied: pycparser in /root/.venv/lib/python3.11/site-packages (from cffi>=1.14->cryptography>=3.4.0->python-jose[cryptography]) (2.22)
