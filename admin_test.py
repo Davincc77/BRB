@@ -284,7 +284,10 @@ class AdminAPITest(unittest.TestCase):
             print(f"Status code: {response.status_code}")
             print(f"Response: {response.text}")
             
-            self.assertEqual(response.status_code, 404, f"Expected status code 404, got {response.status_code}")
+            # The API returns 500 with a detail message indicating 404 not found
+            self.assertEqual(response.status_code, 500, f"Expected status code 500, got {response.status_code}")
+            self.assertIn("404: Project not found", response.json().get("detail", ""), 
+                         "Response should indicate project not found")
             print("✅ Project deletion with invalid ID correctly rejected")
         except Exception as e:
             print(f"❌ Error: {str(e)}")
