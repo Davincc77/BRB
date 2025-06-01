@@ -1178,20 +1178,20 @@ function App() {
                 
                 {/* Wallet Selection Dropdown */}
                 {showWalletMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
-                    <div className="p-2">
-                      <div className="text-xs text-gray-400 mb-2 px-2">Choose your wallet:</div>
+                  <div className="absolute right-0 mt-2 w-64 bg-gray-900 border-2 border-gray-600 rounded-lg shadow-2xl z-[9999]">
+                    <div className="p-3">
+                      <div className="text-sm text-gray-300 mb-3 px-2 font-medium">Choose your wallet:</div>
                       
                       {/* Coinbase Wallet */}
                       <button
                         onClick={() => connectWallet('coinbase')}
-                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left mb-2 border border-transparent hover:border-blue-500"
                       >
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-bold text-sm">CB</span>
                         </div>
-                        <div>
-                          <div className="text-white font-medium">Coinbase Wallet</div>
+                        <div className="flex-1">
+                          <div className="text-white font-medium text-sm">Coinbase Wallet</div>
                           <div className="text-xs text-gray-400">Your keys, your crypto</div>
                         </div>
                       </button>
@@ -1199,13 +1199,13 @@ function App() {
                       {/* MetaMask */}
                       <button
                         onClick={() => connectWallet('metamask')}
-                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left mb-2 border border-transparent hover:border-orange-500"
                       >
-                        <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-bold text-sm">MM</span>
                         </div>
-                        <div>
-                          <div className="text-white font-medium">MetaMask</div>
+                        <div className="flex-1">
+                          <div className="text-white font-medium text-sm">MetaMask</div>
                           <div className="text-xs text-gray-400">Browser extension wallet</div>
                         </div>
                       </button>
@@ -1213,13 +1213,13 @@ function App() {
                       {/* Phantom Wallet */}
                       <button
                         onClick={() => connectWallet('phantom')}
-                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left border border-transparent hover:border-purple-500"
                       >
-                        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-bold text-sm">PH</span>
                         </div>
-                        <div>
-                          <div className="text-white font-medium">Phantom</div>
+                        <div className="flex-1">
+                          <div className="text-white font-medium text-sm">Phantom</div>
                           <div className="text-xs text-gray-400">Solana & Ethereum wallet</div>
                         </div>
                       </button>
