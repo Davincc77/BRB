@@ -72,6 +72,30 @@ backend:
           comment: "Error handling is implemented correctly for most endpoints. Invalid token addresses are handled gracefully. The community stats endpoint handles empty database scenarios properly. One minor issue: invalid chain parameter doesn't return 400 error as expected, but this doesn't affect core functionality."
 
 frontend:
+  - task: "Discrete Admin Access"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "The admin button has the requested discrete styling (smaller, gray) and is properly centered under the DRB allocation section. It has proper hover effect classes as specified. However, the admin login functionality didn't work properly during testing - the admin panel didn't appear after entering the correct password."
+
+  - task: "Recent Transactions Limit"
+    implemented: true
+    working: false
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "The app shows 4 transactions initially instead of the requested 3. The 'Show More' button appears and displays the correct count '(4 more)'. The expand functionality works correctly, showing all 8 transactions. However, the 'Show Less' button doesn't collapse to 3 transactions as expected, but to 4."
+
   - task: "Main Interface & Navigation"
     implemented: true
     working: true
