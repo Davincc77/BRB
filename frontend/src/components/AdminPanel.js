@@ -22,10 +22,16 @@ const AdminPanel = ({ onClose }) => {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get(`${API}/admin/projects`);
+      const token = localStorage.getItem('admin_token');
+      const response = await axios.get(`${API}/admin/projects`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setProjects(response.data.projects || []);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
+      alert('Failed to load projects. Please check your admin credentials.');
     }
   };
 
