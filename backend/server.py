@@ -28,12 +28,23 @@ import asyncio
 
 load_dotenv()
 
+# Security Configuration
+ADMIN_TOKENS = os.environ.get('ADMIN_TOKENS', 'admin_token_davincc').split(',')
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'BurnReliefBot_Default_Secret_Key')
+SESSION_SECRET = os.environ.get('SESSION_SECRET', 'BurnReliefBot_Session_Secret')
+
+# Rate limiting configuration
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI(title="Burn Relief Bot API", version="1.0.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Security middleware
+security = HTTPBearer(auto_error=False)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Create the main app without a prefix
-app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter()
