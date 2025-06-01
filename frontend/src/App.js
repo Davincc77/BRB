@@ -1682,7 +1682,8 @@ function App() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {transactions.map((tx) => (
+                  {/* Show first 3 transactions or all if showAllTransactions is true */}
+                  {(showAllTransactions ? transactions : transactions.slice(0, 3)).map((tx) => (
                     <div key={tx.id} className="silver-glass rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
@@ -1712,6 +1713,32 @@ function App() {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Show More/Show Less button */}
+                  {transactions.length > 3 && (
+                    <div className="flex justify-center mt-4">
+                      <button
+                        onClick={() => setShowAllTransactions(!showAllTransactions)}
+                        className="px-4 py-2 bg-gray-700/50 text-gray-300 rounded-lg text-sm hover:bg-gray-600/60 hover:text-white transition-all duration-300"
+                      >
+                        {showAllTransactions ? (
+                          <>
+                            Show Less
+                            <svg className="w-4 h-4 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                          </>
+                        ) : (
+                          <>
+                            Show More ({transactions.length - 3} more)
+                            <svg className="w-4 h-4 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
