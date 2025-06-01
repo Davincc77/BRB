@@ -184,6 +184,9 @@ test_plan:
     - "Community Tab"
     - "Admin Interface"
     - "API Integration"
+    - "Core API Endpoints"
+    - "Community Stats Endpoint"
+    - "Admin Project Operations"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
