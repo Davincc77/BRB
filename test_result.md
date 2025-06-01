@@ -482,6 +482,7 @@ test_plan:
   current_focus:
     - "Multi-Chain Wallet Support"
     - "Token Classification System"
+    - "Updated Wallet Address Configuration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
