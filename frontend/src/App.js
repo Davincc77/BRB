@@ -469,6 +469,7 @@ function App() {
   const connectWallet = async (walletType) => {
     try {
       console.log('Attempting to connect wallet:', walletType);
+      setShowWalletMenu(false); // Close wallet menu
       
       if (walletType === 'metamask') {
         if (!window.ethereum) {
@@ -510,6 +511,57 @@ function App() {
         setConnectedWallet('metamask');
         console.log('MetaMask connected successfully:', accounts[0]);
         showNotification(`MetaMask connected for ${activeChain} chain!`, 'success');
+        
+      } else if (walletType === 'coinbase') {
+        // Check for Coinbase Wallet
+        if (!window.ethereum || !window.ethereum.isCoinbaseWallet) {
+          // If not detected, try to use WalletLink/Coinbase Wallet SDK
+          if (!window.CoinbaseWalletSDK && !window.ethereum?.providers?.find(p => p.isCoinbaseWallet)) {
+            console.error('Coinbase Wallet not detected');
+            showNotification('Coinbase Wallet not detected. Please install Coinbase Wallet or use the Coinbase Wallet browser.', 'error');
+            return;
+          }
+        }
+
+        console.log('Coinbase Wallet detected, requesting accounts...');
+        let provider = window.ethereum;
+        
+        // If multiple providers, find Coinbase Wallet
+        if (window.ethereum.providers) {
+          provider = window.ethereum.providers.find(p => p.isCoinbaseWallet) || window.ethereum;
+        }
+
+        const accounts = await provider.request({ method: 'eth_requestAccounts' });
+        console.log('Coinbase accounts received:', accounts);
+        
+        // If connecting to Base chain, switch to it
+        if (activeChain === 'base') {
+          try {
+            console.log('Switching to Base chain...');
+            await provider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: BASE_CHAIN_CONFIG.chainId }],
+            });
+            console.log('Successfully switched to Base chain');
+          } catch (switchError) {
+            console.log('Switch error:', switchError);
+            // Add Base chain if it doesn't exist
+            if (switchError.code === 4902) {
+              console.log('Adding Base chain...');
+              await provider.request({
+                method: 'wallet_addEthereumChain',
+                params: [BASE_CHAIN_CONFIG],
+              });
+              console.log('Successfully added Base chain');
+            }
+          }
+        }
+
+        setWalletAddress(accounts[0]);
+        setIsWalletConnected(true);
+        setConnectedWallet('coinbase');
+        console.log('Coinbase Wallet connected successfully:', accounts[0]);
+        showNotification(`Coinbase Wallet connected for ${activeChain} chain!`, 'success');
         
       } else if (walletType === 'phantom') {
         if (!window.solana) {
