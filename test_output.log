@@ -1,0 +1,117 @@
+
+================================================================================
+TESTING SPECIFIC ENDPOINTS FROM REVIEW REQUEST
+================================================================================
+
+TESTING WALLET ENDPOINTS
+================================================================================
+
+1. Testing /api/wallet/status endpoint
+✅ /api/wallet/status endpoint is accessible
+Response: {
+  "connected": false,
+  "wallet_address": null,
+  "network": "Base Mainnet",
+  "rpc_url": "https://mainnet.base.org"
+}
+✅ /api/wallet/status response contains all expected fields
+✅ Wallet is correctly reported as not connected (expected)
+
+2. Testing /api/execute-redistribution endpoint with admin token
+✅ /api/execute-redistribution endpoint returns appropriate error when wallet is not connected
+Response: {"detail":"Failed to execute redistribution: 500: Burn execution failed: 500: Wallet not connected"}
+
+3. Testing /api/execute-redistribution endpoint without admin token
+✅ /api/execute-redistribution endpoint correctly requires admin authentication
+
+1. CORE BURN FUNCTIONALITY
+
+1.1 Testing /api/check-burnable endpoint
+✅ /api/check-burnable correctly identifies burnable tokens
+✅ /api/check-burnable correctly identifies non-burnable tokens
+✅ /api/check-burnable correctly identifies DRB token
+✅ /api/check-burnable correctly identifies stablecoins as non-burnable
+
+1.2 Testing /api/gas-estimates/base endpoint
+✅ /api/gas-estimates/base endpoint returns proper gas estimates
+Gas estimates: {
+  "slow": {
+    "gwei": "1",
+    "usd": "0.001",
+    "time": "30s"
+  },
+  "standard": {
+    "gwei": "2",
+    "usd": "0.002",
+    "time": "15s"
+  },
+  "fast": {
+    "gwei": "3",
+    "usd": "0.003",
+    "time": "5s"
+  }
+}
+
+1.3 Testing /api/token-price endpoint
+✅ /api/token-price endpoint returns proper price data
+Price data: {
+  "price": 0.001,
+  "currency": "USD"
+}
+
+1.4 Testing /api/swap-quote endpoint
+✅ /api/swap-quote endpoint returns proper swap quote
+Swap quote: {
+  "input_amount": "1000",
+  "output_amount": "950.0",
+  "price_impact": "5%",
+  "gas_estimate": "0.002"
+}
+
+1.5 Testing /api/execute-burn endpoint (simulation)
+❌ /api/execute-burn endpoint failed with status code: 500
+
+2. COMMUNITY FEATURES
+
+2.1 Testing /api/community/stats endpoint
+❌ /api/community/stats endpoint failed with status code: 500
+
+2.2 Testing /api/transactions endpoint
+❌ /api/transactions endpoint failed with status code: 500
+
+2.3 Testing /api/community/project endpoint
+❌ /api/community/project endpoint failed with status code: 500
+
+2.6 Testing /api/community/contest endpoint
+❌ /api/community/contest endpoint failed with status code: 500
+
+3. TRANSACTION TRACKING
+
+3.1 Testing /api/transaction-status endpoint
+❌ /api/transaction-status endpoint failed with status code: 500
+
+4. CROSS-CHAIN OPERATIONS
+
+4.1 Testing /api/cross-chain/optimal-routes endpoint
+✅ /api/cross-chain/optimal-routes endpoint returns route optimization data
+Recommended chain: base
+Optimal chains: {'DRB': 'base', 'BNKR': 'base'}
+
+5. EDGE CASES
+
+5.1 Testing with invalid parameters
+❌ /api/check-burnable incorrectly accepts invalid token address
+✅ /api/gas-estimates properly rejects invalid chain
+✅ /api/execute-burn properly rejects invalid wallet address
+
+5.2 Testing error handling
+✅ /api/execute-burn properly rejects incomplete payload
+✅ /api/community/project properly rejects incomplete payload
+
+5.3 Testing response formats match frontend expectations
+
+6. PERFORMANCE AND STABILITY
+
+6.1 Testing response times
+✅ https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/health - Response time: 0.0872 seconds
+✅ https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/chains - Response time: 0.0356 seconds
