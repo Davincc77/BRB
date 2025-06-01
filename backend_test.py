@@ -528,7 +528,7 @@ def test_community_stats():
     return success
 
 def test_admin_endpoints():
-    """Test the admin endpoints"""
+    """Test the admin endpoints with focus on MongoDB query fix for project operations"""
     print_header("Testing Admin Endpoints")
     
     # Set admin headers
@@ -574,8 +574,8 @@ def test_admin_endpoints():
     
     # Test creating a project
     project_data = {
-        "name": "Test Project",
-        "description": "A test project created by the test script",
+        "name": "Test Project for MongoDB Query Fix",
+        "description": "A test project to verify MongoDB query fix using 'id' instead of '_id'",
         "base_address": "0x1234567890123456789012345678901234567890",
         "submitted_by": "test_script"
     }
@@ -593,11 +593,12 @@ def test_admin_endpoints():
         
         # Store project ID for update/delete tests
         project_id = data["project"]["id"]
+        print_info(f"Created project with ID: {project_id}")
         
-        # Test updating the project
+        # Test updating the project - this should use the 'id' field, not '_id'
         update_data = {
             "name": "Updated Test Project",
-            "description": "This project was updated by the test script"
+            "description": "This project was updated to verify MongoDB query fix using 'id' instead of '_id'"
         }
         
         success, data = test_endpoint(
@@ -609,9 +610,32 @@ def test_admin_endpoints():
         )
         
         if success:
-            print_success("Admin can update projects")
+            print_success("Admin can update projects using 'id' field (MongoDB query fix)")
+            
+            # Verify the update by getting the project again
+            success, get_data = test_endpoint(
+                "GET", 
+                "/admin/projects", 
+                headers=admin_headers,
+                verify_keys=["projects"]
+            )
+            
+            if success:
+                # Find our updated project
+                found = False
+                for project in get_data["projects"]:
+                    if project["id"] == project_id:
+                        found = True
+                        if project["name"] == update_data["name"] and project["description"] == update_data["description"]:
+                            print_success("Project was correctly updated in the database")
+                        else:
+                            print_error("Project was found but not updated correctly")
+                        break
+                
+                if not found:
+                    print_error("Updated project not found in database")
         
-        # Test deleting the project
+        # Test deleting the project - this should use the 'id' field, not '_id'
         success, data = test_endpoint(
             "DELETE", 
             f"/admin/projects/{project_id}", 
@@ -620,7 +644,24 @@ def test_admin_endpoints():
         )
         
         if success:
-            print_success("Admin can delete projects")
+            print_success("Admin can delete projects using 'id' field (MongoDB query fix)")
+            
+            # Verify the deletion by getting the projects again
+            success, get_data = test_endpoint(
+                "GET", 
+                "/admin/projects", 
+                headers=admin_headers,
+                verify_keys=["projects"]
+            )
+            
+            if success:
+                # Make sure our project is gone
+                for project in get_data["projects"]:
+                    if project["id"] == project_id:
+                        print_error("Project was not deleted from the database")
+                        break
+                else:
+                    print_success("Project was correctly deleted from the database")
     
     return success
 
