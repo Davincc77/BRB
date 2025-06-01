@@ -575,15 +575,18 @@ test_plan:
 
   - task: "Contest Token Burn Allocation System"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "Tested the new contest token burn allocation system. The /api/check-burnable endpoint with is_contest: true parameter works correctly, returning 88% burn + 12% community pool allocation with allocation_type: 'contest' and appropriate note about contest allocation. Comparison between standard and contest allocations shows the expected differences: standard has normal allocations (burn, grok, community, team) while contest has simplified allocations (88% burn, 12% community only). However, the /api/execute-contest-burn endpoint fails with authentication errors even with admin token, returning status code 500 with error message 'Contest burn failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}'. The transactions endpoint also fails with status code 500, preventing verification of database logging for contest burns. The issue is with MongoDB authentication - the MongoDB server is running without authentication, but the application is trying to connect with authentication credentials (admin:password). The MongoDB connection string in backend/.env needs to be updated to match the actual MongoDB configuration."
+        - working: true
+          agent: "testing"
+          comment: "Fixed the MongoDB authentication issue by updating the MONGO_URL in backend/.env to 'mongodb://localhost:27017/burns_db' (without authentication). Retested the contest token burn allocation system and all tests now pass successfully. The /api/check-burnable endpoint with is_contest: true parameter correctly returns 88% burn + 12% community pool allocation with allocation_type: 'contest' and appropriate note. Comparison between standard and contest allocations shows the expected differences. The /api/execute-contest-burn endpoint now works correctly with admin authentication, calculating the correct contest allocations (88% burn, 12% community) and executing the simplified distribution. Database logging for contest burns is also working correctly, with the is_contest flag set to true, type set to 'contest_burn', and the correct allocation breakdown. The contest token burn allocation system is now fully functional."
 
   - task: "BurnReliefBot Wallet Functionality"
     implemented: true
