@@ -45,6 +45,7 @@ function App() {
   const [projectSubmissionModal, setProjectSubmissionModal] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const [adminToken, setAdminToken] = useState(localStorage.getItem('admin_token'));
+  const [isContestMode, setIsContestMode] = useState(false);  // New state for contest mode
   const [newProject, setNewProject] = useState({
     name: '',
     description: '',
