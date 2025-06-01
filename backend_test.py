@@ -581,51 +581,213 @@ def test_specific_endpoints():
         else:
             print(f"❌ /api/wallet/status response missing expected keys: {missing_keys}")
             
-        # Check if wallet is not connected (expected based on review request)
-        if data.get("connected") == False:
-            print("✅ Wallet is correctly reported as not connected (expected)")
+        # Check if wallet is connected (expected based on review request)
+        if data.get("connected") == True:
+            print("✅ Wallet is correctly reported as connected")
+            
+            # Check wallet address
+            expected_address = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
+            if data.get("wallet_address") == expected_address:
+                print(f"✅ Wallet address matches expected address: {expected_address}")
+            else:
+                print(f"❌ Wallet address does not match expected address. Got: {data.get('wallet_address')}, Expected: {expected_address}")
+            
+            # Check network
+            if data.get("network") == "Base Mainnet":
+                print("✅ Network is correctly set to Base Mainnet")
+            else:
+                print(f"❌ Network is not set to Base Mainnet. Got: {data.get('network')}")
+            
+            # Check RPC URL
+            if "base" in data.get("rpc_url", "").lower():
+                print(f"✅ RPC URL is correctly set to Base: {data.get('rpc_url')}")
+            else:
+                print(f"❌ RPC URL does not point to Base. Got: {data.get('rpc_url')}")
+            
+            # Check ETH balance for gas fees
+            if "eth_balance" in data:
+                eth_balance = data.get("eth_balance")
+                print(f"✅ ETH balance is available: {eth_balance} ETH")
+                
+                # Check if balance is sufficient for gas fees (at least 0.01 ETH)
+                if eth_balance >= 0.01:
+                    print(f"✅ ETH balance is sufficient for gas fees: {eth_balance} ETH")
+                else:
+                    print(f"⚠️ ETH balance may be too low for gas fees: {eth_balance} ETH")
+            else:
+                print("❌ ETH balance information is missing")
+            
+            # Check gas price
+            if "gas_price_gwei" in data:
+                print(f"✅ Gas price information is available: {data.get('gas_price_gwei')} Gwei")
+            else:
+                print("❌ Gas price information is missing")
+            
+            # Check block number
+            if "block_number" in data:
+                print(f"✅ Block number information is available: {data.get('block_number')}")
+            else:
+                print("❌ Block number information is missing")
         else:
-            print("❓ Wallet is reported as connected (unexpected based on review request)")
+            print("❌ Wallet is reported as not connected (unexpected based on review request)")
     else:
         print(f"❌ /api/wallet/status endpoint failed with status code: {response.status_code}")
         print(f"Response: {response.text}")
     
-    # 2. Test execute-redistribution endpoint with admin token
-    print("\n2. Testing /api/execute-redistribution endpoint with admin token")
+    # 2. Test wallet token info endpoint with admin token
+    print("\n2. Testing /api/wallet/token-info/{token_address} endpoint with admin token")
+    
+    # Test token addresses
+    test_tokens = [
+        {"address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd", "name": "Test Token"},
+        {"address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b", "name": "BNKR Token"},
+        {"address": "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913", "name": "USDC Token"}
+    ]
+    
+    # Test with admin token
+    admin_headers = {"Authorization": "Bearer admin_token_davincc"}
+    
+    for token in test_tokens:
+        print(f"\nChecking {token['name']} ({token['address']})")
+        response = requests.get(f"{API_URL}/wallet/token-info/{token['address']}", 
+                               headers=admin_headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"✅ Token info endpoint is accessible for {token['name']}")
+            print(f"Response: {json.dumps(data, indent=2)}")
+            
+            # Check token info structure
+            if "token_address" in data and "token_info" in data:
+                token_info = data["token_info"]
+                print(f"✅ Token info contains required data structure")
+                
+                # Check token details
+                if "symbol" in token_info:
+                    print(f"✅ Token symbol: {token_info['symbol']}")
+                if "decimals" in token_info:
+                    print(f"✅ Token decimals: {token_info['decimals']}")
+                if "balance" in token_info:
+                    print(f"✅ Token balance: {token_info['balance']}")
+                if "balance_formatted" in token_info:
+                    print(f"✅ Formatted balance: {token_info['balance_formatted']} {token_info.get('symbol', '')}")
+            else:
+                print(f"❌ Token info response missing expected structure")
+        elif response.status_code == 500 and "wallet not connected" in response.text.lower():
+            print(f"⚠️ Token info endpoint returns 'wallet not connected' error")
+            print(f"Response: {response.text}")
+        else:
+            print(f"❌ Token info endpoint failed with status code: {response.status_code}")
+            print(f"Response: {response.text}")
+    
+    # Test without admin token
+    print("\n3. Testing /api/wallet/token-info endpoint without admin token")
+    response = requests.get(f"{API_URL}/wallet/token-info/{test_tokens[0]['address']}")
+    
+    if response.status_code == 401:
+        print("✅ Token info endpoint correctly requires admin authentication")
+    else:
+        print(f"❌ Token info endpoint failed with unexpected status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    # 4. Test test-redistribution endpoint with admin token
+    print("\n4. Testing /api/test-redistribution endpoint with admin token")
+    
+    # Prepare test data
+    test_redistribution_payload = {
+        "token_address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # BNKR token
+        "test_amount": 0.01  # Small test amount
+    }
+    
+    # Test with admin token
+    response = requests.post(f"{API_URL}/test-redistribution", 
+                            json=test_redistribution_payload,
+                            headers=admin_headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        print("✅ Test redistribution endpoint is accessible with admin token")
+        print(f"Response: {json.dumps(data, indent=2)}")
+        
+        # Check test result
+        if "test_result" in data and data["test_result"] == "success":
+            print("✅ Test redistribution was successful")
+            
+            # Check token info
+            if "token_info" in data:
+                token_info = data["token_info"]
+                print(f"✅ Token info: {token_info['symbol']}, Balance: {token_info['balance_formatted']}")
+            
+            # Check redistribution result
+            if "redistribution_result" in data:
+                redist_result = data["redistribution_result"]
+                print(f"✅ Redistribution transaction ID: {redist_result.get('transaction_id', 'N/A')}")
+                print(f"✅ Redistribution status: {redist_result.get('status', 'N/A')}")
+        else:
+            print(f"❌ Test redistribution failed: {data.get('detail', 'Unknown error')}")
+    elif response.status_code == 500 and "wallet not connected" in response.text.lower():
+        print("⚠️ Test redistribution endpoint returns 'wallet not connected' error")
+        print(f"Response: {response.text}")
+    elif response.status_code == 400 and "insufficient balance" in response.text.lower():
+        print("⚠️ Test redistribution endpoint returns 'insufficient balance' error")
+        print(f"Response: {response.text}")
+    else:
+        print(f"❌ Test redistribution endpoint failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    # 5. Test execute-redistribution endpoint with admin token
+    print("\n5. Testing /api/execute-redistribution endpoint with admin token")
     
     # Prepare test data
     redistribution_payload = {
         "amount": "1000",
-        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",
-        "is_burnable": True
+        "token_address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # BNKR token
+        "is_burnable": False
     }
     
     # Test with admin token
-    admin_headers = {"Authorization": "Bearer admin_token_davincc"}
     response = requests.post(f"{API_URL}/execute-redistribution", 
                             json=redistribution_payload,
                             headers=admin_headers)
     
     if response.status_code == 200:
         data = response.json()
-        print("✅ /api/execute-redistribution endpoint is accessible with admin token")
+        print("✅ Execute redistribution endpoint is accessible with admin token")
         print(f"Response: {json.dumps(data, indent=2)}")
+        
+        # Check transaction ID
+        if "transaction_id" in data:
+            print(f"✅ Redistribution transaction ID: {data['transaction_id']}")
+        
+        # Check status
+        if "status" in data and data["status"] == "success":
+            print("✅ Redistribution status: success")
+        else:
+            print(f"❌ Redistribution status: {data.get('status', 'unknown')}")
+        
+        # Check transaction hashes
+        if "transaction_hashes" in data:
+            tx_hashes = data["transaction_hashes"]
+            print(f"✅ Transaction hashes: {json.dumps(tx_hashes, indent=2)}")
     elif response.status_code == 500 and "wallet not connected" in response.text.lower():
-        print("✅ /api/execute-redistribution endpoint returns appropriate error when wallet is not connected")
+        print("⚠️ Execute redistribution endpoint returns 'wallet not connected' error")
+        print(f"Response: {response.text}")
+    elif response.status_code == 400 and "insufficient balance" in response.text.lower():
+        print("⚠️ Execute redistribution endpoint returns 'insufficient balance' error")
         print(f"Response: {response.text}")
     else:
-        print(f"❌ /api/execute-redistribution endpoint failed with status code: {response.status_code}")
+        print(f"❌ Execute redistribution endpoint failed with status code: {response.status_code}")
         print(f"Response: {response.text}")
     
     # Test without admin token
-    print("\n3. Testing /api/execute-redistribution endpoint without admin token")
+    print("\n6. Testing /api/execute-redistribution endpoint without admin token")
     response = requests.post(f"{API_URL}/execute-redistribution", 
                             json=redistribution_payload)
     
     if response.status_code == 401:
-        print("✅ /api/execute-redistribution endpoint correctly requires admin authentication")
+        print("✅ Execute redistribution endpoint correctly requires admin authentication")
     else:
-        print(f"❌ /api/execute-redistribution endpoint failed with unexpected status code: {response.status_code}")
+        print(f"❌ Execute redistribution endpoint failed with unexpected status code: {response.status_code}")
         print(f"Response: {response.text}")
     
     # 1. Core Burn Functionality
