@@ -1124,31 +1124,6 @@ function App() {
 
             {/* Wallet Connection */}
           <div className="flex items-center gap-4">
-            {/* Admin Button */}
-            {adminToken ? (
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setAdminPanelOpen(true)}
-                  className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
-                >
-                  Admin Panel
-                </button>
-                <button 
-                  onClick={handleAdminLogout}
-                  className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <button 
-                onClick={handleAdminLogin}
-                className="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
-              >
-                Admin
-              </button>
-            )}
-            
             {/* Wallet Connection */}
             {isWalletConnected ? (
               <div className="flex items-center gap-3">
