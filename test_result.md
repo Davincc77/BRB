@@ -25,15 +25,18 @@ frontend:
 
   - task: "Community Tab"
     implemented: true
-    working: false
+    working: true
     file: "App.js"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "testing"
           comment: "The Community tab UI is well-designed with proper allocation percentages and contest information is clearly presented. However, the /api/community/stats endpoint returns 500 error, causing console errors. This appears to be a backend issue rather than frontend integration problem. The UI still renders but without actual community data."
+        - working: true
+          agent: "testing"
+          comment: "The Community tab now loads correctly and displays all contest information. Community stats are visible showing the $DRB and $BNKR allocations. The contest token allocation section displays the simplified contest allocation with correct percentages (88% burn, 12% community pool). The backend API issues have been resolved."
 
   - task: "Allocation Display"
     implemented: true
