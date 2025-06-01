@@ -2159,20 +2159,20 @@ function App() {
           </div>
         </div>
 
-        {/* Admin Access - Discrete */}
+        {/* Admin Access - Completely Transparent (Invisible until hover) */}
         <div className="flex justify-center mt-6">
           {adminToken ? (
             <div className="flex items-center gap-2">
               <button 
                 onClick={() => setAdminPanelOpen(true)}
-                className="px-3 py-1.5 bg-gray-700/40 text-gray-300 rounded text-xs hover:bg-gray-600/60 hover:text-white transition-all duration-300"
+                className="px-3 py-1.5 bg-transparent text-transparent rounded text-xs hover:bg-gray-700/60 hover:text-gray-200 transition-all duration-700 ease-in-out"
                 title="Admin Panel"
               >
                 ⚙️
               </button>
               <button 
                 onClick={handleAdminLogout}
-                className="px-3 py-1.5 bg-gray-700/40 text-gray-300 rounded text-xs hover:bg-red-600/60 hover:text-white transition-all duration-300"
+                className="px-3 py-1.5 bg-transparent text-transparent rounded text-xs hover:bg-red-600/60 hover:text-red-200 transition-all duration-700 ease-in-out"
                 title="Admin Logout"
               >
                 ✕
@@ -2181,7 +2181,7 @@ function App() {
           ) : (
             <button 
               onClick={handleAdminLogin}
-              className="px-3 py-1.5 bg-gray-800/30 text-gray-500 rounded text-xs hover:bg-gray-700/50 hover:text-gray-300 transition-all duration-300 opacity-40 hover:opacity-80"
+              className="px-3 py-1.5 bg-transparent text-transparent rounded text-xs hover:bg-gray-700/50 hover:text-gray-300 transition-all duration-700 ease-in-out opacity-0 hover:opacity-100"
               title="Admin Access"
             >
               ⚙️
