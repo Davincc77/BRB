@@ -1299,6 +1299,21 @@ async def get_user_votes(wallet_address: str):
 async def get_community_stats():
     """Get community statistics and leaderboard"""
     try:
+        # Check if burns collection exists and has data
+        total_burns_count = await burns_collection.count_documents({})
+        
+        if total_burns_count == 0:
+            # Return empty stats when no burns exist
+            return CommunityStats(
+                total_burns=0,
+                total_volume_usd=0.0,
+                total_tokens_burned=0.0,
+                active_wallets=0,
+                chain_distribution={"base": 100.0},
+                top_burners=[],
+                recent_burns=[]
+            ).dict()
+        
         # Get recent burns
         recent_burns = []
         cursor = burns_collection.find(
@@ -1307,17 +1322,17 @@ async def get_community_stats():
         
         async for doc in cursor:
             recent_burns.append({
-                "wallet": doc["wallet_address"][:6] + "..." + doc["wallet_address"][-4:],
-                "amount": doc["amount"],
-                "chain": doc["chain"],
-                "timestamp": doc["timestamp"].isoformat()
+                "wallet": doc.get("wallet_address", doc.get("wallet", "Unknown"))[:6] + "..." + doc.get("wallet_address", doc.get("wallet", "Unknown"))[-4:],
+                "amount": doc.get("amount", 0),
+                "chain": doc.get("chain", "base"),
+                "timestamp": doc.get("timestamp", datetime.utcnow()).isoformat() if isinstance(doc.get("timestamp"), datetime) else str(doc.get("timestamp", ""))
             })
         
         # Get top burners
         pipeline = [
             {"$match": {"status": "completed"}},
             {"$group": {
-                "_id": "$wallet_address",
+                "_id": {"$ifNull": ["$wallet_address", "$wallet"]},
                 "total_burned": {"$sum": {"$toDouble": "$amount"}},
                 "transaction_count": {"$sum": 1}
             }},
@@ -1327,13 +1342,15 @@ async def get_community_stats():
         
         top_burners = []
         async for doc in burns_collection.aggregate(pipeline):
-            top_burners.append({
-                "wallet": doc["_id"][:6] + "..." + doc["_id"][-4:],
-                "total_burned": doc["total_burned"],
-                "transaction_count": doc["transaction_count"]
-            })
+            wallet_id = doc.get("_id", "Unknown")
+            if wallet_id and wallet_id != "Unknown":
+                top_burners.append({
+                    "wallet": wallet_id[:6] + "..." + wallet_id[-4:],
+                    "total_burned": doc["total_burned"],
+                    "transaction_count": doc["transaction_count"]
+                })
         
-        # Calculate total volume from actual database data, not from the truncated recent_burns
+        # Calculate total volume from actual database data
         total_volume = 0
         try:
             pipeline_volume = [
