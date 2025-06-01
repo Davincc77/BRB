@@ -114,51 +114,91 @@ COMMUNITY_PROJECT_BNKR_PERCENTAGE = 0.5  # 0.5% BNKR for winning project
 VOTE_REQUIREMENT_DRB = 1000.0    # 1000 $DRB to vote
 VOTE_REQUIREMENT_BNKR = 100.0    # 100 $BNKR to vote
 
-# Tokens that should NOT be burned (exceptions)
-NON_BURNABLE_TOKENS = [
-    # Project tokens
-    "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # $BNKR token
-    "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",  # cbBTC token  
-    BNKR_TOKEN_CA.lower(),  # $BNKR token (lowercase)
-    DRB_TOKEN_CA.lower(),  # $DRB token (should be allocated directly)
-    "banker", "bnkr",  # Common names
-    "cbbtc", "coinbase bitcoin",  # cbBTC variations
+# Known token lists (updated with multi-chain support)
+BURNABLE_TOKENS = [
+    # Base/Ethereum DRB and BNKR tokens (burnable)
     "drb", "$drb", "drb token",  # DRB variations
-    
-    # Major cryptocurrencies
-    "btc", "bitcoin", "wbtc", "bitcoin",
-    "eth", "ethereum", "weth",
-    "sol", "solana", 
-    "sui",
-    
-    # Stablecoins
-    "usdc", "usd coin", "usdc.e",
-    "usdt", "tether", "usdt.e", 
-    "dai", "dai stablecoin",
-    "busd", "binance usd",
-    "frax", "frax share",
-    "tusd", "trueusd",
-    "lusd", "liquity usd",
-    "mim", "magic internet money",
-    "fei", "fei protocol",
-    "tribe", "tribe dao",
-    "ust", "terrausd",
-    "ousd", "origin dollar",
-    "usdp", "paxos standard",
-    "gusd", "gemini dollar",
-    "husd", "husd",
-    "susd", "synth susd",
-    "cusd", "celo dollar",
-    "usdk", "usdk",
-    "usdx", "usdx stablecoin",
-    "vai", "venus",
-    "ustc", "terra classic usd",
-    
-    # Major stablecoin contract addresses (Base chain)
-    "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",  # USDC on Base
-    "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",  # DEGEN on Base (popular)
-    "0x50c5725949a6f0c72e6c4a641f24049a917db0cb",  # DAI on Base
+    "bnkr", "$bnkr", "banker", "banker token", "banker club",  # BNKR variations
+    DRB_TOKEN_CA.lower(), BNKR_TOKEN_CA.lower(),  # Contract addresses
 ]
+
+NON_BURNABLE_TOKENS = [
+    # Major cryptocurrencies (non-burnable by default)
+    "btc", "bitcoin", "wbtc", "bitcoin cash", "bch",
+    "eth", "ethereum", "weth", "steth",
+    "ltc", "litecoin", 
+    "doge", "dogecoin", "shib", "shiba",
+    "sol", "solana", "ray", "serum",
+    "ada", "cardano", "dot", "polkadot",
+    "matic", "polygon", "avax", "avalanche",
+    "link", "chainlink", "uni", "uniswap",
+    "aave", "compound", "maker", "mkr",
+    "xrp", "ripple", "xlm", "stellar",
+    "algo", "algorand", "atom", "cosmos",
+    "near", "near protocol", "ftm", "fantom",
+    "flow", "flow blockchain", "icp", "internet computer",
+    "theta", "theta network", "vet", "vechain",
+    "fil", "filecoin", "ar", "arweave",
+    "grt", "the graph", "1inch", "yfi", "yearn",
+    
+    # Stablecoins (non-burnable)
+    "usdc", "usdt", "dai", "frax", "tusd", "busd", "usdp",
+    "usdd", "lusd", "mim", "fei", "ust", "ustc",
+    
+    # Meme tokens (non-burnable by default)
+    "pepe", "floki", "meme", "wojak", "apu", "chad",
+    "giga", "sigma", "based", "wojak coin",
+    
+    # DeFi tokens (non-burnable)
+    "crv", "curve", "cvx", "convex", "bal", "balancer",
+    "snx", "synthetix", "ren", "republic", "ldo", "lido",
+    "rpl", "rocket pool", "fxs", "frax share",
+    
+    # NFT/Gaming tokens (non-burnable)
+    "axs", "axie", "sand", "sandbox", "mana", "decentraland",
+    "enj", "enjin", "chz", "chiliz", "imx", "immutable",
+    
+    # Exchange tokens (non-burnable)
+    "bnb", "binance", "okb", "okex", "ht", "huobi",
+    "kcs", "kucoin", "mx", "mexc", "gt", "gate",
+    
+    # Layer 2 tokens (non-burnable)
+    "op", "optimism", "arb", "arbitrum", "blur",
+    "lrc", "loopring", "boba", "boba network",
+    
+    # Enterprise/Utility tokens (non-burnable)
+    "bat", "basic attention", "zrx", "0x protocol",
+    "ont", "ontology", "qtum", "quantum", "icx", "icon",
+    
+    # Privacy coins (non-burnable)
+    "xmr", "monero", "zcash", "zec", "dash", "beam",
+    
+    # All new tokens default to NON-BURNABLE unless explicitly added to burnable list
+]
+
+# Function to check if token is burnable
+def is_token_burnable(token_identifier: str, chain: str = "base") -> bool:
+    """
+    Check if a token is burnable based on its identifier
+    NEW TOKENS DEFAULT TO NON-BURNABLE
+    """
+    if not token_identifier:
+        return False
+    
+    token_lower = str(token_identifier).lower().strip()
+    
+    # Check if explicitly marked as burnable
+    for burnable_token in BURNABLE_TOKENS:
+        if burnable_token.lower() in token_lower or token_lower in burnable_token.lower():
+            return True
+    
+    # Check if explicitly marked as non-burnable
+    for non_burnable_token in NON_BURNABLE_TOKENS:
+        if non_burnable_token.lower() in token_lower or token_lower in non_burnable_token.lower():
+            return False
+    
+    # DEFAULT: NEW TOKENS ARE NON-BURNABLE
+    return False
 
 # Supported token types
 SUPPORTED_TOKEN_TYPES = [
