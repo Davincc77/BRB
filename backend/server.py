@@ -875,7 +875,7 @@ async def create_burn_transaction(request: BurnRequest, background_tasks: Backgr
             raise HTTPException(status_code=400, detail="Invalid token contract")
         
         # Check if token is burnable and if it's DRB
-        is_burnable = await is_token_burnable(request.token_address)
+        is_burnable = is_token_burnable(request.token_address)
         is_drb = await is_drb_token(request.token_address)
         
         # Calculate amounts based on token type
