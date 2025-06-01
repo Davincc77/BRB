@@ -1,21 +1,20 @@
-from fastapi import FastAPI, HTTPException, APIRouter, Depends, BackgroundTasks, Header
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
-from datetime import datetime, timedelta
 import os
-import logging
-import asyncio
-import aiohttp
-import uuid
-import json
-from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo import IndexModel, ASCENDING, DESCENDING
 import time
-from web3 import Web3
-import websockets
-import traceback
+import uuid
+import logging
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any, List
+from fastapi import FastAPI, HTTPException, APIRouter, Depends, Header, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+from pymongo import DESCENDING
+import uvicorn
 from jose import jwt, JWTError
+from web3 import Web3
+from eth_account import Account
+import asyncio
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
