@@ -2316,6 +2316,36 @@ function App() {
         {adminPanelOpen && adminToken && (
           <AdminPanel onClose={() => setAdminPanelOpen(false)} />
         )}
+
+        {/* Discrete Admin Access - Bottom Right Corner */}
+        <div className="fixed bottom-4 right-4 z-40">
+          {adminToken ? (
+            <div className="flex flex-col gap-2">
+              <button 
+                onClick={() => setAdminPanelOpen(true)}
+                className="px-2 py-1 bg-purple-600/80 text-white rounded text-xs hover:bg-purple-700/90 backdrop-blur-sm shadow-lg"
+                title="Admin Panel"
+              >
+                ⚙️
+              </button>
+              <button 
+                onClick={handleAdminLogout}
+                className="px-2 py-1 bg-gray-600/80 text-white rounded text-xs hover:bg-gray-700/90 backdrop-blur-sm shadow-lg"
+                title="Admin Logout"
+              >
+                🚪
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={handleAdminLogin}
+              className="px-2 py-1 bg-purple-600/80 text-white rounded text-xs hover:bg-purple-700/90 backdrop-blur-sm shadow-lg opacity-30 hover:opacity-100 transition-opacity"
+              title="Admin Access"
+            >
+              ⚙️
+            </button>
+          )}
+        </div>
       </main>
     </div>
   );
