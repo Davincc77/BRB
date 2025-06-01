@@ -1383,6 +1383,56 @@ async def get_user_votes(wallet_address: str):
         logger.error(f"User votes error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get user votes: {str(e)}")
 
+@api_router.get("/leaderboard")
+@limiter.limit("30/minute")  # Rate limit leaderboard requests
+async def get_leaderboard(request: Request):
+    """Get global leaderboard of top burners"""
+    try:
+        # Get top burners from burns collection
+        pipeline = [
+            {"$match": {"status": "completed"}},
+            {"$group": {
+                "_id": {"$ifNull": ["$wallet_address", "$wallet"]},
+                "total_burned_usd": {"$sum": {"$toDouble": "$amount"}},
+                "transaction_count": {"$sum": 1}
+            }},
+            {"$sort": {"total_burned_usd": -1}},
+            {"$limit": 100}  # Get top 100 burners
+        ]
+        
+        leaderboard = []
+        total_volume = 0
+        
+        async for doc in burns_collection.aggregate(pipeline):
+            wallet_id = doc.get("_id", "Unknown")
+            burned_amount = doc["total_burned_usd"]
+            total_volume += burned_amount
+            
+            if wallet_id and wallet_id != "Unknown":
+                leaderboard.append({
+                    "wallet_address": wallet_id,
+                    "total_burned_usd": burned_amount,
+                    "transaction_count": doc["transaction_count"],
+                    "rank": len(leaderboard) + 1,
+                    "percentage_of_total": 0  # Will be calculated after
+                })
+        
+        # Calculate percentage of total for each entry
+        if total_volume > 0:
+            for entry in leaderboard:
+                entry["percentage_of_total"] = (entry["total_burned_usd"] / total_volume) * 100
+        
+        return {
+            "leaderboard": leaderboard,
+            "total_volume": total_volume,
+            "total_participants": len(leaderboard),
+            "updated_at": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Leaderboard error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get leaderboard: {str(e)}")
+
 @api_router.get("/community/stats")
 async def get_community_stats():
     """Get community statistics and leaderboard"""
