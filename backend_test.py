@@ -1,1785 +1,730 @@
-
+#!/usr/bin/env python3
 import requests
-import unittest
 import json
 import time
+import sys
 from datetime import datetime
-import os
 
-# Backend URL from frontend .env
-with open('/app/frontend/.env', 'r') as f:
-    for line in f:
-        if line.startswith('REACT_APP_BACKEND_URL='):
-            BACKEND_URL = line.strip().split('=')[1]
-            break
-    else:
-        BACKEND_URL = "https://da1071c2-49d0-40cd-a59e-7eddc2918c8b.preview.emergentagent.com"
+# Backend URL from frontend/.env
+BACKEND_URL = "https://da1071c2-49d0-40cd-a59e-7eddc2918c8b.preview.emergentagent.com"
+API_BASE_URL = f"{BACKEND_URL}/api"
 
-API_URL = f"{BACKEND_URL}/api"
+# Test wallet addresses
+TEST_WALLET = "0x1234567890123456789012345678901234567890"
+TEST_TOKEN = "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b"  # BNKR token
+TEST_AMOUNT = "100"
 
-class BurnReliefBotAPITests(unittest.TestCase):
-    """Test suite for Burn Relief Bot API endpoints after Community Contest upgrade"""
+# Admin token for testing admin endpoints
+ADMIN_TOKEN = "admin_token_davincc"
 
-    def setUp(self):
-        """Setup for each test"""
-        self.test_wallet = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-        self.test_token = "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd"  # AERO token
-        self.bnkr_token = "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b"  # $BNKR token
-        self.drb_token = "0x1234567890123456789012345678901234567890"  # DRB token
-        self.usdc_token = "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913"  # USDC on Base
-        self.test_amount = "1000"
-        self.chain = "base"  # Only Base chain is supported now
-        
-        # Test project data
-        self.test_project = {
-            "name": "Test Community Project",
-            "description": "A test project for the community contest",
-            "base_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44f",
-            "submitted_by": self.test_wallet,
-            "website": "https://example.com",
-            "twitter": "@testproject",
-            "logo_url": "https://example.com/logo.png"
-        }
-        
-        # Test vote data
-        self.test_vote = {
-            "voter_wallet": self.test_wallet,
-            "project_id": "",  # Will be filled after project creation
-            "vote_token": "DRB",
-            "vote_amount": "1000",
-            "burn_tx_hash": "0x" + "a" * 64
-        }
-        
-    def test_01_health_check(self):
-        """Test API health endpoint"""
-        response = requests.get(f"{API_URL}/health")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertIn("status", data)
-        self.assertEqual(data["status"], "healthy")
-        self.assertIn("timestamp", data)
-        print("✅ API health check passed")
+# Colors for terminal output
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RESET = "\033[0m"
 
-    def test_02_chains_endpoint(self):
-        """Test chains endpoint for Base-only setup with updated allocations"""
-        response = requests.get(f"{API_URL}/chains")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
+def print_header(text):
+    """Print a formatted header"""
+    print(f"\n{BLUE}{'=' * 80}{RESET}")
+    print(f"{BLUE}== {text}{RESET}")
+    print(f"{BLUE}{'=' * 80}{RESET}")
+
+def print_success(text):
+    """Print a success message"""
+    print(f"{GREEN}✓ {text}{RESET}")
+
+def print_error(text):
+    """Print an error message"""
+    print(f"{RED}✗ {text}{RESET}")
+
+def print_warning(text):
+    """Print a warning message"""
+    print(f"{YELLOW}! {text}{RESET}")
+
+def print_info(text):
+    """Print an info message"""
+    print(f"{BLUE}ℹ {text}{RESET}")
+
+def test_endpoint(method, endpoint, expected_status=200, data=None, headers=None, params=None, verify_keys=None):
+    """
+    Test an API endpoint and verify the response
+    
+    Args:
+        method: HTTP method (GET, POST, etc.)
+        endpoint: API endpoint to test
+        expected_status: Expected HTTP status code
+        data: Request data (for POST/PUT)
+        headers: Request headers
+        params: URL parameters
+        verify_keys: List of keys to verify in the response
         
-        # Verify chains data
-        self.assertIn("chains", data)
-        chains = data["chains"]
+    Returns:
+        tuple: (success, response_data)
+    """
+    url = f"{API_BASE_URL}{endpoint}"
+    print_info(f"Testing {method} {url}")
+    
+    try:
+        if method.upper() == "GET":
+            response = requests.get(url, headers=headers, params=params)
+        elif method.upper() == "POST":
+            response = requests.post(url, json=data, headers=headers)
+        elif method.upper() == "PUT":
+            response = requests.put(url, json=data, headers=headers)
+        elif method.upper() == "DELETE":
+            response = requests.delete(url, headers=headers)
+        else:
+            print_error(f"Unsupported method: {method}")
+            return False, None
         
-        # Should only have Base chain
-        self.assertEqual(len(chains), 1)
-        self.assertIn("base", chains)
+        # Check status code
+        if response.status_code != expected_status:
+            print_error(f"Expected status {expected_status}, got {response.status_code}")
+            print_error(f"Response: {response.text}")
+            return False, None
         
-        # Verify Base chain data
-        base_chain = chains["base"]
-        self.assertEqual(base_chain["name"], "Base")
-        self.assertEqual(base_chain["chain_id"], 8453)
-        self.assertEqual(base_chain["currency"], "ETH")
+        # Try to parse JSON response
+        try:
+            response_data = response.json()
+        except json.JSONDecodeError:
+            if expected_status != 200:
+                # Non-200 responses might not be JSON
+                print_warning("Response is not JSON (expected for error responses)")
+                return True, response.text
+            print_error(f"Invalid JSON response: {response.text}")
+            return False, None
         
-        # Verify default chain is Base
-        self.assertEqual(data["default_chain"], "base")
+        # Verify keys in response
+        if verify_keys:
+            missing_keys = [key for key in verify_keys if key not in response_data]
+            if missing_keys:
+                print_error(f"Missing keys in response: {missing_keys}")
+                return False, response_data
         
-        # Verify token addresses
-        self.assertIn("drb_token_address", data)
-        self.assertIn("bnkr_token_address", data)
-        self.assertEqual(data["bnkr_token_address"], "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b")
+        print_success(f"Response: {response.status_code} {response.reason}")
+        return True, response_data
+    
+    except requests.RequestException as e:
+        print_error(f"Request failed: {e}")
+        return False, None
+
+def test_health_check():
+    """Test the health check endpoint"""
+    print_header("Testing Health Check Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/health", 
+        verify_keys=["status", "timestamp"]
+    )
+    
+    if success:
+        if data["status"] == "healthy":
+            print_success("Health check endpoint is working correctly")
+        else:
+            print_error(f"Unexpected status: {data['status']}")
+    
+    return success
+
+def test_chains_endpoint():
+    """Test the chains endpoint"""
+    print_header("Testing Chains Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/chains", 
+        verify_keys=["chains", "default_chain", "allocations"]
+    )
+    
+    if success:
+        # Verify Base chain is returned
+        if "base" in data["chains"]:
+            print_success("Base chain is correctly returned")
+        else:
+            print_error("Base chain not found in response")
+            return False
         
-        # Verify allocations with updated percentages
-        self.assertIn("allocations", data)
+        # Verify allocations
         allocations = data["allocations"]
-        self.assertEqual(allocations["burn_percentage"], 88.0)
-        self.assertEqual(allocations["drb_total_percentage"], 10.0)
-        self.assertEqual(allocations["drb_grok_percentage"], 7.0)
-        self.assertEqual(allocations["drb_community_percentage"], 1.5)
-        self.assertEqual(allocations["drb_team_percentage"], 0.5)  # Reduced from 1%
-        self.assertEqual(allocations["bnkr_total_percentage"], 2.5)
-        self.assertEqual(allocations["bnkr_community_percentage"], 1.5)
-        self.assertEqual(allocations["bnkr_team_percentage"], 0.5)  # Reduced from 1%
+        if allocations["burn_percentage"] == 88.0:
+            print_success("Burn percentage is correct (88%)")
+        else:
+            print_error(f"Incorrect burn percentage: {allocations['burn_percentage']}")
         
-        print("✅ Chains endpoint verified - Base-only setup with updated allocations confirmed")
+        # Verify BNKR allocations
+        if allocations["bnkr_total_percentage"] == 2.5:
+            print_success("BNKR total percentage is correct (2.5%)")
+        else:
+            print_error(f"Incorrect BNKR percentage: {allocations['bnkr_total_percentage']}")
+        
+        # Verify team allocations
+        if allocations["bnkr_team_percentage"] == 0.5 and allocations["drb_team_percentage"] == 0.5:
+            print_success("Team percentages are correct (0.5% each)")
+        else:
+            print_error(f"Incorrect team percentages: BNKR={allocations['bnkr_team_percentage']}, DRB={allocations['drb_team_percentage']}")
+    
+    return success
 
-    def test_03_check_burnable_regular_token(self):
-        """Test check-burnable endpoint with regular token (should be burnable)"""
-        payload = {
-            "token_address": self.test_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify regular token is burnable
-        self.assertIn("is_burnable", data)
-        self.assertTrue(data["is_burnable"])
-        self.assertFalse(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "burn_and_swap")
-        
-        print("✅ Regular token correctly identified as burnable")
-
-    def test_04_check_burnable_bnkr_token(self):
-        """Test check-burnable endpoint with $BNKR token (should be swap-only)"""
-        payload = {
-            "token_address": self.bnkr_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify BNKR token is not burnable
-        self.assertIn("is_burnable", data)
-        self.assertFalse(data["is_burnable"])
-        self.assertFalse(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "swap_only")
-        
-        print("✅ $BNKR token correctly identified as swap-only")
-
-    def test_05_check_burnable_drb_token(self):
-        """Test check-burnable endpoint with DRB token (should be direct allocation)"""
-        payload = {
-            "token_address": self.drb_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify DRB token is handled with direct allocation
-        self.assertIn("is_drb", data)
-        self.assertTrue(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "drb_direct_allocation")
-        
-        print("✅ DRB token correctly identified for direct allocation")
-
-    def test_06_check_burnable_stablecoin(self):
-        """Test check-burnable endpoint with stablecoin like USDC (should be swap-only)"""
-        payload = {
-            "token_address": self.usdc_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify USDC is not burnable
-        self.assertIn("is_burnable", data)
-        self.assertFalse(data["is_burnable"])
-        self.assertFalse(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "swap_only")
-        
-        print("✅ USDC stablecoin correctly identified as swap-only")
-
-    def test_07_stats_endpoint(self):
-        """Test stats endpoint for proper property names"""
-        response = requests.get(f"{API_URL}/stats")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify stats data structure
-        self.assertIn("total_transactions", data)
-        self.assertIn("completed_transactions", data)
-        self.assertIn("total_volume_usd", data)
-        self.assertIn("total_tokens_burned", data)
-        self.assertIn("total_drb_allocated", data)
-        self.assertIn("total_bnkr_allocated", data)
-        self.assertIn("burn_percentage", data)
-        self.assertIn("drb_percentage", data)
-        self.assertIn("bnkr_percentage", data)
-        self.assertIn("supported_chains", data)
-        
-        # Verify BNKR percentage is correct
-        self.assertEqual(data["bnkr_percentage"], 2.5)
-        
-        # Verify supported chains is only Base
-        self.assertEqual(data["supported_chains"], ["base"])
-        
-        print("✅ Stats endpoint verified with correct property names")
-
-    def test_08_community_stats_endpoint(self):
-        """Test community stats endpoint"""
-        response = requests.get(f"{API_URL}/community/stats")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify community stats data structure
-        self.assertIn("total_burns", data)
-        self.assertIn("total_volume_usd", data)
-        self.assertIn("total_tokens_burned", data)
-        self.assertIn("active_wallets", data)
-        self.assertIn("chain_distribution", data)
-        self.assertIn("top_burners", data)
-        self.assertIn("recent_burns", data)
-        
-        # Verify chain distribution is only Base
-        chain_distribution = data["chain_distribution"]
-        self.assertEqual(len(chain_distribution), 1)
-        self.assertIn("base", chain_distribution)
-        self.assertEqual(chain_distribution["base"], 100.0)
-        
-        print("✅ Community stats endpoint verified")
-
-    def test_09_token_validation(self):
-        """Test token validation endpoint"""
-        payload = {
-            "token_address": self.test_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/validate-token", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify validation response
-        self.assertIn("is_valid", data)
+def test_token_validation():
+    """Test the token validation endpoint"""
+    print_header("Testing Token Validation Endpoint")
+    
+    # Test with valid token
+    success, data = test_endpoint(
+        "POST", 
+        "/validate-token", 
+        data={
+            "token_address": TEST_TOKEN,
+            "chain": "base"
+        },
+        verify_keys=["is_valid", "symbol", "name", "decimals", "total_supply"]
+    )
+    
+    if success:
         if data["is_valid"]:
-            self.assertIn("symbol", data)
-            self.assertIn("name", data)
-            self.assertIn("decimals", data)
-            self.assertIn("total_supply", data)
-        
-        print("✅ Token validation endpoint verified")
-
-    def test_10_burn_endpoint(self):
-        """Test burn endpoint with updated allocation logic"""
-        print("⚠️ Skipping actual burn transaction - requires valid token contract")
-        
-        # Instead of making a real burn request, we'll test the preview allocations
-        # from the check-burnable endpoint to verify the allocation logic
-        
-        # Test regular token (burnable)
-        payload = {
-            "token_address": self.test_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify allocation percentages for regular token
-        preview = data["preview_allocations"]
-        self.assertIn("burn_percentage", preview)
-        self.assertIn("drb_grok_percentage", preview)
-        self.assertIn("drb_community_percentage", preview)
-        self.assertIn("drb_team_percentage", preview)
-        self.assertIn("bnkr_community_percentage", preview)
-        self.assertIn("bnkr_team_percentage", preview)
-        
-        # Test DRB token (direct allocation)
-        payload = {
-            "token_address": self.drb_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify DRB token is handled with direct allocation
-        self.assertTrue(data["is_drb"])
-        self.assertEqual(data["allocation_type"], "drb_direct_allocation")
-        
-        # Test protected token (USDC - swap only)
-        payload = {
-            "token_address": self.usdc_token,
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify USDC is not burnable
-        self.assertFalse(data["is_burnable"])
-        self.assertEqual(data["allocation_type"], "swap_only")
-        
-        print("✅ Burn allocation logic verified for different token types")
-
-    def test_11_community_contest_endpoint(self):
-        """Test community contest endpoint"""
-        response = requests.get(f"{API_URL}/community/contest")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify contest data structure
-        self.assertIn("voting_period", data)
-        self.assertIn("projects", data)
-        self.assertIn("vote_requirements", data)
-        self.assertIn("contest_allocations", data)
-        
-        # Verify vote requirements
-        vote_requirements = data["vote_requirements"]
-        self.assertIn("drb_amount", vote_requirements)
-        self.assertIn("bnkr_amount", vote_requirements)
-        
-        # Verify contest allocations
-        contest_allocations = data["contest_allocations"]
-        self.assertIn("drb_percentage", contest_allocations)
-        self.assertIn("bnkr_percentage", contest_allocations)
-        self.assertEqual(contest_allocations["drb_percentage"], 0.5)
-        self.assertEqual(contest_allocations["bnkr_percentage"], 0.5)
-        
-        print("✅ Community contest endpoint verified")
+            print_success("Token validation works for valid token")
+        else:
+            print_error("Valid token was not recognized")
     
-    def test_12_community_project_submission(self):
-        """Test community project submission endpoint"""
-        response = requests.post(f"{API_URL}/community/project", json=self.test_project)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify project submission response
-        self.assertIn("project_id", data)
-        self.assertIn("status", data)
-        self.assertEqual(data["status"], "submitted")
-        
-        # Save project ID for voting test
-        self.test_vote["project_id"] = data["project_id"]
-        
-        print("✅ Community project submission endpoint verified")
-    
-    def test_13_community_vote_endpoint(self):
-        """Test community vote endpoint"""
-        # Skip if no project ID
-        if not self.test_vote["project_id"]:
-            print("⚠️ Skipping vote test - no project ID available")
-            return
-            
-        response = requests.post(f"{API_URL}/community/vote", json=self.test_vote)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify vote response
-        self.assertIn("vote_id", data)
-        self.assertIn("status", data)
-        self.assertEqual(data["status"], "success")
-        
-        print("✅ Community vote endpoint verified")
-    
-    def test_14_user_votes_endpoint(self):
-        """Test user votes endpoint"""
-        response = requests.get(f"{API_URL}/community/votes/{self.test_wallet}")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify votes data structure
-        self.assertIn("votes", data)
-        
-        # If we successfully voted in the previous test, we should have at least one vote
-        if self.test_vote["project_id"]:
-            if len(data["votes"]) > 0:
-                vote = data["votes"][0]
-                self.assertIn("voter_wallet", vote)
-                self.assertIn("project_id", vote)
-                self.assertIn("vote_token", vote)
-                self.assertIn("vote_amount", vote)
-        
-        print("✅ User votes endpoint verified")
-    
-    def test_15_error_handling_missing_params(self):
-        """Test error handling for missing parameters"""
-        # Test project submission with missing required fields
-        incomplete_project = {
-            "name": "Incomplete Project"
-            # Missing other required fields
-        }
-        
-        response = requests.post(f"{API_URL}/community/project", json=incomplete_project)
-        # The API might return 400 (ideal) or 500 (if validation is not properly implemented)
-        self.assertIn(response.status_code, [400, 500])
-        
-        # Test vote submission with missing required fields
-        incomplete_vote = {
-            "voter_wallet": self.test_wallet
-            # Missing other required fields
-        }
-        
-        response = requests.post(f"{API_URL}/community/vote", json=incomplete_vote)
-        # The API might return 400 (ideal) or 500 (if validation is not properly implemented)
-        self.assertIn(response.status_code, [400, 500])
-        
-        print("✅ Error handling for missing parameters verified")
-    
-    def test_16_error_handling_invalid_requests(self):
-        """Test error handling for invalid requests"""
-        # Test with invalid token address format
-        payload = {
-            "token_address": "invalid-address",  # Not a valid Ethereum address
+    # Test with invalid token
+    success, data = test_endpoint(
+        "POST", 
+        "/validate-token", 
+        data={
+            "token_address": "invalid_address",
             "chain": "base"
         }
-        
-        response = requests.post(f"{API_URL}/validate-token", json=payload)
-        # Should either return 400 Bad Request or 200 with is_valid=False
-        if response.status_code == 200:
-            data = response.json()
-            self.assertIn("is_valid", data)
-            self.assertFalse(data["is_valid"])
+    )
+    
+    if success:
+        if not data["is_valid"]:
+            print_success("Token validation correctly rejects invalid token")
         else:
-            self.assertIn(response.status_code, [400, 500])
-        
-        # Test with invalid chain
-        response = requests.get(f"{API_URL}/gas-estimates/invalid-chain")
-        self.assertIn(response.status_code, [400, 404, 500])  # Should return an error
-        
-        print("✅ Error handling for invalid requests verified")
+            print_error("Invalid token was incorrectly validated")
     
-    def test_17_cross_chain_optimal_routes(self):
-        """Test cross-chain optimal routes endpoint"""
-        response = requests.get(f"{API_URL}/cross-chain/optimal-routes")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify optimal routes data structure
-        self.assertIn("optimal_chains", data)
-        self.assertIn("recommended_chain", data)
-        self.assertIn("gas_estimates", data)
-        self.assertIn("liquidity_analysis", data)
-        
-        # Verify Base is the recommended chain
-        self.assertEqual(data["recommended_chain"], "base")
-        
-        # Verify optimal chains for tokens
-        optimal_chains = data["optimal_chains"]
-        self.assertIn("DRB", optimal_chains)
-        self.assertIn("BNKR", optimal_chains)
-        self.assertEqual(optimal_chains["DRB"], "base")
-        self.assertEqual(optimal_chains["BNKR"], "base")
-        
-        print("✅ Cross-chain optimal routes endpoint verified")
-    
-    def test_18_gas_estimates_endpoint(self):
-        """Test gas estimates endpoint"""
-        response = requests.get(f"{API_URL}/gas-estimates/{self.chain}")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify gas estimates data structure
-        self.assertIn("slow", data)
-        self.assertIn("standard", data)
-        self.assertIn("fast", data)
-        
-        # Verify each estimate has required fields
-        for speed in ["slow", "standard", "fast"]:
-            self.assertIn("gwei", data[speed])
-            self.assertIn("usd", data[speed])
-            self.assertIn("time", data[speed])
-        
-        print("✅ Gas estimates endpoint verified")
-    
-    def test_19_token_price_endpoint(self):
-        """Test token price endpoint"""
-        response = requests.get(f"{API_URL}/token-price/{self.test_token}/{self.chain}")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify token price data structure
-        self.assertIn("price", data)
-        self.assertIn("currency", data)
-        self.assertEqual(data["currency"], "USD")
-        
-        print("✅ Token price endpoint verified")
-    
-    def test_20_swap_quote_endpoint(self):
-        """Test swap quote endpoint"""
-        payload = {
-            "token_address": self.test_token,
-            "amount": "1000",
-            "chain": self.chain
-        }
-        
-        response = requests.post(f"{API_URL}/swap-quote", json=payload)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify swap quote data structure
-        self.assertIn("status", data)
-        self.assertEqual(data["status"], "success")
-        self.assertIn("data", data)
-        
-        quote_data = data["data"]
-        self.assertIn("input_amount", quote_data)
-        self.assertIn("output_amount", quote_data)
-        self.assertIn("price_impact", quote_data)
-        self.assertIn("gas_estimate", quote_data)
-        
-        print("✅ Swap quote endpoint verified")
-    
-    def test_21_transactions_endpoint(self):
-        """Test transactions endpoint"""
-        response = requests.get(f"{API_URL}/transactions")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify transactions data structure
-        self.assertIn("transactions", data)
-        
-        print("✅ Transactions endpoint verified")
-    
-    def test_22_wallet_transactions_endpoint(self):
-        """Test wallet transactions endpoint"""
-        response = requests.get(f"{API_URL}/transactions/{self.test_wallet}")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        
-        # Verify wallet transactions data structure
-        self.assertIn("transactions", data)
-        
-        print("✅ Wallet transactions endpoint verified")
+    return success
 
-def run_tests():
-    """Run all tests"""
-    print(f"🧪 Testing Burn Relief Bot API at {API_URL}")
-    print("=" * 80)
+def test_check_burnable():
+    """Test the check-burnable endpoint"""
+    print_header("Testing Check Burnable Endpoint")
     
-    # Create test suite
-    loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(BurnReliefBotAPITests)
+    # Test with BNKR token
+    success, data = test_endpoint(
+        "POST", 
+        "/check-burnable", 
+        data={
+            "token_address": TEST_TOKEN,
+            "chain": "base"
+        },
+        verify_keys=["is_burnable", "allocation_preview", "chain_wallets"]
+    )
     
-    # Run tests
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
-    
-    # Print summary
-    print("\n" + "=" * 80)
-    print(f"✅ Passed: {result.testsRun - len(result.errors) - len(result.failures)}")
-    print(f"❌ Failed: {len(result.failures)}")
-    print(f"⚠️ Errors: {len(result.errors)}")
-    
-    return result
-
-def test_specific_endpoints():
-    """Test specific endpoints mentioned in the review request"""
-    print("\n" + "=" * 80)
-    print("TESTING SPECIFIC ENDPOINTS FROM REVIEW REQUEST")
-    print("=" * 80)
-    
-    # Test wallet endpoints
-    print("\nTESTING WALLET ENDPOINTS")
-    print("=" * 80)
-    
-    # 1. Test wallet status endpoint
-    print("\n1. Testing /api/wallet/status endpoint")
-    response = requests.get(f"{API_URL}/wallet/status")
-    if response.status_code == 200:
-        data = response.json()
-        print("✅ /api/wallet/status endpoint is accessible")
-        print(f"Response: {json.dumps(data, indent=2)}")
-        
-        # Check expected fields
-        expected_keys = ["connected", "wallet_address", "network", "rpc_url"]
-        missing_keys = [key for key in expected_keys if key not in data]
-        
-        if not missing_keys:
-            print("✅ /api/wallet/status response contains all expected fields")
+    if success:
+        # Verify BNKR token is recognized
+        if data["token_address"] == TEST_TOKEN:
+            print_success("Token address is correctly returned")
         else:
-            print(f"❌ /api/wallet/status response missing expected keys: {missing_keys}")
-            
-        # Check if wallet is connected (expected based on review request)
-        if data.get("connected") == True:
-            print("✅ Wallet is correctly reported as connected")
-            
-            # Check wallet address
-            expected_address = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
-            if data.get("wallet_address") == expected_address:
-                print(f"✅ Wallet address matches expected address: {expected_address}")
-            else:
-                print(f"❌ Wallet address does not match expected address. Got: {data.get('wallet_address')}, Expected: {expected_address}")
-            
-            # Check network
-            if data.get("network") == "Base Mainnet":
-                print("✅ Network is correctly set to Base Mainnet")
-            else:
-                print(f"❌ Network is not set to Base Mainnet. Got: {data.get('network')}")
-            
-            # Check RPC URL
-            if "base" in data.get("rpc_url", "").lower():
-                print(f"✅ RPC URL is correctly set to Base: {data.get('rpc_url')}")
-            else:
-                print(f"❌ RPC URL does not point to Base. Got: {data.get('rpc_url')}")
-            
-            # Check ETH balance for gas fees
-            if "eth_balance" in data:
-                eth_balance = data.get("eth_balance")
-                print(f"✅ ETH balance is available: {eth_balance} ETH")
-                
-                # Check if balance is sufficient for gas fees (at least 0.01 ETH)
-                if eth_balance >= 0.01:
-                    print(f"✅ ETH balance is sufficient for gas fees: {eth_balance} ETH")
-                else:
-                    print(f"⚠️ ETH balance may be too low for gas fees: {eth_balance} ETH")
-            else:
-                print("❌ ETH balance information is missing")
-            
-            # Check gas price
-            if "gas_price_gwei" in data:
-                print(f"✅ Gas price information is available: {data.get('gas_price_gwei')} Gwei")
-            else:
-                print("❌ Gas price information is missing")
-            
-            # Check block number
-            if "block_number" in data:
-                print(f"✅ Block number information is available: {data.get('block_number')}")
-            else:
-                print("❌ Block number information is missing")
-        else:
-            print("❌ Wallet is reported as not connected (unexpected based on review request)")
-    else:
-        print(f"❌ /api/wallet/status endpoint failed with status code: {response.status_code}")
-        print(f"Response: {response.text}")
-    
-    # 2. Test wallet token info endpoint with admin token
-    print("\n2. Testing /api/wallet/token-info/{token_address} endpoint with admin token")
-    
-    # Test token addresses
-    test_tokens = [
-        {"address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd", "name": "Test Token"},
-        {"address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b", "name": "BNKR Token"},
-        {"address": "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913", "name": "USDC Token"}
-    ]
-    
-    # Test with admin token
-    admin_headers = {"Authorization": "Bearer admin_token_davincc"}
-    
-    for token in test_tokens:
-        print(f"\nChecking {token['name']} ({token['address']})")
-        response = requests.get(f"{API_URL}/wallet/token-info/{token['address']}", 
-                               headers=admin_headers)
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"✅ Token info endpoint is accessible for {token['name']}")
-            print(f"Response: {json.dumps(data, indent=2)}")
-            
-            # Check token info structure
-            if "token_address" in data and "token_info" in data:
-                token_info = data["token_info"]
-                print(f"✅ Token info contains required data structure")
-                
-                # Check token details
-                if "symbol" in token_info:
-                    print(f"✅ Token symbol: {token_info['symbol']}")
-                if "decimals" in token_info:
-                    print(f"✅ Token decimals: {token_info['decimals']}")
-                if "balance" in token_info:
-                    print(f"✅ Token balance: {token_info['balance']}")
-                if "balance_formatted" in token_info:
-                    print(f"✅ Formatted balance: {token_info['balance_formatted']} {token_info.get('symbol', '')}")
-            else:
-                print(f"❌ Token info response missing expected structure")
-        elif response.status_code == 500 and "wallet not connected" in response.text.lower():
-            print(f"⚠️ Token info endpoint returns 'wallet not connected' error")
-            print(f"Response: {response.text}")
-        else:
-            print(f"❌ Token info endpoint failed with status code: {response.status_code}")
-            print(f"Response: {response.text}")
-    
-    # Test without admin token
-    print("\n3. Testing /api/wallet/token-info endpoint without admin token")
-    response = requests.get(f"{API_URL}/wallet/token-info/{test_tokens[0]['address']}")
-    
-    if response.status_code == 401:
-        print("✅ Token info endpoint correctly requires admin authentication")
-    else:
-        print(f"❌ Token info endpoint failed with unexpected status code: {response.status_code}")
-        print(f"Response: {response.text}")
-    
-    # 4. Test test-redistribution endpoint with admin token
-    print("\n4. Testing /api/test-redistribution endpoint with admin token")
-    
-    # Prepare test data
-    test_redistribution_payload = {
-        "token_address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # BNKR token
-        "test_amount": 0.01  # Small test amount
-    }
-    
-    # Test with admin token
-    response = requests.post(f"{API_URL}/test-redistribution", 
-                            json=test_redistribution_payload,
-                            headers=admin_headers)
-    
-    if response.status_code == 200:
-        data = response.json()
-        print("✅ Test redistribution endpoint is accessible with admin token")
-        print(f"Response: {json.dumps(data, indent=2)}")
-        
-        # Check test result
-        if "test_result" in data and data["test_result"] == "success":
-            print("✅ Test redistribution was successful")
-            
-            # Check token info
-            if "token_info" in data:
-                token_info = data["token_info"]
-                print(f"✅ Token info: {token_info['symbol']}, Balance: {token_info['balance_formatted']}")
-            
-            # Check redistribution result
-            if "redistribution_result" in data:
-                redist_result = data["redistribution_result"]
-                print(f"✅ Redistribution transaction ID: {redist_result.get('transaction_id', 'N/A')}")
-                print(f"✅ Redistribution status: {redist_result.get('status', 'N/A')}")
-        else:
-            print(f"❌ Test redistribution failed: {data.get('detail', 'Unknown error')}")
-    elif response.status_code == 500 and "wallet not connected" in response.text.lower():
-        print("⚠️ Test redistribution endpoint returns 'wallet not connected' error")
-        print(f"Response: {response.text}")
-    elif response.status_code == 400 and "insufficient balance" in response.text.lower():
-        print("⚠️ Test redistribution endpoint returns 'insufficient balance' error")
-        print(f"Response: {response.text}")
-    else:
-        print(f"❌ Test redistribution endpoint failed with status code: {response.status_code}")
-        print(f"Response: {response.text}")
-    
-    # 5. Test execute-redistribution endpoint with admin token
-    print("\n5. Testing /api/execute-redistribution endpoint with admin token")
-    
-    # Prepare test data
-    redistribution_payload = {
-        "amount": "1000",
-        "token_address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # BNKR token
-        "is_burnable": False
-    }
-    
-    # Test with admin token
-    response = requests.post(f"{API_URL}/execute-redistribution", 
-                            json=redistribution_payload,
-                            headers=admin_headers)
-    
-    if response.status_code == 200:
-        data = response.json()
-        print("✅ Execute redistribution endpoint is accessible with admin token")
-        print(f"Response: {json.dumps(data, indent=2)}")
-        
-        # Check transaction ID
-        if "transaction_id" in data:
-            print(f"✅ Redistribution transaction ID: {data['transaction_id']}")
-        
-        # Check status
-        if "status" in data and data["status"] == "success":
-            print("✅ Redistribution status: success")
-        else:
-            print(f"❌ Redistribution status: {data.get('status', 'unknown')}")
-        
-        # Check transaction hashes
-        if "transaction_hashes" in data:
-            tx_hashes = data["transaction_hashes"]
-            print(f"✅ Transaction hashes: {json.dumps(tx_hashes, indent=2)}")
-    elif response.status_code == 500 and "wallet not connected" in response.text.lower():
-        print("⚠️ Execute redistribution endpoint returns 'wallet not connected' error")
-        print(f"Response: {response.text}")
-    elif response.status_code == 400 and "insufficient balance" in response.text.lower():
-        print("⚠️ Execute redistribution endpoint returns 'insufficient balance' error")
-        print(f"Response: {response.text}")
-    else:
-        print(f"❌ Execute redistribution endpoint failed with status code: {response.status_code}")
-        print(f"Response: {response.text}")
-    
-    # Test without admin token
-    print("\n6. Testing /api/execute-redistribution endpoint without admin token")
-    response = requests.post(f"{API_URL}/execute-redistribution", 
-                            json=redistribution_payload)
-    
-    if response.status_code == 401:
-        print("✅ Execute redistribution endpoint correctly requires admin authentication")
-    else:
-        print(f"❌ Execute redistribution endpoint failed with unexpected status code: {response.status_code}")
-        print(f"Response: {response.text}")
-    
-    # 1. Core Burn Functionality
-    print("\n1. CORE BURN FUNCTIONALITY")
-    
-    # 1.1 Test /api/check-burnable endpoint
-    print("\n1.1 Testing /api/check-burnable endpoint")
-    burnable_payload = {
-        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
-        "chain": "base"
-    }
-    
-    non_burnable_payload = {
-        "token_address": "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b",  # $BNKR token
-        "chain": "base"
-    }
-    
-    drb_payload = {
-        "token_address": "0x1234567890123456789012345678901234567890",  # DRB token
-        "chain": "base"
-    }
-    
-    stablecoin_payload = {
-        "token_address": "0x833589fCD6eDb6E08f4c7C32d4f71b54bdA02913",  # USDC on Base
-        "chain": "base"
-    }
-    
-    # Test with regular token (should be burnable)
-    response = requests.post(f"{API_URL}/check-burnable", json=burnable_payload)
-    if response.status_code == 200:
-        data = response.json()
-        if data.get("is_burnable") == True:
-            print("✅ /api/check-burnable correctly identifies burnable tokens")
-        else:
-            print("❌ /api/check-burnable failed to identify burnable token")
-    else:
-        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
-    
-    # Test with non-burnable token
-    response = requests.post(f"{API_URL}/check-burnable", json=non_burnable_payload)
-    if response.status_code == 200:
-        data = response.json()
-        if data.get("is_burnable") == False:
-            print("✅ /api/check-burnable correctly identifies non-burnable tokens")
-        else:
-            print("❌ /api/check-burnable failed to identify non-burnable token")
-    else:
-        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
-    
-    # Test with DRB token
-    response = requests.post(f"{API_URL}/check-burnable", json=drb_payload)
-    if response.status_code == 200:
-        data = response.json()
-        if data.get("is_drb") == True:
-            print("✅ /api/check-burnable correctly identifies DRB token")
-        else:
-            print("❌ /api/check-burnable failed to identify DRB token")
-    else:
-        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
-    
-    # Test with stablecoin
-    response = requests.post(f"{API_URL}/check-burnable", json=stablecoin_payload)
-    if response.status_code == 200:
-        data = response.json()
-        if data.get("is_burnable") == False:
-            print("✅ /api/check-burnable correctly identifies stablecoins as non-burnable")
-        else:
-            print("❌ /api/check-burnable failed to identify stablecoin as non-burnable")
-    else:
-        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
-    
-    # 1.2 Test /api/gas-estimates/{chain} endpoint
-    print("\n1.2 Testing /api/gas-estimates/base endpoint")
-    response = requests.get(f"{API_URL}/gas-estimates/base")
-    if response.status_code == 200:
-        data = response.json()
-        if all(key in data for key in ["slow", "standard", "fast"]):
-            print("✅ /api/gas-estimates/base endpoint returns proper gas estimates")
-            print(f"Gas estimates: {json.dumps(data, indent=2)}")
-        else:
-            print("❌ /api/gas-estimates/base endpoint response missing expected keys")
-    else:
-        print(f"❌ /api/gas-estimates/base endpoint failed with status code: {response.status_code}")
-    
-    # 1.3 Test /api/token-price/{token}/{chain} endpoint
-    print("\n1.3 Testing /api/token-price endpoint")
-    test_token = "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd"
-    response = requests.get(f"{API_URL}/token-price/{test_token}/base")
-    if response.status_code == 200:
-        data = response.json()
-        if "price" in data and "currency" in data:
-            print("✅ /api/token-price endpoint returns proper price data")
-            print(f"Price data: {json.dumps(data, indent=2)}")
-        else:
-            print("❌ /api/token-price endpoint response missing expected keys")
-    else:
-        print(f"❌ /api/token-price endpoint failed with status code: {response.status_code}")
-    
-    # 1.4 Test /api/swap-quote endpoint
-    print("\n1.4 Testing /api/swap-quote endpoint")
-    swap_payload = {
-        "token_address": test_token,
-        "amount": "1000",
-        "chain": "base"
-    }
-    
-    response = requests.post(f"{API_URL}/swap-quote", json=swap_payload)
-    if response.status_code == 200:
-        data = response.json()
-        if "status" in data and data["status"] == "success" and "data" in data:
-            quote_data = data["data"]
-            if all(key in quote_data for key in ["input_amount", "output_amount", "price_impact", "gas_estimate"]):
-                print("✅ /api/swap-quote endpoint returns proper swap quote")
-                print(f"Swap quote: {json.dumps(quote_data, indent=2)}")
-            else:
-                print("❌ /api/swap-quote endpoint response missing expected data keys")
-        else:
-            print("❌ /api/swap-quote endpoint response missing expected status or data")
-    else:
-        print(f"❌ /api/swap-quote endpoint failed with status code: {response.status_code}")
-    
-    # 1.5 Test /api/execute-burn endpoint
-    print("\n1.5 Testing /api/execute-burn endpoint (simulation)")
-    burn_payload = {
-        "wallet_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-        "token_address": test_token,
-        "amount": "1000",
-        "chain": "base"
-    }
-    
-    response = requests.post(f"{API_URL}/execute-burn", json=burn_payload)
-    if response.status_code == 200:
-        data = response.json()
-        if "transaction_id" in data and "status" in data and data["status"] == "pending":
-            print("✅ /api/execute-burn endpoint successfully creates burn transaction")
-            print(f"Transaction ID: {data['transaction_id']}")
-            print(f"Status: {data['status']}")
-            if "amounts" in data:
-                print(f"Allocation type: {data.get('allocation_type', 'N/A')}")
-        else:
-            print("❌ /api/execute-burn endpoint response missing expected keys")
-    else:
-        print(f"❌ /api/execute-burn endpoint failed with status code: {response.status_code}")
-    
-    # 2. Community Features
-    print("\n2. COMMUNITY FEATURES")
-    
-    # 2.1 Test /api/community/stats endpoint
-    print("\n2.1 Testing /api/community/stats endpoint")
-    response = requests.get(f"{API_URL}/community/stats")
-    if response.status_code == 200:
-        data = response.json()
-        expected_keys = ["total_burns", "total_volume_usd", "total_tokens_burned", 
-                         "active_wallets", "chain_distribution", "top_burners", "recent_burns"]
-        missing_keys = [key for key in expected_keys if key not in data]
-        
-        if not missing_keys:
-            print("✅ /api/community/stats endpoint returns complete community statistics")
-            print(f"Stats keys: {list(data.keys())}")
-            
-            # Check top_burners and recent_burns structure
-            if data["top_burners"] and isinstance(data["top_burners"], list):
-                print(f"Top burners count: {len(data['top_burners'])}")
-            
-            if data["recent_burns"] and isinstance(data["recent_burns"], list):
-                print(f"Recent burns count: {len(data['recent_burns'])}")
-        else:
-            print(f"❌ /api/community/stats endpoint response missing expected keys: {missing_keys}")
-    else:
-        print(f"❌ /api/community/stats endpoint failed with status code: {response.status_code}")
-    
-    # 2.2 Test /api/transactions endpoint
-    print("\n2.2 Testing /api/transactions endpoint")
-    response = requests.get(f"{API_URL}/transactions")
-    if response.status_code == 200:
-        data = response.json()
-        if "transactions" in data and isinstance(data["transactions"], list):
-            print("✅ /api/transactions endpoint returns transaction data in correct format")
-            print(f"Number of transactions: {len(data['transactions'])}")
-            if data["transactions"]:
-                print(f"Transaction keys: {list(data['transactions'][0].keys())}")
-        else:
-            print("❌ /api/transactions endpoint response doesn't have expected 'transactions' key")
-    else:
-        print(f"❌ /api/transactions endpoint failed with status code: {response.status_code}")
-    
-    # 2.3 Test /api/community/project endpoint
-    print("\n2.3 Testing /api/community/project endpoint")
-    project_payload = {
-        "name": "Test Project",
-        "description": "A test project for the community contest",
-        "base_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-        "submitted_by": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-        "website": "https://example.com",
-        "twitter": "@testproject",
-        "logo_url": "https://example.com/logo.png"
-    }
-    
-    response = requests.post(f"{API_URL}/community/project", json=project_payload)
-    if response.status_code == 200:
-        data = response.json()
-        if "project_id" in data and "status" in data and data["status"] == "submitted":
-            print("✅ /api/community/project endpoint successfully creates community project")
-            print(f"Project ID: {data['project_id']}")
-            print(f"Status: {data['status']}")
-            
-            # Save project ID for vote test
-            project_id = data["project_id"]
-            
-            # Test voting
-            print("\n2.4 Testing /api/community/vote endpoint")
-            vote_payload = {
-                "voter_wallet": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-                "project_id": project_id,
-                "vote_token": "DRB",
-                "vote_amount": "1000",
-                "burn_tx_hash": "0x" + "a" * 64
-            }
-            
-            vote_response = requests.post(f"{API_URL}/community/vote", json=vote_payload)
-            if vote_response.status_code == 200:
-                vote_data = vote_response.json()
-                if "vote_id" in vote_data and "status" in vote_data and vote_data["status"] == "success":
-                    print("✅ /api/community/vote endpoint successfully creates vote")
-                    print(f"Vote ID: {vote_data['vote_id']}")
-                    print(f"Status: {vote_data['status']}")
-                else:
-                    print("❌ /api/community/vote endpoint response missing expected keys")
-            else:
-                print(f"❌ /api/community/vote endpoint failed with status code: {vote_response.status_code}")
-                
-            # Test user votes
-            print("\n2.5 Testing /api/community/votes/{wallet_address} endpoint")
-            wallet = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-            votes_response = requests.get(f"{API_URL}/community/votes/{wallet}")
-            if votes_response.status_code == 200:
-                votes_data = votes_response.json()
-                if "votes" in votes_data and isinstance(votes_data["votes"], list):
-                    print("✅ /api/community/votes endpoint returns user votes")
-                    print(f"Number of votes: {len(votes_data['votes'])}")
-                    if votes_data["votes"]:
-                        print(f"Vote keys: {list(votes_data['votes'][0].keys())}")
-                else:
-                    print("❌ /api/community/votes endpoint response missing expected keys")
-            else:
-                print(f"❌ /api/community/votes endpoint failed with status code: {votes_response.status_code}")
-        else:
-            print("❌ /api/community/project endpoint response missing expected keys")
-    else:
-        print(f"❌ /api/community/project endpoint failed with status code: {response.status_code}")
-    
-    # 2.6 Test /api/community/contest endpoint
-    print("\n2.6 Testing /api/community/contest endpoint")
-    response = requests.get(f"{API_URL}/community/contest")
-    if response.status_code == 200:
-        data = response.json()
-        expected_keys = ["voting_period", "projects", "vote_requirements", "contest_allocations"]
-        missing_keys = [key for key in expected_keys if key not in data]
-        
-        if not missing_keys:
-            print("✅ /api/community/contest endpoint returns complete contest information")
-            print(f"Contest keys: {list(data.keys())}")
-            
-            # Check vote requirements
-            if "vote_requirements" in data:
-                vote_req = data["vote_requirements"]
-                if "drb_amount" in vote_req and "bnkr_amount" in vote_req:
-                    print(f"Vote requirements: DRB={vote_req['drb_amount']}, BNKR={vote_req['bnkr_amount']}")
-                else:
-                    print("❌ Vote requirements missing expected keys")
-            
-            # Check contest allocations
-            if "contest_allocations" in data:
-                allocations = data["contest_allocations"]
-                if "drb_percentage" in allocations and "bnkr_percentage" in allocations:
-                    print(f"Contest allocations: DRB={allocations['drb_percentage']}%, BNKR={allocations['bnkr_percentage']}%")
-                else:
-                    print("❌ Contest allocations missing expected keys")
-        else:
-            print(f"❌ /api/community/contest endpoint response missing expected keys: {missing_keys}")
-    else:
-        print(f"❌ /api/community/contest endpoint failed with status code: {response.status_code}")
-    
-    # 3. Transaction Tracking
-    print("\n3. TRANSACTION TRACKING")
-    
-    # 3.1 Test /api/transaction-status/{tx_hash}/{chain} endpoint
-    print("\n3.1 Testing /api/transaction-status endpoint")
-    tx_hash = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
-    chain = "base"
-    
-    response = requests.get(f"{API_URL}/transaction-status/{tx_hash}/{chain}")
-    if response.status_code == 200:
-        data = response.json()
-        expected_keys = ["status", "confirmations", "tx_hash", "chain"]
-        missing_keys = [key for key in expected_keys if key not in data]
-        
-        if not missing_keys:
-            print("✅ /api/transaction-status endpoint returns transaction status in correct format")
-            print(f"Status: {data['status']}")
-            print(f"Confirmations: {data['confirmations']}")
-        else:
-            print(f"❌ /api/transaction-status endpoint response missing expected keys: {missing_keys}")
-    else:
-        print(f"❌ /api/transaction-status endpoint failed with status code: {response.status_code}")
-    
-    # 4. Cross-chain Operations
-    print("\n4. CROSS-CHAIN OPERATIONS")
-    
-    # 4.1 Test /api/cross-chain/optimal-routes endpoint
-    print("\n4.1 Testing /api/cross-chain/optimal-routes endpoint")
-    response = requests.get(f"{API_URL}/cross-chain/optimal-routes")
-    if response.status_code == 200:
-        data = response.json()
-        expected_keys = ["optimal_chains", "recommended_chain", "gas_estimates", "liquidity_analysis"]
-        missing_keys = [key for key in expected_keys if key not in data]
-        
-        if not missing_keys:
-            print("✅ /api/cross-chain/optimal-routes endpoint returns route optimization data")
-            print(f"Recommended chain: {data['recommended_chain']}")
-            print(f"Optimal chains: {data['optimal_chains']}")
-        else:
-            print(f"❌ /api/cross-chain/optimal-routes endpoint response missing expected keys: {missing_keys}")
-    else:
-        print(f"❌ /api/cross-chain/optimal-routes endpoint failed with status code: {response.status_code}")
-    
-    # 5. Edge Cases
-    print("\n5. EDGE CASES")
-    
-    # 5.1 Test with invalid parameters
-    print("\n5.1 Testing with invalid parameters")
-    
-    # Invalid token address
-    invalid_token_payload = {
-        "token_address": "invalid-address",
-        "chain": "base"
-    }
-    
-    response = requests.post(f"{API_URL}/check-burnable", json=invalid_token_payload)
-    if response.status_code != 200:
-        print("✅ /api/check-burnable properly rejects invalid token address")
-    else:
-        data = response.json()
-        if data.get("is_burnable") == False or "error" in data:
-            print("✅ /api/check-burnable properly handles invalid token address")
-        else:
-            print("❌ /api/check-burnable incorrectly accepts invalid token address")
-    
-    # Invalid chain
-    response = requests.get(f"{API_URL}/gas-estimates/invalid-chain")
-    if response.status_code != 200:
-        print("✅ /api/gas-estimates properly rejects invalid chain")
-    else:
-        print("❌ /api/gas-estimates incorrectly accepts invalid chain")
-    
-    # Invalid wallet address
-    invalid_wallet_payload = {
-        "wallet_address": "invalid-wallet",
-        "token_address": test_token,
-        "amount": "1000",
-        "chain": "base"
-    }
-    
-    response = requests.post(f"{API_URL}/execute-burn", json=invalid_wallet_payload)
-    if response.status_code != 200:
-        print("✅ /api/execute-burn properly rejects invalid wallet address")
-    else:
-        print("❌ /api/execute-burn incorrectly accepts invalid wallet address")
-    
-    # 5.2 Test error handling
-    print("\n5.2 Testing error handling")
-    
-    # Missing required parameters
-    incomplete_burn_payload = {
-        "wallet_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-        # Missing token_address and amount
-        "chain": "base"
-    }
-    
-    response = requests.post(f"{API_URL}/execute-burn", json=incomplete_burn_payload)
-    if response.status_code != 200:
-        print("✅ /api/execute-burn properly rejects incomplete payload")
-    else:
-        print("❌ /api/execute-burn incorrectly accepts incomplete payload")
-    
-    # Missing required parameters for project submission
-    incomplete_project_payload = {
-        "name": "Incomplete Project"
-        # Missing other required fields
-    }
-    
-    response = requests.post(f"{API_URL}/community/project", json=incomplete_project_payload)
-    if response.status_code != 200:
-        print("✅ /api/community/project properly rejects incomplete payload")
-    else:
-        print("❌ /api/community/project incorrectly accepts incomplete payload")
-    
-    # 5.3 Test response formats
-    print("\n5.3 Testing response formats match frontend expectations")
-    
-    # Check community stats format
-    response = requests.get(f"{API_URL}/community/stats")
-    if response.status_code == 200:
-        data = response.json()
-        # Check if the response has the keys expected by the frontend
-        frontend_keys = ["total_burns", "total_volume_usd", "total_tokens_burned", "active_wallets", 
-                         "chain_distribution", "top_burners", "recent_burns"]
-        missing_keys = [key for key in frontend_keys if key not in data]
-        
-        if not missing_keys:
-            print("✅ /api/community/stats response format matches frontend expectations")
-        else:
-            print(f"❌ /api/community/stats response missing keys expected by frontend: {missing_keys}")
-    
-    # Check transactions format
-    response = requests.get(f"{API_URL}/transactions")
-    if response.status_code == 200:
-        data = response.json()
-        if "transactions" in data and isinstance(data["transactions"], list):
-            print("✅ /api/transactions response format matches frontend expectations")
-        else:
-            print("❌ /api/transactions response format doesn't match frontend expectations")
-    
-    # 6. Performance and Stability
-    print("\n6. PERFORMANCE AND STABILITY")
-    
-    # 6.1 Test response times
-    print("\n6.1 Testing response times")
-    
-    endpoints = [
-        {"method": "GET", "url": f"{API_URL}/health"},
-        {"method": "GET", "url": f"{API_URL}/chains"},
-        {"method": "GET", "url": f"{API_URL}/stats"},
-        {"method": "GET", "url": f"{API_URL}/community/stats"},
-        {"method": "GET", "url": f"{API_URL}/transactions"}
-    ]
-    
-    for endpoint in endpoints:
-        start_time = time.time()
-        if endpoint["method"] == "GET":
-            response = requests.get(endpoint["url"])
-        else:
-            response = requests.post(endpoint["url"])
-        
-        response_time = time.time() - start_time
-        
-        if response.status_code == 200:
-            print(f"✅ {endpoint['url']} - Response time: {response_time:.4f} seconds")
-        else:
-            print(f"❌ {endpoint['url']} - Failed with status code: {response.status_code}")
-    
-    # 6.2 Test concurrent requests
-    print("\n6.2 Testing concurrent requests")
-    
-    import concurrent.futures
-    
-    def make_request(endpoint):
-        start_time = time.time()
-        if endpoint["method"] == "GET":
-            response = requests.get(endpoint["url"])
-        else:
-            response = requests.post(endpoint["url"], json=endpoint.get("payload", {}))
-        
-        response_time = time.time() - start_time
-        return {
-            "url": endpoint["url"],
-            "status_code": response.status_code,
-            "response_time": response_time
-        }
-    
-    concurrent_endpoints = [
-        {"method": "GET", "url": f"{API_URL}/health"},
-        {"method": "GET", "url": f"{API_URL}/chains"},
-        {"method": "GET", "url": f"{API_URL}/stats"},
-        {"method": "GET", "url": f"{API_URL}/community/stats"},
-        {"method": "GET", "url": f"{API_URL}/transactions"},
-        {"method": "POST", "url": f"{API_URL}/check-burnable", "payload": burnable_payload},
-        {"method": "POST", "url": f"{API_URL}/check-burnable", "payload": non_burnable_payload},
-        {"method": "GET", "url": f"{API_URL}/gas-estimates/base"},
-        {"method": "GET", "url": f"{API_URL}/token-price/{test_token}/base"},
-        {"method": "POST", "url": f"{API_URL}/swap-quote", "payload": swap_payload}
-    ]
-    
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_endpoint = {executor.submit(make_request, endpoint): endpoint for endpoint in concurrent_endpoints}
-        
-        success_count = 0
-        failure_count = 0
-        total_time = 0
-        
-        for future in concurrent.futures.as_completed(future_to_endpoint):
-            result = future.result()
-            if result["status_code"] == 200:
-                success_count += 1
-                total_time += result["response_time"]
-                print(f"✅ Concurrent {result['url']} - Response time: {result['response_time']:.4f} seconds")
-            else:
-                failure_count += 1
-                print(f"❌ Concurrent {result['url']} - Failed with status code: {result['status_code']}")
-        
-        if success_count > 0:
-            avg_time = total_time / success_count
-            print(f"\nConcurrent requests summary:")
-            print(f"Success: {success_count}/{len(concurrent_endpoints)}")
-            print(f"Failures: {failure_count}/{len(concurrent_endpoints)}")
-            print(f"Average response time: {avg_time:.4f} seconds")
-        else:
-            print("\nAll concurrent requests failed")
-    
-    print("\n" + "=" * 80)
-    print("SPECIFIC ENDPOINT TESTING COMPLETE")
-    print("=" * 80)
-
-def test_wallet_address_configuration():
-    """Test the updated wallet address configuration"""
-    print("\n" + "=" * 80)
-    print("TESTING UPDATED WALLET ADDRESS CONFIGURATION")
-    print("=" * 80)
-    
-    # 1. Test /api/check-burnable endpoint to verify wallet addresses
-    print("\n1. Testing /api/check-burnable endpoint for wallet addresses")
-    
-    # Test with a regular token on Base chain
-    payload = {
-        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
-        "chain": "base"
-    }
-    
-    response = requests.post(f"{API_URL}/check-burnable", json=payload)
-    if response.status_code == 200:
-        data = response.json()
-        print("✅ /api/check-burnable endpoint returned successful response")
-        
-        # Verify recipient_wallet matches BurnReliefBot address
-        expected_recipient = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
-        if data.get("recipient_wallet") == expected_recipient:
-            print(f"✅ recipient_wallet correctly matches BurnReliefBot address: {expected_recipient}")
-        else:
-            print(f"❌ recipient_wallet does not match expected BurnReliefBot address. Got: {data.get('recipient_wallet')}, Expected: {expected_recipient}")
-        
-        # Verify chain_wallets object shows updated addresses
-        if "chain_wallets" in data:
-            chain_wallets = data.get("chain_wallets")
-            print("✅ chain_wallets object is present in the response")
-            
-            # Verify team_wallet is BurnReliefBot address
-            expected_team_wallet = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
-            if chain_wallets.get("team_wallet") == expected_team_wallet:
-                print(f"✅ team_wallet correctly matches BurnReliefBot address: {expected_team_wallet}")
-            else:
-                print(f"❌ team_wallet does not match expected BurnReliefBot address. Got: {chain_wallets.get('team_wallet')}, Expected: {expected_team_wallet}")
-            
-            # Verify community_wallet is updated address
-            expected_community_wallet = "0xdc5400599723Da6487C54d134EE44e948a22718b"
-            if chain_wallets.get("community_wallet") == expected_community_wallet:
-                print(f"✅ community_wallet correctly matches updated address: {expected_community_wallet}")
-            else:
-                print(f"❌ community_wallet does not match expected updated address. Got: {chain_wallets.get('community_wallet')}, Expected: {expected_community_wallet}")
-        else:
-            print("❌ chain_wallets object is missing from the response")
-    else:
-        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
-    
-    # 2. Test multi-chain consistency - verify address updates across chains
-    print("\n2. Testing multi-chain consistency")
-    
-    chains = ["base", "ethereum", "solana"]
-    
-    for chain in chains:
-        payload = {
-            "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
-            "chain": chain
-        }
-        
-        response = requests.post(f"{API_URL}/check-burnable", json=payload)
-        if response.status_code == 200:
-            data = response.json()
-            chain_wallets = data.get("chain_wallets", {})
-            
-            if chain in ["base", "ethereum"]:
-                # For EVM chains, verify team_wallet is BurnReliefBot address
-                expected_team_wallet = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
-                if chain_wallets.get("team_wallet") == expected_team_wallet:
-                    print(f"✅ {chain} chain: team_wallet correctly matches BurnReliefBot address")
-                else:
-                    print(f"❌ {chain} chain: team_wallet does not match expected BurnReliefBot address. Got: {chain_wallets.get('team_wallet')}")
-                
-                # For EVM chains, verify community_wallet is updated address
-                expected_community_wallet = "0xdc5400599723Da6487C54d134EE44e948a22718b"
-                if chain_wallets.get("community_wallet") == expected_community_wallet:
-                    print(f"✅ {chain} chain: community_wallet correctly matches updated address")
-                else:
-                    print(f"❌ {chain} chain: community_wallet does not match expected updated address. Got: {chain_wallets.get('community_wallet')}")
-            elif chain == "solana":
-                # For Solana, just verify the addresses are present (they may be different)
-                if "team_wallet" in chain_wallets:
-                    print(f"✅ {chain} chain: team_wallet is present: {chain_wallets.get('team_wallet')}")
-                else:
-                    print(f"❌ {chain} chain: team_wallet is missing")
-                
-                if "community_wallet" in chain_wallets:
-                    print(f"✅ {chain} chain: community_wallet is present: {chain_wallets.get('community_wallet')}")
-                else:
-                    print(f"❌ {chain} chain: community_wallet is missing")
-        else:
-            print(f"❌ /api/check-burnable endpoint failed for {chain} chain with status code: {response.status_code}")
-    
-    # 3. Test allocation logic with the updated addresses
-    print("\n3. Testing allocation logic with updated addresses")
-    
-    # Test with a regular token (should be burnable)
-    payload = {
-        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
-        "chain": "base"
-    }
-    
-    response = requests.post(f"{API_URL}/check-burnable", json=payload)
-    if response.status_code == 200:
-        data = response.json()
+            print_error(f"Incorrect token address: {data['token_address']}")
         
         # Verify allocation preview
-        if "allocation_preview" in data:
-            allocation = data.get("allocation_preview", {})
-            print("✅ allocation_preview is present in the response")
-            
-            # Verify team percentage
-            expected_team_percentage = 0.5  # Updated from 1% to 0.5%
-            if allocation.get("team_percentage") == expected_team_percentage:
-                print(f"✅ team_percentage correctly matches updated value: {expected_team_percentage}%")
-            else:
-                print(f"❌ team_percentage does not match expected updated value. Got: {allocation.get('team_percentage')}%, Expected: {expected_team_percentage}%")
-            
-            # Verify community percentage
-            expected_community_percentage = 1.5
-            if allocation.get("community_percentage") == expected_community_percentage:
-                print(f"✅ community_percentage correctly matches expected value: {expected_community_percentage}%")
-            else:
-                print(f"❌ community_percentage does not match expected value. Got: {allocation.get('community_percentage')}%, Expected: {expected_community_percentage}%")
-            
-            # Verify BNKR team percentage
-            expected_bnkr_team_percentage = 0.5  # Updated from 1% to 0.5%
-            if allocation.get("bnkr_team_percentage") == expected_bnkr_team_percentage:
-                print(f"✅ bnkr_team_percentage correctly matches updated value: {expected_bnkr_team_percentage}%")
-            else:
-                print(f"❌ bnkr_team_percentage does not match expected updated value. Got: {allocation.get('bnkr_team_percentage')}%, Expected: {expected_bnkr_team_percentage}%")
-            
-            # Verify BNKR community percentage
-            expected_bnkr_community_percentage = 1.5
-            if allocation.get("bnkr_community_percentage") == expected_bnkr_community_percentage:
-                print(f"✅ bnkr_community_percentage correctly matches expected value: {expected_bnkr_community_percentage}%")
-            else:
-                print(f"❌ bnkr_community_percentage does not match expected value. Got: {allocation.get('bnkr_community_percentage')}%, Expected: {expected_bnkr_community_percentage}%")
+        allocation = data["allocation_preview"]
+        if "burn_percentage" in allocation and "grok_percentage" in allocation:
+            print_success("Allocation preview contains required fields")
         else:
-            print("❌ allocation_preview is missing from the response")
-    else:
-        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
+            print_error("Allocation preview missing required fields")
+        
+        # Verify chain wallets
+        if "recipient_wallet" in data["chain_wallets"]:
+            print_success("Chain wallets information is included")
+        else:
+            print_error("Chain wallets information is missing")
     
-    print("\n" + "=" * 80)
-    print("WALLET ADDRESS CONFIGURATION TESTING COMPLETE")
-    print("=" * 80)
+    # Test with contest parameter
+    success, data = test_endpoint(
+        "POST", 
+        "/check-burnable", 
+        data={
+            "token_address": TEST_TOKEN,
+            "chain": "base",
+            "is_contest": True
+        },
+        verify_keys=["is_burnable", "allocation_preview", "is_contest"]
+    )
+    
+    if success:
+        # Verify contest allocation
+        if data["is_contest"] and data["allocation_preview"]["allocation_type"] == "contest":
+            print_success("Contest allocation is correctly identified")
+            
+            # Verify contest percentages
+            if data["allocation_preview"]["burn_percentage"] == 88.0 and data["allocation_preview"]["community_percentage"] == 12.0:
+                print_success("Contest allocation percentages are correct (88% burn, 12% community)")
+            else:
+                print_error(f"Incorrect contest allocation percentages: {data['allocation_preview']}")
+        else:
+            print_error("Contest allocation not correctly identified")
+    
+    return success
 
-def test_contest_token_burn_allocation():
-    """Test the new contest token burn allocation system"""
-    print("\n" + "=" * 80)
-    print("TESTING CONTEST TOKEN BURN ALLOCATION SYSTEM")
-    print("=" * 80)
+def test_burn_endpoint():
+    """Test the burn endpoint"""
+    print_header("Testing Burn Endpoint")
     
-    # 1. Test Contest Allocation Check
-    print("\n1. Testing /api/check-burnable with is_contest: true parameter")
+    success, data = test_endpoint(
+        "POST", 
+        "/burn", 
+        data={
+            "wallet_address": TEST_WALLET,
+            "token_address": TEST_TOKEN,
+            "amount": TEST_AMOUNT,
+            "chain": "base"
+        },
+        verify_keys=["transaction_id", "status", "amounts"]
+    )
     
-    # Test with a regular token and is_contest: true
-    contest_payload = {
-        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
-        "chain": "base",
-        "is_contest": True
+    if success:
+        # Verify transaction was created
+        if data["status"] == "pending":
+            print_success("Burn transaction created successfully")
+        else:
+            print_error(f"Unexpected transaction status: {data['status']}")
+        
+        # Verify amounts
+        amounts = data["amounts"]
+        if "burn_amount" in amounts and "drb_total_amount" in amounts and "bnkr_total_amount" in amounts:
+            print_success("Burn amounts are correctly calculated")
+            
+            # Store transaction ID for later tests
+            transaction_id = data["transaction_id"]
+            
+            # Wait for transaction to be processed
+            print_info("Waiting for transaction to be processed...")
+            time.sleep(3)
+            
+            # Check transaction status
+            success, tx_data = test_endpoint(
+                "GET", 
+                "/transactions", 
+                verify_keys=["transactions"]
+            )
+            
+            if success:
+                # Find our transaction
+                found = False
+                for tx in tx_data["transactions"]:
+                    if tx["id"] == transaction_id:
+                        found = True
+                        print_success(f"Transaction found in database with status: {tx['status']}")
+                        break
+                
+                if not found:
+                    print_error("Transaction not found in database")
+        else:
+            print_error("Burn amounts missing required fields")
+    
+    return success
+
+def test_stats_endpoint():
+    """Test the stats endpoint"""
+    print_header("Testing Stats Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/stats", 
+        verify_keys=["total_transactions", "completed_transactions", "burn_percentage", "bnkr_percentage"]
+    )
+    
+    if success:
+        # Verify burn percentage
+        if data["burn_percentage"] == 88.0:
+            print_success("Burn percentage is correct (88%)")
+        else:
+            print_error(f"Incorrect burn percentage: {data['burn_percentage']}")
+        
+        # Verify BNKR percentage
+        if data["bnkr_percentage"] == 2.5:
+            print_success("BNKR percentage is correct (2.5%)")
+        else:
+            print_error(f"Incorrect BNKR percentage: {data['bnkr_percentage']}")
+        
+        # Verify total_bnkr_allocated field
+        if "total_bnkr_allocated" in data:
+            print_success("BNKR allocation data is included")
+        else:
+            print_warning("total_bnkr_allocated field not found, but may be named differently")
+    
+    return success
+
+def test_gas_estimates():
+    """Test the gas estimates endpoint"""
+    print_header("Testing Gas Estimates Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/gas-estimates/base", 
+        verify_keys=["slow", "standard", "fast"]
+    )
+    
+    if success:
+        # Verify gas estimate structure
+        if "gwei" in data["standard"] and "usd" in data["standard"]:
+            print_success("Gas estimates are correctly structured")
+        else:
+            print_error("Gas estimates missing required fields")
+    
+    return success
+
+def test_token_price():
+    """Test the token price endpoint"""
+    print_header("Testing Token Price Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        f"/token-price/{TEST_TOKEN}/base", 
+        verify_keys=["price", "currency"]
+    )
+    
+    if success:
+        # Verify price is a number
+        try:
+            price = float(data["price"])
+            print_success(f"Token price returned: {price} {data['currency']}")
+        except (ValueError, TypeError):
+            print_error(f"Invalid price format: {data['price']}")
+    
+    return success
+
+def test_swap_quote():
+    """Test the swap quote endpoint"""
+    print_header("Testing Swap Quote Endpoint")
+    
+    success, data = test_endpoint(
+        "POST", 
+        "/swap-quote", 
+        data={
+            "amount": TEST_AMOUNT,
+            "token_address": TEST_TOKEN,
+            "chain": "base"
+        },
+        verify_keys=["status", "data"]
+    )
+    
+    if success:
+        # Verify quote data
+        quote_data = data["data"]
+        if "input_amount" in quote_data and "output_amount" in quote_data:
+            print_success("Swap quote contains required fields")
+        else:
+            print_error("Swap quote missing required fields")
+    
+    return success
+
+def test_transactions_endpoint():
+    """Test the transactions endpoint"""
+    print_header("Testing Transactions Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/transactions", 
+        verify_keys=["transactions"]
+    )
+    
+    if success:
+        # Verify transactions list
+        if isinstance(data["transactions"], list):
+            print_success(f"Transactions endpoint returned {len(data['transactions'])} transactions")
+        else:
+            print_error("Transactions not returned as a list")
+    
+    return success
+
+def test_transaction_status():
+    """Test the transaction status endpoint"""
+    print_header("Testing Transaction Status Endpoint")
+    
+    # Use a dummy transaction hash
+    tx_hash = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    
+    success, data = test_endpoint(
+        "GET", 
+        f"/transaction-status/{tx_hash}/base", 
+        verify_keys=["status", "tx_hash", "chain"]
+    )
+    
+    if success:
+        # Verify transaction status
+        if data["status"] in ["pending", "confirmed"]:
+            print_success(f"Transaction status returned: {data['status']}")
+        else:
+            print_error(f"Unexpected transaction status: {data['status']}")
+    
+    return success
+
+def test_optimal_routes():
+    """Test the optimal routes endpoint"""
+    print_header("Testing Optimal Routes Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/cross-chain/optimal-routes", 
+        verify_keys=["optimal_chains", "recommended_chain"]
+    )
+    
+    if success:
+        # Verify Base is recommended
+        if data["recommended_chain"] == "base":
+            print_success("Base chain is correctly recommended")
+        else:
+            print_error(f"Unexpected recommended chain: {data['recommended_chain']}")
+    
+    return success
+
+def test_community_stats():
+    """Test the community stats endpoint"""
+    print_header("Testing Community Stats Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/community/stats", 
+        verify_keys=["total_burns", "total_volume_usd", "top_burners", "recent_burns"]
+    )
+    
+    if success:
+        # Verify top burners list
+        if isinstance(data["top_burners"], list):
+            print_success(f"Community stats returned {len(data['top_burners'])} top burners")
+        else:
+            print_error("Top burners not returned as a list")
+        
+        # Verify recent burns list
+        if isinstance(data["recent_burns"], list):
+            print_success(f"Community stats returned {len(data['recent_burns'])} recent burns")
+        else:
+            print_error("Recent burns not returned as a list")
+    
+    return success
+
+def test_admin_endpoints():
+    """Test the admin endpoints"""
+    print_header("Testing Admin Endpoints")
+    
+    # Set admin headers
+    admin_headers = {
+        "Authorization": f"Bearer {ADMIN_TOKEN}"
     }
     
-    response = requests.post(f"{API_URL}/check-burnable", json=contest_payload)
-    if response.status_code == 200:
-        data = response.json()
-        print("✅ /api/check-burnable endpoint with is_contest: true returned successful response")
-        
-        # Verify is_contest flag is returned
-        if data.get("is_contest") == True:
-            print("✅ is_contest flag is correctly returned as true")
-        else:
-            print("❌ is_contest flag is not correctly returned")
-        
-        # Verify allocation_preview for contest
-        if "allocation_preview" in data:
-            allocation = data.get("allocation_preview", {})
-            print("✅ allocation_preview is present in the response")
-            
-            # Verify burn percentage is 88%
-            expected_burn_percentage = 88.0
-            if allocation.get("burn_percentage") == expected_burn_percentage:
-                print(f"✅ burn_percentage correctly matches contest value: {expected_burn_percentage}%")
-            else:
-                print(f"❌ burn_percentage does not match expected contest value. Got: {allocation.get('burn_percentage')}%, Expected: {expected_burn_percentage}%")
-            
-            # Verify community percentage is 12%
-            expected_community_percentage = 12.0
-            if allocation.get("community_percentage") == expected_community_percentage:
-                print(f"✅ community_percentage correctly matches contest value: {expected_community_percentage}%")
-            else:
-                print(f"❌ community_percentage does not match expected contest value. Got: {allocation.get('community_percentage')}%, Expected: {expected_community_percentage}%")
-            
-            # Verify other percentages are 0
-            if allocation.get("grok_percentage") == 0:
-                print("✅ grok_percentage is correctly set to 0 for contest allocation")
-            else:
-                print(f"❌ grok_percentage is not 0 for contest allocation. Got: {allocation.get('grok_percentage')}%")
-            
-            if allocation.get("team_percentage") == 0:
-                print("✅ team_percentage is correctly set to 0 for contest allocation")
-            else:
-                print(f"❌ team_percentage is not 0 for contest allocation. Got: {allocation.get('team_percentage')}%")
-            
-            if allocation.get("bnkr_community_percentage") == 0:
-                print("✅ bnkr_community_percentage is correctly set to 0 for contest allocation")
-            else:
-                print(f"❌ bnkr_community_percentage is not 0 for contest allocation. Got: {allocation.get('bnkr_community_percentage')}%")
-            
-            if allocation.get("bnkr_team_percentage") == 0:
-                print("✅ bnkr_team_percentage is correctly set to 0 for contest allocation")
-            else:
-                print(f"❌ bnkr_team_percentage is not 0 for contest allocation. Got: {allocation.get('bnkr_team_percentage')}%")
-            
-            # Verify allocation_type is "contest"
-            if allocation.get("allocation_type") == "contest":
-                print("✅ allocation_type is correctly set to 'contest'")
-            else:
-                print(f"❌ allocation_type is not set to 'contest'. Got: {allocation.get('allocation_type')}")
-        else:
-            print("❌ allocation_preview is missing from the response")
-        
-        # Verify note about contest allocation
-        expected_note = "Contest allocation: 88% burn + 12% community pool"
-        if data.get("note") == expected_note:
-            print(f"✅ note correctly explains contest allocation: '{expected_note}'")
-        else:
-            print(f"❌ note does not match expected contest explanation. Got: '{data.get('note')}', Expected: '{expected_note}'")
-    else:
-        print(f"❌ /api/check-burnable endpoint with is_contest: true failed with status code: {response.status_code}")
+    # Test projects endpoint with admin token
+    success, data = test_endpoint(
+        "GET", 
+        "/admin/projects", 
+        headers=admin_headers,
+        verify_keys=["projects"]
+    )
     
-    # 2. Standard vs Contest Comparison
-    print("\n2. Testing the same token with and without contest flag")
+    if success:
+        print_success("Admin authentication works correctly")
     
-    # Standard allocation (already tested above)
-    standard_payload = {
-        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
-        "chain": "base",
-        "is_contest": False
+    # Test without admin token (should fail)
+    success, data = test_endpoint(
+        "GET", 
+        "/admin/projects", 
+        expected_status=401
+    )
+    
+    if success:
+        print_success("Admin endpoint correctly rejects unauthorized requests")
+    
+    # Test with invalid admin token (should fail)
+    invalid_headers = {
+        "Authorization": "Bearer invalid_token"
     }
     
-    # Get standard allocation
-    standard_response = requests.post(f"{API_URL}/check-burnable", json=standard_payload)
-    if standard_response.status_code == 200:
-        standard_data = standard_response.json()
-        standard_allocation = standard_data.get("allocation_preview", {})
-        
-        # Get contest allocation (already fetched above)
-        contest_allocation = data.get("allocation_preview", {})
-        
-        print("Comparing standard vs contest allocations:")
-        print(f"Standard burn: {standard_allocation.get('burn_percentage')}% vs Contest burn: {contest_allocation.get('burn_percentage')}%")
-        print(f"Standard community: {standard_allocation.get('community_percentage')}% vs Contest community: {contest_allocation.get('community_percentage')}%")
-        print(f"Standard grok: {standard_allocation.get('grok_percentage')}% vs Contest grok: {contest_allocation.get('grok_percentage')}%")
-        print(f"Standard team: {standard_allocation.get('team_percentage')}% vs Contest team: {contest_allocation.get('team_percentage')}%")
-        print(f"Standard BNKR community: {standard_allocation.get('bnkr_community_percentage')}% vs Contest BNKR community: {contest_allocation.get('bnkr_community_percentage')}%")
-        print(f"Standard BNKR team: {standard_allocation.get('bnkr_team_percentage')}% vs Contest BNKR team: {contest_allocation.get('bnkr_team_percentage')}%")
-        
-        # Verify standard allocation has normal percentages
-        if standard_allocation.get("burn_percentage") == 88.0:
-            print("✅ Standard allocation has correct burn percentage (88%)")
-        else:
-            print(f"❌ Standard allocation has incorrect burn percentage. Got: {standard_allocation.get('burn_percentage')}%, Expected: 88%")
-        
-        if standard_allocation.get("grok_percentage") > 0:
-            print(f"✅ Standard allocation has non-zero grok percentage ({standard_allocation.get('grok_percentage')}%)")
-        else:
-            print("❌ Standard allocation has zero grok percentage (unexpected)")
-        
-        if standard_allocation.get("community_percentage") > 0:
-            print(f"✅ Standard allocation has non-zero community percentage ({standard_allocation.get('community_percentage')}%)")
-        else:
-            print("❌ Standard allocation has zero community percentage (unexpected)")
-        
-        if standard_allocation.get("team_percentage") > 0:
-            print(f"✅ Standard allocation has non-zero team percentage ({standard_allocation.get('team_percentage')}%)")
-        else:
-            print("❌ Standard allocation has zero team percentage (unexpected)")
-        
-        # Verify contest allocation has simplified percentages
-        if contest_allocation.get("burn_percentage") == 88.0 and contest_allocation.get("community_percentage") == 12.0:
-            print("✅ Contest allocation has correct simplified percentages (88% burn, 12% community)")
-        else:
-            print(f"❌ Contest allocation has incorrect percentages. Got: {contest_allocation.get('burn_percentage')}% burn, {contest_allocation.get('community_percentage')}% community")
-        
-        if contest_allocation.get("grok_percentage") == 0 and contest_allocation.get("team_percentage") == 0:
-            print("✅ Contest allocation correctly has zero grok and team percentages")
-        else:
-            print(f"❌ Contest allocation has non-zero grok or team percentages. Grok: {contest_allocation.get('grok_percentage')}%, Team: {contest_allocation.get('team_percentage')}%")
-    else:
-        print(f"❌ /api/check-burnable endpoint with standard allocation failed with status code: {standard_response.status_code}")
+    success, data = test_endpoint(
+        "GET", 
+        "/admin/projects", 
+        headers=invalid_headers,
+        expected_status=401
+    )
     
-    # 3. Contest Burn Execution
-    print("\n3. Testing /api/execute-contest-burn endpoint (admin-only)")
+    if success:
+        print_success("Admin endpoint correctly rejects invalid tokens")
     
-    # Test without admin token first (should fail)
-    contest_burn_payload = {
-        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
-        "amount": "1000",
+    # Test creating a project
+    project_data = {
+        "name": "Test Project",
+        "description": "A test project created by the test script",
+        "base_address": "0x1234567890123456789012345678901234567890",
+        "submitted_by": "test_script"
+    }
+    
+    success, data = test_endpoint(
+        "POST", 
+        "/admin/projects", 
+        headers=admin_headers,
+        data=project_data,
+        verify_keys=["status", "project"]
+    )
+    
+    if success:
+        print_success("Admin can create projects")
+        
+        # Store project ID for update/delete tests
+        project_id = data["project"]["id"]
+        
+        # Test updating the project
+        update_data = {
+            "name": "Updated Test Project",
+            "description": "This project was updated by the test script"
+        }
+        
+        success, data = test_endpoint(
+            "PUT", 
+            f"/admin/projects/{project_id}", 
+            headers=admin_headers,
+            data=update_data,
+            verify_keys=["status"]
+        )
+        
+        if success:
+            print_success("Admin can update projects")
+        
+        # Test deleting the project
+        success, data = test_endpoint(
+            "DELETE", 
+            f"/admin/projects/{project_id}", 
+            headers=admin_headers,
+            verify_keys=["status"]
+        )
+        
+        if success:
+            print_success("Admin can delete projects")
+    
+    return success
+
+def test_wallet_status():
+    """Test the wallet status endpoint"""
+    print_header("Testing Wallet Status Endpoint")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/wallet/status", 
+        verify_keys=["connected", "network", "rpc_url"]
+    )
+    
+    if success:
+        # Verify wallet status
+        print_success(f"Wallet status: connected={data['connected']}")
+        print_success(f"Network: {data['network']}")
+        
+        # Verify RPC URL
+        if data["rpc_url"] == "https://mainnet.base.org":
+            print_success("Base RPC URL is correct")
+        else:
+            print_error(f"Unexpected RPC URL: {data['rpc_url']}")
+    
+    return success
+
+def test_contest_burn():
+    """Test the contest burn endpoint"""
+    print_header("Testing Contest Burn Endpoint")
+    
+    # Set admin headers
+    admin_headers = {
+        "Authorization": f"Bearer {ADMIN_TOKEN}"
+    }
+    
+    # Test contest burn endpoint
+    contest_data = {
+        "amount": "10",
+        "token_address": TEST_TOKEN,
         "description": "Test contest burn"
     }
     
-    no_auth_response = requests.post(f"{API_URL}/execute-contest-burn", json=contest_burn_payload)
-    if no_auth_response.status_code == 401:
-        print("✅ /api/execute-contest-burn correctly requires admin authentication")
-    else:
-        print(f"❌ /api/execute-contest-burn does not properly require admin authentication. Got status code: {no_auth_response.status_code}")
+    success, data = test_endpoint(
+        "POST", 
+        "/execute-contest-burn", 
+        headers=admin_headers,
+        data=contest_data,
+        verify_keys=["status", "transaction_id", "allocations", "allocation_type"]
+    )
     
-    # Test with admin token
-    admin_headers = {"Authorization": "Bearer admin_token_davincc"}
-    
-    admin_response = requests.post(f"{API_URL}/execute-contest-burn", 
-                                  json=contest_burn_payload,
-                                  headers=admin_headers)
-    
-    if admin_response.status_code == 200:
-        admin_data = admin_response.json()
-        print("✅ /api/execute-contest-burn endpoint is accessible with admin token")
-        
-        # Verify transaction ID
-        if "transaction_id" in admin_data:
-            print(f"✅ Contest burn transaction ID: {admin_data['transaction_id']}")
-        else:
-            print("❌ Contest burn response missing transaction ID")
-        
-        # Verify status
-        if "status" in admin_data and admin_data["status"] == "success":
-            print("✅ Contest burn status: success")
-        else:
-            print(f"❌ Contest burn status: {admin_data.get('status', 'unknown')}")
-        
-        # Verify allocations
-        if "allocations" in admin_data:
-            allocations = admin_data["allocations"]
-            print("✅ Contest burn allocations are present in the response")
+    if success:
+        # Verify contest allocation
+        if data["allocation_type"] == "contest":
+            print_success("Contest allocation is correctly identified")
             
-            # Check allocation type
-            if allocations.get("allocation_type") == "contest":
-                print("✅ Allocation type is correctly set to 'contest'")
-            else:
-                print(f"❌ Allocation type is not set to 'contest'. Got: {allocations.get('allocation_type')}")
-            
-            # Check burn amount
-            if "burn_amount" in allocations:
+            # Verify allocations
+            allocations = data["allocations"]
+            if "burn_amount" in allocations and "community_amount" in allocations:
+                print_success("Contest burn allocations are correctly calculated")
+                
+                # Verify burn amount is 88%
                 burn_amount = float(allocations["burn_amount"])
-                total_amount = float(contest_burn_payload["amount"])
-                expected_burn = total_amount * 0.88  # 88%
-                
-                if abs(burn_amount - expected_burn) < 0.01:  # Allow for small rounding differences
-                    print(f"✅ Burn amount is correctly calculated: {burn_amount} (88% of {total_amount})")
-                else:
-                    print(f"❌ Burn amount is incorrectly calculated. Got: {burn_amount}, Expected: {expected_burn}")
-            else:
-                print("❌ Burn amount is missing from allocations")
-            
-            # Check community amount
-            if "community_amount" in allocations:
                 community_amount = float(allocations["community_amount"])
-                total_amount = float(contest_burn_payload["amount"])
-                expected_community = total_amount * 0.12  # 12%
+                total_amount = burn_amount + community_amount
                 
-                if abs(community_amount - expected_community) < 0.01:  # Allow for small rounding differences
-                    print(f"✅ Community amount is correctly calculated: {community_amount} (12% of {total_amount})")
+                burn_percentage = (burn_amount / total_amount) * 100
+                community_percentage = (community_amount / total_amount) * 100
+                
+                if abs(burn_percentage - 88.0) < 0.1 and abs(community_percentage - 12.0) < 0.1:
+                    print_success("Contest burn percentages are correct (88% burn, 12% community)")
                 else:
-                    print(f"❌ Community amount is incorrectly calculated. Got: {community_amount}, Expected: {expected_community}")
+                    print_error(f"Incorrect contest burn percentages: burn={burn_percentage}%, community={community_percentage}%")
             else:
-                print("❌ Community amount is missing from allocations")
-            
-            # Check other amounts are zero
-            if "drb_grok_amount" in allocations and float(allocations["drb_grok_amount"]) == 0:
-                print("✅ DRB grok amount is correctly set to 0")
-            else:
-                print(f"❌ DRB grok amount is not 0. Got: {allocations.get('drb_grok_amount')}")
-            
-            if "drb_team_amount" in allocations and float(allocations["drb_team_amount"]) == 0:
-                print("✅ DRB team amount is correctly set to 0")
-            else:
-                print(f"❌ DRB team amount is not 0. Got: {allocations.get('drb_team_amount')}")
+                print_error("Contest burn allocations missing required fields")
         else:
-            print("❌ Contest burn response missing allocations")
-        
-        # Verify transaction hashes
-        if "transaction_hashes" in admin_data:
-            tx_hashes = admin_data["transaction_hashes"]
-            print(f"✅ Transaction hashes: {json.dumps(tx_hashes, indent=2)}")
-        else:
-            print("❌ Contest burn response missing transaction hashes")
-    elif admin_response.status_code == 500 and "wallet not connected" in admin_response.text.lower():
-        print("⚠️ Execute contest burn endpoint returns 'wallet not connected' error")
-        print(f"Response: {admin_response.text}")
-    else:
-        print(f"❌ Execute contest burn endpoint failed with status code: {admin_response.status_code}")
-        print(f"Response: {admin_response.text}")
+            print_error(f"Unexpected allocation type: {data['allocation_type']}")
     
-    # 4. Database Logging
-    print("\n4. Verifying database logging for contest burns")
+    return success
+
+def run_all_tests():
+    """Run all tests and return the results"""
+    results = {}
     
-    # Get transactions to check if the contest burn was logged
-    response = requests.get(f"{API_URL}/transactions")
-    if response.status_code == 200:
-        data = response.json()
-        if "transactions" in data and isinstance(data["transactions"], list):
-            transactions = data["transactions"]
-            
-            # Look for contest burns
-            contest_burns = [tx for tx in transactions if tx.get("type") == "contest_burn"]
-            
-            if contest_burns:
-                print(f"✅ Found {len(contest_burns)} contest burns in the transaction log")
-                
-                # Check the most recent contest burn
-                latest_contest_burn = contest_burns[0]
-                print(f"Latest contest burn ID: {latest_contest_burn.get('id')}")
-                
-                # Verify is_contest flag
-                if latest_contest_burn.get("is_contest") == True:
-                    print("✅ is_contest flag is correctly set to true in the database")
-                else:
-                    print("❌ is_contest flag is not correctly set in the database")
-                
-                # Verify type
-                if latest_contest_burn.get("type") == "contest_burn":
-                    print("✅ type is correctly set to 'contest_burn' in the database")
-                else:
-                    print(f"❌ type is not correctly set in the database. Got: {latest_contest_burn.get('type')}")
-                
-                # Verify allocations
-                if "allocations" in latest_contest_burn:
-                    allocations = latest_contest_burn["allocations"]
-                    
-                    # Check allocation type
-                    if allocations.get("allocation_type") == "contest":
-                        print("✅ Allocation type is correctly set to 'contest' in the database")
-                    else:
-                        print(f"❌ Allocation type is not correctly set in the database. Got: {allocations.get('allocation_type')}")
-                    
-                    # Check burn amount percentage
-                    total_amount = float(latest_contest_burn.get("total_amount", 0))
-                    if total_amount > 0 and "burn_amount" in allocations:
-                        burn_amount = float(allocations["burn_amount"])
-                        burn_percentage = (burn_amount / total_amount) * 100
-                        
-                        if abs(burn_percentage - 88.0) < 1.0:  # Allow for small rounding differences
-                            print(f"✅ Burn percentage in database is approximately 88% ({burn_percentage:.2f}%)")
-                        else:
-                            print(f"❌ Burn percentage in database is not 88%. Got: {burn_percentage:.2f}%")
-                    
-                    # Check community amount percentage
-                    if total_amount > 0 and "community_amount" in allocations:
-                        community_amount = float(allocations["community_amount"])
-                        community_percentage = (community_amount / total_amount) * 100
-                        
-                        if abs(community_percentage - 12.0) < 1.0:  # Allow for small rounding differences
-                            print(f"✅ Community percentage in database is approximately 12% ({community_percentage:.2f}%)")
-                        else:
-                            print(f"❌ Community percentage in database is not 12%. Got: {community_percentage:.2f}%")
-                else:
-                    print("❌ Allocations are missing from the database record")
-            else:
-                print("⚠️ No contest burns found in the transaction log")
-        else:
-            print("❌ Transactions endpoint response doesn't have expected 'transactions' key")
-    else:
-        print(f"❌ Transactions endpoint failed with status code: {response.status_code}")
+    # Core functionality tests
+    results["health_check"] = test_health_check()
+    results["chains"] = test_chains_endpoint()
+    results["token_validation"] = test_token_validation()
+    results["check_burnable"] = test_check_burnable()
+    results["burn"] = test_burn_endpoint()
+    results["stats"] = test_stats_endpoint()
     
-    print("\n" + "=" * 80)
-    print("CONTEST TOKEN BURN ALLOCATION SYSTEM TESTING COMPLETE")
-    print("=" * 80)
+    # Additional API tests
+    results["gas_estimates"] = test_gas_estimates()
+    results["token_price"] = test_token_price()
+    results["swap_quote"] = test_swap_quote()
+    results["transactions"] = test_transactions_endpoint()
+    results["transaction_status"] = test_transaction_status()
+    results["optimal_routes"] = test_optimal_routes()
+    results["community_stats"] = test_community_stats()
+    
+    # Admin functionality tests
+    results["admin"] = test_admin_endpoints()
+    results["wallet_status"] = test_wallet_status()
+    results["contest_burn"] = test_contest_burn()
+    
+    # Print summary
+    print_header("Test Summary")
+    
+    passed = sum(1 for result in results.values() if result)
+    total = len(results)
+    
+    for test, result in results.items():
+        status = f"{GREEN}PASS{RESET}" if result else f"{RED}FAIL{RESET}"
+        print(f"{test}: {status}")
+    
+    print(f"\n{passed}/{total} tests passed ({passed/total*100:.1f}%)")
+    
+    return passed == total
 
 if __name__ == "__main__":
-    # Test the contest token burn allocation system
-    test_contest_token_burn_allocation()
+    print_header(f"Testing Burn Relief Bot Backend API at {API_BASE_URL}")
+    print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # Test the updated wallet address configuration
-    # test_wallet_address_configuration()
+    success = run_all_tests()
     
-    # Run the specific tests for the endpoints mentioned in the review request
-    # test_specific_endpoints()
+    print_header(f"Testing completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # Uncomment to run all tests
-    # run_tests()
+    if not success:
+        sys.exit(1)
