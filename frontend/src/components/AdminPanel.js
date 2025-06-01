@@ -56,7 +56,13 @@ const AdminPanel = ({ onClose }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = secureStorage.getAdminToken();
+      if (!token) {
+        alert('Admin session expired. Please login again.');
+        onClose();
+        return;
+      }
+      
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
