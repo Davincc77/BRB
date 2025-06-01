@@ -96,15 +96,19 @@ CHAIN_WALLETS = {
 # Default wallet fallbacks (for Base/ETH)
 DEFAULT_WALLETS = CHAIN_WALLETS["base"]
 
-# Percentage allocations (updated for community contest)
+# Allocation percentages for different scenarios
 BURN_PERCENTAGE = 88.0
 DRB_PERCENTAGE = 10.0          # Total DRB: 7% + 1.5% + 0.5% = 9.0%
-DRB_GROK_PERCENTAGE = 7.0      # 7% DRB to Grok
-DRB_COMMUNITY_PERCENTAGE = 1.5 # 1.5% DRB to community
-DRB_TEAM_PERCENTAGE = 0.5      # 0.5% DRB to team (reduced from 1%)
+DRB_GROK_PERCENTAGE = 7.0  # Reduced to 7% for burnable, increased to 95% for non-burnable
+DRB_COMMUNITY_PERCENTAGE = 1.5
+DRB_TEAM_PERCENTAGE = 0.5  # Reduced from 1% to 0.5%
 BNKR_PERCENTAGE = 2.5         # 2.5% total BNKR allocation
-BNKR_COMMUNITY_PERCENTAGE = 1.5  # 1.5% BNKR for BANKR Club Members
-BNKR_TEAM_PERCENTAGE = 0.5       # 0.5% BNKR to team (reduced from 1%)
+BNKR_COMMUNITY_PERCENTAGE = 1.5
+BNKR_TEAM_PERCENTAGE = 0.5  # Reduced from 1% to 0.5%
+
+# Contest-specific allocation percentages
+CONTEST_BURN_PERCENTAGE = 88.0  # 88% burn for contest tokens
+CONTEST_COMMUNITY_PERCENTAGE = 12.0  # 12% to community pool for contest tokens
 
 # Community Contest Allocations (extra 1% from team reduction)
 COMMUNITY_PROJECT_DRB_PERCENTAGE = 0.5  # 0.5% DRB for winning project
