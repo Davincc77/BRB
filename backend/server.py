@@ -1766,7 +1766,8 @@ app.include_router(api_router, prefix="/api")
 admin_router = APIRouter()
 
 @admin_router.get("/projects")
-async def get_admin_projects(admin_user: dict = Depends(verify_admin_token)):
+@limiter.limit("60/minute")  # Rate limit admin requests
+async def get_admin_projects(request: Request, admin_token: Dict = Depends(verify_admin_token)):
     """Get all projects for admin management"""
     try:
         projects = []
