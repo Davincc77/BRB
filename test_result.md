@@ -185,7 +185,6 @@ metadata:
 test_plan:
   current_focus:
     - "Community Tab"
-    - "Admin Interface"
     - "API Integration"
     - "Core API Endpoints"
     - "Community Stats Endpoint"
