@@ -1200,6 +1200,33 @@ function App() {
             </button>
           )}
         </div>
+          {adminToken ? (
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setAdminPanelOpen(true)}
+                className="px-4 py-2 bg-purple-600/80 text-white rounded-lg text-sm hover:bg-purple-700/90 backdrop-blur-sm shadow-lg transition-all"
+                title="Admin Panel"
+              >
+                ⚙️ Admin Panel
+              </button>
+              <button 
+                onClick={handleAdminLogout}
+                className="px-4 py-2 bg-gray-600/80 text-white rounded-lg text-sm hover:bg-gray-700/90 backdrop-blur-sm shadow-lg transition-all"
+                title="Admin Logout"
+              >
+                🚪 Logout
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={handleAdminLogin}
+              className="px-4 py-2 bg-purple-600/50 text-white rounded-lg text-sm hover:bg-purple-700/80 backdrop-blur-sm shadow-lg opacity-60 hover:opacity-100 transition-all"
+              title="Admin Access"
+            >
+              ⚙️ Admin Access
+            </button>
+          )}
+        </div>
 
         {/* Wallet Selection Modal Overlay */}
         {showWalletMenu && (
