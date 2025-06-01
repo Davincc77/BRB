@@ -130,7 +130,13 @@ const AdminPanel = ({ onClose }) => {
 
   const handleStartContest = async (projectId) => {
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = secureStorage.getAdminToken();
+      if (!token) {
+        alert('Admin session expired. Please login again.');
+        onClose();
+        return;
+      }
+      
       await axios.post(`${API}/admin/contest/start`, { project_id: projectId }, {
         headers: {
           'Authorization': `Bearer ${token}`,
