@@ -1333,10 +1333,26 @@ async def get_community_stats():
                 "transaction_count": doc["transaction_count"]
             })
         
+        # Calculate total volume from actual database data, not from the truncated recent_burns
+        total_volume = 0
+        try:
+            pipeline_volume = [
+                {"$match": {"status": "completed"}},
+                {"$group": {
+                    "_id": None,
+                    "total": {"$sum": {"$toDouble": "$amount"}}
+                }}
+            ]
+            async for doc in burns_collection.aggregate(pipeline_volume):
+                total_volume = doc.get("total", 0)
+                break
+        except:
+            total_volume = 0
+        
         return CommunityStats(
             total_burns=await burns_collection.count_documents({"status": "completed"}),
-            total_volume_usd=sum([float(b["amount"]) for b in recent_burns]),
-            total_tokens_burned=0,  # Simplified
+            total_volume_usd=total_volume,
+            total_tokens_burned=total_volume,  # Same as volume for now
             active_wallets=len(top_burners),
             chain_distribution={"base": 100.0},  # Base only for now
             top_burners=top_burners,
