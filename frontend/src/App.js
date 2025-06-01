@@ -1164,10 +1164,10 @@ function App() {
                 </button>
               </div>
             ) : (
-              <div className="relative">
+              <div className="relative z-[99999]">
                 <button 
                   onClick={() => setShowWalletMenu(!showWalletMenu)}
-                  className="btn-primary flex items-center gap-2"
+                  className="btn-primary flex items-center gap-2 relative z-[99999]"
                 >
                   <Wallet className="w-4 h-4" />
                   Connect Wallet
@@ -1178,7 +1178,10 @@ function App() {
                 
                 {/* Wallet Selection Dropdown */}
                 {showWalletMenu && (
-                  <div className="absolute right-0 mt-2 w-64 bg-gray-900 border-2 border-gray-600 rounded-lg shadow-2xl z-[9999]">
+                  <div 
+                    className="fixed right-4 top-20 w-64 bg-gray-900 border-2 border-gray-600 rounded-lg shadow-2xl"
+                    style={{ zIndex: 999999 }}
+                  >
                     <div className="p-3">
                       <div className="text-sm text-gray-300 mb-3 px-2 font-medium">Choose your wallet:</div>
                       
