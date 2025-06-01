@@ -1184,7 +1184,7 @@ async def execute_redistribution(redistribution_data: dict, admin_user: dict = D
         raise HTTPException(status_code=500, detail=f"Failed to execute redistribution: {str(e)}")
 
 # Include the API router
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api")
 
 # Admin router
 admin_router = APIRouter()
