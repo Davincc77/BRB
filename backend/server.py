@@ -16,6 +16,8 @@ from web3 import Web3
 from eth_account import Account
 import asyncio
 
+load_dotenv()
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
