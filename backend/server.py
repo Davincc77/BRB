@@ -1263,6 +1263,44 @@ async def start_contest(contest_data: dict, admin_user: dict = Depends(verify_ad
 
 app.include_router(admin_router, prefix="/api/admin")
 
+# Wallet management endpoints
+@api_router.get("/wallet/status")
+async def get_wallet_status():
+    """Get BurnReliefBot wallet status"""
+    try:
+        is_connected = burn_wallet_manager.is_connected()
+        wallet_address = burn_wallet_manager.account.address if burn_wallet_manager.account else None
+        
+        return {
+            "connected": is_connected,
+            "wallet_address": wallet_address,
+            "network": "Base Mainnet",
+            "rpc_url": BASE_RPC_URL
+        }
+    except Exception as e:
+        logger.error(f"Wallet status check failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to check wallet status: {str(e)}")
+
+@api_router.post("/execute-redistribution")
+async def execute_redistribution(redistribution_data: dict, admin_user: dict = Depends(verify_admin_token)):
+    """Manually execute token redistribution (admin only)"""
+    try:
+        total_amount = float(redistribution_data.get("amount", 0))
+        token_address = redistribution_data.get("token_address", "")
+        is_burnable = redistribution_data.get("is_burnable", True)
+        
+        if total_amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid amount")
+        
+        result = await burn_wallet_manager.execute_burn_and_redistribute(
+            total_amount, token_address, is_burnable
+        )
+        
+        return result
+    except Exception as e:
+        logger.error(f"Manual redistribution failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to execute redistribution: {str(e)}")
+
 @app.get("/")
 async def root():
     return {"message": "Burn Relief Bot API - Base Chain Only", "version": "2.0", "chains": ["base"]}
