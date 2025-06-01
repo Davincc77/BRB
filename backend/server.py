@@ -1481,6 +1481,74 @@ async def test_redistribution(test_data: dict, admin_user: dict = Depends(verify
         logger.error(f"Test redistribution failed: {e}")
         raise HTTPException(status_code=500, detail=f"Test failed: {str(e)}")
 
+@api_router.post("/execute-contest-burn")
+async def execute_contest_burn(contest_burn_data: dict, admin_user: dict = Depends(verify_admin_token)):
+    """Execute contest token burn with simplified allocation (admin only)"""
+    try:
+        total_amount = float(contest_burn_data.get("amount", 0))
+        token_address = contest_burn_data.get("token_address", "")
+        description = contest_burn_data.get("description", "Contest token burn")
+        
+        if total_amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid amount")
+        
+        if not burn_wallet_manager.is_connected():
+            raise HTTPException(status_code=500, detail="Wallet not connected")
+        
+        # Calculate contest allocations (88% burn + 12% community)
+        allocations = calculate_burn_amounts(
+            total_amount, 
+            token_address, 
+            is_burnable=True, 
+            is_contest=True
+        )
+        
+        # Prepare distribution dictionary for contest burns
+        distributions = {}
+        
+        # 88% to burn address
+        if float(allocations["burn_amount"]) > 0:
+            distributions[BURN_ADDRESS] = float(allocations["burn_amount"])
+        
+        # 12% to community wallet
+        if float(allocations["community_amount"]) > 0:
+            distributions[COMMUNITY_WALLET] = float(allocations["community_amount"])
+        
+        logger.info(f"Executing contest burn: {distributions}")
+        
+        # Execute REAL redistribution
+        tx_results = await burn_wallet_manager.send_token_redistribution(token_address, distributions)
+        
+        # Log transaction to database
+        transaction_record = {
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.utcnow(),
+            "total_amount": total_amount,
+            "token_address": token_address,
+            "is_burnable": True,
+            "is_contest": True,
+            "allocations": allocations,
+            "transaction_hashes": tx_results,
+            "status": "completed",
+            "description": description,
+            "type": "contest_burn"
+        }
+        
+        await burns_collection.insert_one(transaction_record)
+        
+        return {
+            "status": "success",
+            "transaction_id": transaction_record["id"],
+            "allocations": allocations,
+            "transaction_hashes": tx_results,
+            "allocation_type": "contest",
+            "description": description
+        }
+        
+    except Exception as e:
+        logger.error(f"Contest burn execution failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Contest burn failed: {str(e)}")
+
 @api_router.post("/execute-redistribution")
 async def execute_redistribution(redistribution_data: dict, admin_user: dict = Depends(verify_admin_token)):
     """Manually execute token redistribution (admin only)"""
