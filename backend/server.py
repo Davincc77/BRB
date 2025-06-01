@@ -664,21 +664,6 @@ async def is_drb_token(token_address: str, token_name: str = "", token_symbol: s
     
     return False
 
-async def is_token_burnable(token_address: str, token_name: str = "", token_symbol: str = "") -> bool:
-    """Check if token should be burned or swapped entirely"""
-    # Check against non-burnable token list
-    check_values = [
-        token_address.lower(),
-        token_name.lower(),
-        token_symbol.lower()
-    ]
-    
-    for value in check_values:
-        if value in [t.lower() for t in NON_BURNABLE_TOKENS]:
-            return False
-    
-    return True
-
 def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burnable: bool = True, is_drb: bool = False, winning_project_wallet: str = None) -> Dict[str, str]:
     """Calculate distribution amounts for burn transaction"""
     total = float(total_amount)
