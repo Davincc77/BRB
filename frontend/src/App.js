@@ -1737,6 +1737,76 @@ function App() {
               </div>
             </div>
 
+            {/* Contest Burn Allocation */}
+            <div className="card silverish-gradient">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                <Star className="w-6 h-6 text-yellow-500 mr-2" />
+                Contest Token Allocation
+              </h3>
+              <div className="bg-purple-900/20 border border-purple-600/30 rounded-lg p-6">
+                <div className="text-center mb-6">
+                  <h4 className="text-lg font-bold text-purple-300 mb-2">
+                    🏆 Simplified Contest Allocation
+                  </h4>
+                  <p className="text-gray-300 text-sm">
+                    When tokens are burned for contest voting, they follow a simplified allocation:
+                  </p>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Burn Allocation */}
+                  <div className="flex items-center justify-between p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-white font-bold text-lg">🔥</span>
+                      </div>
+                      <div>
+                        <div className="text-red-300 font-semibold">Burned Forever</div>
+                        <div className="text-gray-400 text-sm">Permanently destroyed</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-red-400">88%</div>
+                    </div>
+                  </div>
+
+                  {/* Community Pool */}
+                  <div className="flex items-center justify-between p-4 bg-green-900/20 border border-green-600/30 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-white font-bold text-lg">🏆</span>
+                      </div>
+                      <div>
+                        <div className="text-green-300 font-semibold">Community Pool</div>
+                        <div className="text-gray-400 text-sm">Winning project team</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-green-400">12%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg">
+                  <div className="flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-blue-300 font-semibold mb-1">💡 How It Works</div>
+                      <p className="text-gray-400 text-sm">
+                        Contest burns use a simplified allocation: <span className="text-yellow-400">88% burned</span> for deflation + 
+                        <span className="text-green-400"> 12% to community pool</span> for winning projects
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <div className="text-xs text-gray-500">
+                    * Different from standard burns which have multiple allocations (Grok, Team, etc.)
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Current Winner */}
             {contestData?.current_winner && (
               <div className="card silverish-gradient">
