@@ -236,7 +236,7 @@ const AdminPanel = ({ onClose }) => {
           <h3 className="text-xl font-semibold text-white mb-4">Manage Projects</h3>
           <div className="space-y-4">
             {projects.map((project) => (
-              <div key={project._id} className="bg-gray-800 rounded-lg p-4">
+              <div key={project.id || project._id} className="bg-gray-800 rounded-lg p-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h4 className="text-lg font-semibold text-white">{project.name}</h4>
