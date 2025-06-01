@@ -546,6 +546,18 @@ test_plan:
           agent: "testing"
           comment: "Tested multi-chain wallet support with the /api/check-burnable endpoint. The endpoint correctly returns chain-specific wallet addresses for all tested chains (base, ethereum, solana, bitcoin, litecoin, dogecoin). ETH returns 0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F, SOL returns 26DXAxLUKNgeiv6hj74L4mhFZmXqc44aMFjRWGo8UhYo, and BTC/LTC/DOGE return their respective xpub addresses. The multi-chain wallet system is fully functional."
 
+  - task: "Token Classification System"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Tested token classification system. DRB and BNKR tokens are correctly marked as burnable, while major cryptocurrencies (BTC, ETH, SOL, etc.) and stablecoins (USDC, USDT, DAI) are correctly marked as non-burnable. New tokens default to non-burnable as expected. The token classification system is working correctly."
+
   - task: "Updated Wallet Address Configuration"
     implemented: true
     working: true
