@@ -269,13 +269,13 @@ const AdminPanel = ({ onClose }) => {
                       Edit
                     </button>
                     <button 
-                      onClick={() => handleStartContest(project._id)}
+                      onClick={() => handleStartContest(project.id)}
                       className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                     >
                       Start Contest
                     </button>
                     <button 
-                      onClick={() => handleDeleteProject(project._id)}
+                      onClick={() => handleDeleteProject(project.id)}
                       className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                     >
                       Delete
