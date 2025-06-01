@@ -1266,7 +1266,7 @@ function App() {
                           onClick={() => {
                             setIsContestMode(!isContestMode);
                             if (tokenAddress) {
-                              handleTokenAddressValidation(tokenAddress); // Re-validate with new mode
+                              checkTokenBurnability(tokenAddress); // Re-validate with new mode
                             }
                           }}
                           className={`w-12 h-6 rounded-full transition-colors relative ${
