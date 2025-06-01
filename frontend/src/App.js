@@ -104,18 +104,23 @@ function App() {
     const password = prompt("Enter admin password:");
     if (password === "10121277@burnreliefbot!10121277") {  // Updated admin password
       const token = "admin_token_davincc";
-      setAdminToken(token);
-      localStorage.setItem('admin_token', token);
-      showNotification('Admin access granted!', 'success');
-      setAdminPanelOpen(true);
-    } else {
+      
+      // Use secure storage with 60-minute expiration
+      if (secureStorage.setAdminToken(token, 60)) {
+        setAdminToken(token);
+        showNotification('Admin access granted! (60 min session)', 'success');
+        setAdminPanelOpen(true);
+      } else {
+        showNotification('Failed to create secure session', 'error');
+      }
+    } else if (password) {  // Don't show error for cancelled prompt
       showNotification('Invalid admin credentials', 'error');
     }
   };
 
   const handleAdminLogout = () => {
+    secureStorage.clearAdminToken();
     setAdminToken(null);
-    localStorage.removeItem('admin_token');
     setAdminPanelOpen(false);
     showNotification('Admin logged out', 'info');
   };
