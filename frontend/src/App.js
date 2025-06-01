@@ -1279,18 +1279,25 @@ function App() {
                   </div>
                   <div className="flex justify-center space-x-4">
                     <button
+                      onClick={() => connectWallet('coinbase')}
+                      className="wallet-btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
+                    >
+                      <Wallet className="w-5 h-5" />
+                      <span>Coinbase Wallet</span>
+                    </button>
+                    <button
                       onClick={() => connectWallet('metamask')}
                       className="wallet-btn bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
                     >
                       <Wallet className="w-5 h-5" />
-                      <span>Connect MetaMask</span>
+                      <span>MetaMask</span>
                     </button>
                     <button
                       onClick={() => connectWallet('phantom')}
                       className="wallet-btn bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors"
                     >
                       <Wallet className="w-5 h-5" />
-                      <span>Connect Phantom</span>
+                      <span>Phantom</span>
                     </button>
                   </div>
                 </div>
