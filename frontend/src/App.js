@@ -98,6 +98,7 @@ function App() {
   const [analyzingRoute, setAnalyzingRoute] = useState(false);
   const [crossChainTransactions, setCrossChainTransactions] = useState([]);
   const [optimalRoutes, setOptimalRoutes] = useState(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false); // New state for transaction display
 
   // Admin authentication function (simplified for demo)
   const handleAdminLogin = () => {
