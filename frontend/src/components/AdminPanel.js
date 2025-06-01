@@ -109,7 +109,13 @@ const AdminPanel = ({ onClose }) => {
     }
 
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = secureStorage.getAdminToken();
+      if (!token) {
+        alert('Admin session expired. Please login again.');
+        onClose();
+        return;
+      }
+      
       await axios.delete(`${API}/admin/projects/${projectId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
