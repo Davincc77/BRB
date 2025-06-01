@@ -1201,9 +1201,8 @@ function App() {
           )}
         </div>
 
-        {/* Admin Access - Centered under DRB allocation */}
-        <div className="flex justify-center mt-8 mb-8">
-          {adminToken ? (
+        {/* Wallet Selection Modal Overlay */}
+        {showWalletMenu && (
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setAdminPanelOpen(true)}
