@@ -90,7 +90,12 @@ const AdminPanel = ({ onClose }) => {
     }
 
     try {
-      await axios.delete(`${API}/admin/projects/${projectId}`);
+      const token = localStorage.getItem('admin_token');
+      await axios.delete(`${API}/admin/projects/${projectId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       fetchProjects();
     } catch (error) {
       console.error('Failed to delete project:', error);
