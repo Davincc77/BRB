@@ -1200,7 +1200,6 @@ function App() {
             </button>
           )}
         </div>
-        </div>
       </header>
 
       {/* Wallet Selection Modal Overlay */}
