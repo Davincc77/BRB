@@ -741,17 +741,151 @@ def test_contest_burn():
     
     return success
 
-def run_focused_tests():
-    """Run focused tests on the specific endpoints that were fixed"""
+def test_redistribution_endpoint():
+    """Test the redistribution endpoint"""
+    print_header("Testing Redistribution Endpoint")
+    
+    # Set admin headers
+    admin_headers = {
+        "Authorization": f"Bearer {ADMIN_TOKEN}"
+    }
+    
+    # Test redistribution endpoint
+    redistribution_data = {
+        "amount": "10",
+        "token_address": TEST_TOKEN,
+        "description": "Test redistribution"
+    }
+    
+    success, data = test_endpoint(
+        "POST", 
+        "/execute-redistribution", 
+        headers=admin_headers,
+        data=redistribution_data,
+        verify_keys=["status", "transaction_id"]
+    )
+    
+    if success:
+        print_success("Redistribution endpoint is working correctly")
+    
+    return success
+
+def test_leaderboard():
+    """Test the leaderboard data in community stats endpoint"""
+    print_header("Testing Leaderboard Data")
+    
+    success, data = test_endpoint(
+        "GET", 
+        "/community/stats", 
+        verify_keys=["total_burns", "total_volume_usd", "top_burners"]
+    )
+    
+    if success:
+        # Verify top burners (leaderboard)
+        if isinstance(data["top_burners"], list):
+            print_success(f"Leaderboard returned {len(data['top_burners'])} top burners")
+            
+            # Check structure of top burners
+            if len(data["top_burners"]) > 0:
+                first_burner = data["top_burners"][0]
+                if "wallet_address" in first_burner and "total_burned_usd" in first_burner:
+                    print_success("Leaderboard entries have correct structure")
+                else:
+                    print_error("Leaderboard entries missing required fields")
+            else:
+                print_warning("Leaderboard is empty, but endpoint handled it gracefully")
+        else:
+            print_error("Top burners not returned as a list")
+    
+    return success
+
+def test_error_handling():
+    """Test error handling for invalid inputs"""
+    print_header("Testing Error Handling")
+    
+    # Test invalid token address
+    success, data = test_endpoint(
+        "POST", 
+        "/validate-token", 
+        data={
+            "token_address": "invalid_address",
+            "chain": "base"
+        },
+        expected_status=200  # Should return 200 with is_valid=false, not 500
+    )
+    
+    if success:
+        if "is_valid" in data and data["is_valid"] is False:
+            print_success("Invalid token address handled gracefully")
+        else:
+            print_error("Invalid token address not handled correctly")
+    
+    # Test invalid chain
+    success, data = test_endpoint(
+        "POST", 
+        "/validate-token", 
+        data={
+            "token_address": TEST_TOKEN,
+            "chain": "invalid_chain"
+        },
+        expected_status=400  # Should return 400 for invalid chain
+    )
+    
+    if success:
+        print_success("Invalid chain handled correctly")
+    
+    # Test community stats with empty database
+    # This endpoint should handle empty database gracefully
+    success, data = test_endpoint(
+        "GET", 
+        "/community/stats", 
+        verify_keys=["total_burns", "total_volume_usd"]
+    )
+    
+    if success:
+        print_success("Community stats endpoint handles empty database gracefully")
+    
+    return success
+
+def run_comprehensive_tests():
+    """Run comprehensive tests on all backend endpoints"""
     results = {}
     
-    print_header("Running Focused Tests for Fixed Issues")
+    print_header("Running Comprehensive Backend Tests")
     
-    # Test the burn endpoint to verify the async/await fix for is_token_burnable
+    # Core functionality
+    print_info("Testing Core Functionality...")
+    results["health_check"] = test_health_check()
     results["burn_endpoint"] = test_burn_endpoint()
+    results["stats_endpoint"] = test_stats_endpoint()
+    results["leaderboard"] = test_leaderboard()
     
-    # Test the admin project endpoints to verify the MongoDB query fix
+    # Fixed issues verification
+    print_info("Verifying Fixed Issues...")
+    results["community_stats"] = test_community_stats()
     results["admin_projects"] = test_admin_endpoints()
+    
+    # Admin endpoints
+    print_info("Testing Admin Endpoints...")
+    results["contest_burn"] = test_contest_burn()
+    results["redistribution"] = test_redistribution_endpoint()
+    
+    # Additional functionality
+    print_info("Testing Additional Functionality...")
+    results["chains"] = test_chains_endpoint()
+    results["token_validation"] = test_token_validation()
+    results["check_burnable"] = test_check_burnable()
+    results["gas_estimates"] = test_gas_estimates()
+    results["token_price"] = test_token_price()
+    results["swap_quote"] = test_swap_quote()
+    results["transactions"] = test_transactions_endpoint()
+    results["transaction_status"] = test_transaction_status()
+    results["optimal_routes"] = test_optimal_routes()
+    results["wallet_status"] = test_wallet_status()
+    
+    # Error handling
+    print_info("Testing Error Handling...")
+    results["error_handling"] = test_error_handling()
     
     # Print summary
     print_header("Test Summary")
@@ -765,14 +899,14 @@ def run_focused_tests():
     
     print(f"\n{passed}/{total} tests passed ({passed/total*100:.1f}%)")
     
-    return passed == total
+    return passed == total, results
 
 if __name__ == "__main__":
     print_header(f"Testing Burn Relief Bot Backend API at {API_BASE_URL}")
     print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # Run focused tests on the fixed issues
-    success = run_focused_tests()
+    # Run comprehensive tests on all backend endpoints
+    success, results = run_comprehensive_tests()
     
     print_header(f"Testing completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
