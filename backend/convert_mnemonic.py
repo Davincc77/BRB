@@ -17,7 +17,7 @@ def mnemonic_to_private_key(mnemonic_phrase: str, account_index: int = 0) -> str
 
 if __name__ == "__main__":
     # Your mnemonic phrase
-    mnemonic = "symptom grace spider pumpkin rain pulp antenna kid season surround shoot"
+    mnemonic = "symptom grace spider pumpkin rain pulp antenna wage kid season surround shoot"
     
     try:
         # Convert to private key (account index 0)
