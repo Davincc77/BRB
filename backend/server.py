@@ -672,6 +672,23 @@ def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burn
     """Calculate distribution amounts for burn transaction"""
     total = float(total_amount)
     
+    # Contest allocation: 88% burn + 12% community pool
+    if is_contest:
+        burn_amount = total * (CONTEST_BURN_PERCENTAGE / 100)  # 88%
+        community_amount = total * (CONTEST_COMMUNITY_PERCENTAGE / 100)  # 12%
+        
+        return {
+            "burn_amount": f"{burn_amount:.6f}",
+            "community_amount": f"{community_amount:.6f}",
+            "drb_grok_amount": "0.0",
+            "drb_community_amount": "0.0", 
+            "drb_team_amount": "0.0",
+            "bnkr_community_amount": "0.0",
+            "bnkr_team_amount": "0.0",
+            "total_distributed": f"{total:.6f}",
+            "allocation_type": "contest"
+        }
+    
     if is_drb:
         # Special handling for DRB tokens - direct allocation with minimal swapping
         burn_amount = 0.0
