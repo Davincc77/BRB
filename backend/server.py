@@ -47,30 +47,30 @@ BNKR_TOKEN_CA = "0x22aF33FE49fD1Fa80c7149773dDe5890D3c76F3b"  # $BNKR token for 
 # Wallet Addresses for Different Chains/Tokens
 BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD"  # Universal burn address
 GROK_WALLET = "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9"
-TEAM_WALLET = "0xdc5400599723Da6487C54d134EE44e948a22718b"
-COMMUNITY_WALLET = "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1c"
+TEAM_WALLET = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"  # Updated: BurnReliefBot address for team allocation
+COMMUNITY_WALLET = "0xdc5400599723Da6487C54d134EE44e948a22718b"  # Updated: Former team wallet for community allocation
 
 # Multi-Chain Wallet Configuration
 CHAIN_WALLETS = {
     "base": {
         "recipient_wallet": "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F",  # ETH/Base wallet
         "grok_wallet": "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9",
-        "team_wallet": "0xdc5400599723Da6487C54d134EE44e948a22718b",
-        "community_wallet": "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1c",
+        "team_wallet": "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F",  # Updated: Same as recipient
+        "community_wallet": "0xdc5400599723Da6487C54d134EE44e948a22718b",  # Updated
         "burn_address": "0x000000000000000000000000000000000000dEaD"
     },
     "ethereum": {
         "recipient_wallet": "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F",  # ETH wallet
         "grok_wallet": "0xb1058c959987e3513600eb5b4fd82aeee2a0e4f9",
-        "team_wallet": "0xdc5400599723Da6487C54d134EE44e948a22718b",
-        "community_wallet": "0x742d35Cc6634C0532925a3b8D0d67c58C95B4b1c",
+        "team_wallet": "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F",  # Updated: Same as recipient
+        "community_wallet": "0xdc5400599723Da6487C54d134EE44e948a22718b",  # Updated
         "burn_address": "0x000000000000000000000000000000000000dEaD"
     },
     "solana": {
         "recipient_wallet": "26DXAxLUKNgeiv6hj74L4mhFZmXqc44aMFjRWGo8UhYo",  # SOL wallet
         "grok_wallet": "26DXAxLUKNgeiv6hj74L4mhFZmXqc44aMFjRWGo8UhYo",  # Same for now
-        "team_wallet": "26DXAxLUKNgeiv6hj74L4mhFZmXqc44aMFjRWGo8UhYo",
-        "community_wallet": "26DXAxLUKNgeiv6hj74L4mhFZmXqc44aMFjRWGo8UhYo",
+        "team_wallet": "26DXAxLUKNgeiv6hj74L4mhFZmXqc44aMFjRWGo8UhYo",  # Same for now
+        "community_wallet": "26DXAxLUKNgeiv6hj74L4mhFZmXqc44aMFjRWGo8UhYo",  # Same for now
         "burn_address": "11111111111111111111111111111112"  # Solana burn address
     },
     "bitcoin": {
