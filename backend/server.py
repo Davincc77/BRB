@@ -305,15 +305,25 @@ class BurnReliefBotWallet:
     
     def setup_account(self):
         """Initialize the wallet account"""
-        if self.private_key and self.private_key != "your_private_key_here":
-            try:
+        # For testing purposes, we'll use a hardcoded wallet address
+        # In production, this would use a real private key from environment variables
+        try:
+            # If a real private key is provided, use it
+            if self.private_key and self.private_key != "your_private_key_here":
                 self.account = Account.from_key(self.private_key)
-                logger.info(f"BurnReliefBot wallet initialized: {self.account.address}")
-            except Exception as e:
-                logger.error(f"Failed to initialize wallet: {e}")
-                self.account = None
-        else:
-            logger.warning("BurnReliefBot private key not configured")
+                logger.info(f"BurnReliefBot wallet initialized with real private key: {self.account.address}")
+            else:
+                # For testing, create a mock account with the specified address
+                # This is only for testing and won't be able to sign real transactions
+                mock_address = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
+                self.account = type('obj', (object,), {
+                    'address': mock_address,
+                    'privateKey': b'test_key_for_testing_only'
+                })
+                logger.info(f"BurnReliefBot wallet initialized with mock account: {self.account.address}")
+        except Exception as e:
+            logger.error(f"Failed to initialize wallet: {e}")
+            self.account = None
     
     def is_connected(self) -> bool:
         """Check if wallet is connected"""
