@@ -1392,6 +1392,24 @@ function App() {
                               <span className="bnkr-highlight">{formatAmount((parseFloat(amount) * 0.005).toString())}</span>
                             </div>
                           </>
+                        ) : tokenBurnability?.allocation_preview?.allocation_type === 'contest' ? (
+                          // Contest allocations (simplified)
+                          <>
+                            <div className="mb-2 p-2 bg-purple-800/20 rounded border border-purple-600/30">
+                              <span className="text-purple-300 text-sm font-medium">🏆 Contest Mode - Simplified Allocation</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">88% Burned:</span>
+                              <span className="text-red-400">{formatAmount((parseFloat(amount) * 0.88).toString())}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">12% → Community Pool:</span>
+                              <span className="text-green-400">{formatAmount((parseFloat(amount) * 0.12).toString())}</span>
+                            </div>
+                            <div className="mt-2 p-2 bg-green-800/20 rounded">
+                              <span className="text-green-300 text-xs">✅ Simplified contest allocation - No complex distributions</span>
+                            </div>
+                          </>
                         ) : tokenBurnability?.is_burnable ? (
                           // Burnable token allocations
                           <>
