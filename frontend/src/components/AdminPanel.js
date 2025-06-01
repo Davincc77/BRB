@@ -43,10 +43,16 @@ const AdminPanel = ({ onClose }) => {
 
     setLoading(true);
     try {
+      const token = localStorage.getItem('admin_token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      
       if (editingProject) {
-        await axios.put(`${API}/admin/projects/${editingProject._id}`, newProject);
+        await axios.put(`${API}/admin/projects/${editingProject.id}`, newProject, { headers });
       } else {
-        await axios.post(`${API}/admin/projects`, newProject);
+        await axios.post(`${API}/admin/projects`, newProject, { headers });
       }
       
       setNewProject({
