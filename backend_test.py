@@ -560,6 +560,74 @@ def test_specific_endpoints():
     print("TESTING SPECIFIC ENDPOINTS FROM REVIEW REQUEST")
     print("=" * 80)
     
+    # Test wallet endpoints
+    print("\nTESTING WALLET ENDPOINTS")
+    print("=" * 80)
+    
+    # 1. Test wallet status endpoint
+    print("\n1. Testing /api/wallet/status endpoint")
+    response = requests.get(f"{API_URL}/wallet/status")
+    if response.status_code == 200:
+        data = response.json()
+        print("✅ /api/wallet/status endpoint is accessible")
+        print(f"Response: {json.dumps(data, indent=2)}")
+        
+        # Check expected fields
+        expected_keys = ["connected", "wallet_address", "network", "rpc_url"]
+        missing_keys = [key for key in expected_keys if key not in data]
+        
+        if not missing_keys:
+            print("✅ /api/wallet/status response contains all expected fields")
+        else:
+            print(f"❌ /api/wallet/status response missing expected keys: {missing_keys}")
+            
+        # Check if wallet is not connected (expected based on review request)
+        if data.get("connected") == False:
+            print("✅ Wallet is correctly reported as not connected (expected)")
+        else:
+            print("❓ Wallet is reported as connected (unexpected based on review request)")
+    else:
+        print(f"❌ /api/wallet/status endpoint failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    # 2. Test execute-redistribution endpoint with admin token
+    print("\n2. Testing /api/execute-redistribution endpoint with admin token")
+    
+    # Prepare test data
+    redistribution_payload = {
+        "amount": "1000",
+        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",
+        "is_burnable": True
+    }
+    
+    # Test with admin token
+    admin_headers = {"Authorization": "Bearer admin_token_davincc"}
+    response = requests.post(f"{API_URL}/execute-redistribution", 
+                            json=redistribution_payload,
+                            headers=admin_headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        print("✅ /api/execute-redistribution endpoint is accessible with admin token")
+        print(f"Response: {json.dumps(data, indent=2)}")
+    elif response.status_code == 500 and "wallet not connected" in response.text.lower():
+        print("✅ /api/execute-redistribution endpoint returns appropriate error when wallet is not connected")
+        print(f"Response: {response.text}")
+    else:
+        print(f"❌ /api/execute-redistribution endpoint failed with status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
+    # Test without admin token
+    print("\n3. Testing /api/execute-redistribution endpoint without admin token")
+    response = requests.post(f"{API_URL}/execute-redistribution", 
+                            json=redistribution_payload)
+    
+    if response.status_code == 401:
+        print("✅ /api/execute-redistribution endpoint correctly requires admin authentication")
+    else:
+        print(f"❌ /api/execute-redistribution endpoint failed with unexpected status code: {response.status_code}")
+        print(f"Response: {response.text}")
+    
     # 1. Core Burn Functionality
     print("\n1. CORE BURN FUNCTIONALITY")
     
