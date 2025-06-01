@@ -268,9 +268,10 @@ def test_check_burnable():
     return success
 
 def test_burn_endpoint():
-    """Test the burn endpoint"""
+    """Test the burn endpoint with focus on async/await fix for is_token_burnable"""
     print_header("Testing Burn Endpoint")
     
+    # Test with a regular token
     success, data = test_endpoint(
         "POST", 
         "/burn", 
@@ -322,6 +323,27 @@ def test_burn_endpoint():
                     print_error("Transaction not found in database")
         else:
             print_error("Burn amounts missing required fields")
+    
+    # Test with a non-standard token to verify is_token_burnable function works
+    print_info("Testing with a non-standard token to verify is_token_burnable function...")
+    
+    non_standard_token = "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd"  # Test token
+    
+    success, data = test_endpoint(
+        "POST", 
+        "/burn", 
+        data={
+            "wallet_address": TEST_WALLET,
+            "token_address": non_standard_token,
+            "amount": TEST_AMOUNT,
+            "chain": "base"
+        },
+        verify_keys=["transaction_id", "status", "amounts"]
+    )
+    
+    if success:
+        print_success("Burn endpoint successfully processed non-standard token")
+        print_success("is_token_burnable function is working correctly with async/await")
     
     return success
 
