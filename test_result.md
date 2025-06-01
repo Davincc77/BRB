@@ -534,7 +534,7 @@ test_plan:
 
   - task: "BurnReliefBot Wallet Functionality"
     implemented: true
-    working: "NA"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
@@ -543,6 +543,9 @@ test_plan:
         - working: "NA"
           agent: "testing"
           comment: "Tested wallet functionality. The wallet manager is properly initialized in the code with appropriate error handling for missing private key. The wallet endpoints (/api/wallet/status and /api/execute-redistribution) are defined in the code but return 404 errors, indicating they may not be registered correctly. This is expected behavior until the actual Coinbase wallet private key is provided. The system properly handles the case where the private key hasn't been set yet, with appropriate warning logs."
+        - working: true
+          agent: "testing"
+          comment: "Fixed the wallet endpoints by correcting the API router configuration. The /api/wallet/status endpoint now returns the expected response with connected=false, wallet_address=null, network='Base Mainnet', and rpc_url='https://mainnet.base.org'. The /api/execute-redistribution endpoint correctly requires admin authentication and returns an appropriate error when the wallet is not connected. Both endpoints are now properly registered and accessible."
 agent_communication:
     - agent: "main"
       message: "🎯 ALL BUGS COMPLETELY RESOLVED! ✅ All API endpoints working ✅ All tabs (Burn/Community/Leaderboard) functional ✅ Token allocation display perfect ✅ DRB direct allocation logic ✅ 30+ protected tokens ✅ Enhanced UI with proper badges ✅ Clean visual grid ✅ Base-focused branding ✅ Silverish blue theme ✅ TV positioning perfect. The Burn Relief Bot is now 100% functional and production-ready!"
