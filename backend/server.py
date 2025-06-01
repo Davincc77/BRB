@@ -1292,15 +1292,87 @@ async def get_wallet_status():
         is_connected = burn_wallet_manager.is_connected()
         wallet_address = burn_wallet_manager.account.address if burn_wallet_manager.account else None
         
+        # Get additional info if connected
+        additional_info = {}
+        if is_connected:
+            try:
+                # Get ETH balance for gas
+                eth_balance = burn_wallet_manager.web3.eth.get_balance(wallet_address)
+                eth_balance_formatted = eth_balance / (10 ** 18)
+                
+                # Get current gas price
+                gas_price = burn_wallet_manager.web3.eth.gas_price
+                gas_price_gwei = gas_price / (10 ** 9)
+                
+                additional_info = {
+                    "eth_balance": eth_balance_formatted,
+                    "gas_price_gwei": gas_price_gwei,
+                    "block_number": burn_wallet_manager.web3.eth.block_number
+                }
+            except Exception as e:
+                logger.warning(f"Could not get additional wallet info: {e}")
+        
         return {
             "connected": is_connected,
             "wallet_address": wallet_address,
             "network": "Base Mainnet",
-            "rpc_url": BASE_RPC_URL
+            "rpc_url": BASE_RPC_URL,
+            **additional_info
         }
     except Exception as e:
         logger.error(f"Wallet status check failed: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to check wallet status: {str(e)}")
+
+@api_router.get("/wallet/token-info/{token_address}")
+async def get_token_info(token_address: str, admin_user: dict = Depends(verify_admin_token)):
+    """Get detailed token information (admin only)"""
+    try:
+        if not burn_wallet_manager.is_connected():
+            raise HTTPException(status_code=500, detail="Wallet not connected")
+        
+        token_info = await burn_wallet_manager.get_token_info(token_address)
+        return {
+            "token_address": token_address,
+            "token_info": token_info
+        }
+    except Exception as e:
+        logger.error(f"Token info check failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get token info: {str(e)}")
+
+@api_router.post("/test-redistribution")
+async def test_redistribution(test_data: dict, admin_user: dict = Depends(verify_admin_token)):
+    """Test redistribution with small amounts (admin only)"""
+    try:
+        token_address = test_data.get("token_address")
+        test_amount = float(test_data.get("test_amount", 0.01))  # Default 0.01 tokens
+        
+        if not burn_wallet_manager.is_connected():
+            raise HTTPException(status_code=500, detail="Wallet not connected")
+        
+        # Get token info first
+        token_info = await burn_wallet_manager.get_token_info(token_address)
+        
+        if token_info["balance_formatted"] < test_amount:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Insufficient balance for test. Have: {token_info['balance_formatted']}, Need: {test_amount}"
+            )
+        
+        # Execute test redistribution
+        result = await burn_wallet_manager.execute_burn_and_redistribute(
+            test_amount, token_address, True
+        )
+        
+        return {
+            "test_result": "success",
+            "test_amount": test_amount,
+            "token_info": token_info,
+            "redistribution_result": result
+        }
+        
+    except Exception as e:
+        logger.error(f"Test redistribution failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Test failed: {str(e)}")
 
 @api_router.post("/execute-redistribution")
 async def execute_redistribution(redistribution_data: dict, admin_user: dict = Depends(verify_admin_token)):
