@@ -45,8 +45,17 @@ function App() {
   const [transactionStatus, setTransactionStatus] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectSubmissionModal, setProjectSubmissionModal] = useState(false);
+  // Admin state with secure storage
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
-  const [adminToken, setAdminToken] = useState(localStorage.getItem('admin_token'));
+  const [adminToken, setAdminToken] = useState(secureStorage.getAdminToken());
+
+  // Check for valid admin token on component mount
+  useEffect(() => {
+    const token = secureStorage.getAdminToken();
+    if (token) {
+      setAdminToken(token);
+    }
+  }, []);
   const [isContestMode, setIsContestMode] = useState(false);  // New state for contest mode
   const [newProject, setNewProject] = useState({
     name: '',
