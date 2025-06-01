@@ -110,6 +110,18 @@ function App() {
     showNotification('Admin logged out', 'info');
   };
 
+  // Close wallet menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showWalletMenu && !event.target.closest('.relative')) {
+        setShowWalletMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showWalletMenu]);
+
   // Check if wallet is already connected
   useEffect(() => {
     fetchAvailableChains();
