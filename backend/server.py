@@ -1145,9 +1145,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include the API router
-app.include_router(api_router)
-
 # Wallet management endpoints
 @api_router.get("/wallet/status")
 async def get_wallet_status():
@@ -1185,6 +1182,9 @@ async def execute_redistribution(redistribution_data: dict, admin_user: dict = D
     except Exception as e:
         logger.error(f"Manual redistribution failed: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to execute redistribution: {str(e)}")
+
+# Include the API router
+app.include_router(api_router)
 
 # Admin router
 admin_router = APIRouter()
