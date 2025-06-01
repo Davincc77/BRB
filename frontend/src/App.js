@@ -1807,6 +1807,83 @@ function App() {
               </div>
             </div>
 
+            {/* Allocation Comparison */}
+            <div className="card silverish-gradient">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                <BarChart3 className="w-6 h-6 text-yellow-500 mr-2" />
+                Standard vs Contest Allocations
+              </h3>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Standard Allocation */}
+                <div className="bg-gray-900/20 border border-gray-600/30 rounded-lg p-4">
+                  <h4 className="text-lg font-bold text-gray-300 mb-4 text-center">
+                    🔄 Standard Burns
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">88% Burned</span>
+                      <span className="text-red-400">🔥</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">8% Grok</span>
+                      <span className="text-blue-400">🤖</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">1.5% Community</span>
+                      <span className="text-green-400">👥</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">0.5% Team</span>
+                      <span className="text-purple-400">👨‍💻</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">2% BNKR</span>
+                      <span className="text-yellow-400">🏛️</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 text-xs text-gray-500 text-center">
+                    Complex multi-recipient system
+                  </div>
+                </div>
+
+                {/* Contest Allocation */}
+                <div className="bg-purple-900/20 border border-purple-600/30 rounded-lg p-4">
+                  <h4 className="text-lg font-bold text-purple-300 mb-4 text-center">
+                    🏆 Contest Burns
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">88% Burned</span>
+                      <span className="text-red-400">🔥</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">12% Community Pool</span>
+                      <span className="text-green-400">🏆</span>
+                    </div>
+                    <div className="text-center py-4">
+                      <span className="text-gray-500 text-sm">
+                        All other allocations: 0%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-3 text-xs text-purple-400 text-center">
+                    Simplified contest-focused system
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                <div className="text-center">
+                  <div className="text-yellow-300 font-semibold mb-2">🎯 Contest Benefits</div>
+                  <p className="text-gray-400 text-sm">
+                    Contest allocation puts <span className="text-green-400">more rewards directly to winning projects</span> (12% vs 1.5%), 
+                    while maintaining the same <span className="text-red-400">88% burn rate</span> for token deflation.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Current Winner */}
             {contestData?.current_winner && (
               <div className="card silverish-gradient">
