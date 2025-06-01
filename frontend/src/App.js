@@ -1073,7 +1073,7 @@ function App() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">Burn Relief Bot</h1>
-              <p className="text-xs text-gray-400">Token burning protocol it's based!</p>
+              <p className="text-xs text-gray-400">Based burning protocol !</p>
             </div>
           </div>
           
