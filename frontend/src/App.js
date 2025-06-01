@@ -1715,7 +1715,7 @@ function App() {
               <p className="text-gray-300 mb-6">
                 Vote for Base ecosystem projects so the team of the featured project receives the allocation!
                 <br/>Burn <span className="bnkr-highlight">1000 $DRB</span> or <span className="bnkr-highlight">100 $BNKR</span> to cast your vote.
-                <br/><span className="text-lg font-semibold text-yellow-400">+ 0.5% $DRB + 0.5% $BNKR</span>
+                <br/><span className="text-lg font-semibold text-yellow-400">+ 0.5% $DRB + 0.5% $BNKR from normal burn</span>
               </p>
               
               {/* Contest Info */}
