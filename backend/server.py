@@ -798,46 +798,47 @@ async def validate_token(request: TokenValidationRequest):
         raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
 
 @api_router.post("/check-burnable")
-async def check_token_burnable(request: TokenValidationRequest):
-    """Check if a token is burnable or should be swapped entirely"""
+async def check_if_burnable(request_data: dict):
+    """Check if a token is burnable and get wallet addresses for the chain"""
     try:
-        is_burnable = await is_token_burnable(request.token_address)
-        is_drb = await is_drb_token(request.token_address)
+        token_address = request_data.get("token_address", "").strip()
+        chain = request_data.get("chain", "base").lower()
         
-        # Get preview of allocations
-        preview_amounts = calculate_burn_amounts(1000000.0, request.token_address, is_burnable, is_drb)
+        # Validate inputs
+        if not token_address:
+            raise HTTPException(status_code=400, detail="Token address is required")
         
-        if is_drb:
-            allocation_type = "drb_direct_allocation"
-            message = "DRB tokens will be directly allocated (97.5%) with minimal swapping (2.5% to BNKR)"
-        elif is_burnable:
-            allocation_type = "burn_and_swap"
-            message = "Token will be burned (88%) and swapped"
+        # Get chain-specific wallets
+        chain_wallets = CHAIN_WALLETS.get(chain, DEFAULT_WALLETS)
+        
+        # Check if token is burnable using the new function
+        is_burnable = is_token_burnable(token_address, chain)
+        
+        # Get recipient wallet for the specific chain
+        if chain in ["bitcoin", "litecoin", "dogecoin"]:
+            recipient_wallet = chain_wallets.get("recipient_xpub", DEFAULT_WALLETS["recipient_wallet"])
         else:
-            allocation_type = "swap_only"
-            message = "Token will be swapped entirely (no burning)"
+            recipient_wallet = chain_wallets.get("recipient_wallet", DEFAULT_WALLETS["recipient_wallet"])
         
         return {
-            "token_address": request.token_address,
+            "token_address": token_address,
+            "chain": chain,
             "is_burnable": is_burnable,
-            "is_drb": is_drb,
-            "allocation_type": allocation_type,
-            "preview_allocations": {
-                "burn_percentage": float(preview_amounts["burn_amount"]) / 10000.0,
-                "drb_grok_percentage": float(preview_amounts["drb_grok_amount"]) / 10000.0,
-                "drb_community_percentage": float(preview_amounts["drb_community_amount"]) / 10000.0,
-                "drb_team_percentage": float(preview_amounts["drb_team_amount"]) / 10000.0,
-                "drb_project_percentage": float(preview_amounts["drb_project_amount"]) / 10000.0,
-                "bnkr_community_percentage": float(preview_amounts["bnkr_community_amount"]) / 10000.0,
-                "bnkr_team_percentage": float(preview_amounts["bnkr_team_amount"]) / 10000.0,
-                "bnkr_project_percentage": float(preview_amounts["bnkr_project_amount"]) / 10000.0
+            "recipient_wallet": recipient_wallet,
+            "chain_wallets": chain_wallets,
+            "allocation_preview": {
+                "burn_percentage": BURN_PERCENTAGE if is_burnable else 0,
+                "grok_percentage": DRB_GROK_PERCENTAGE + (BURN_PERCENTAGE if not is_burnable else 0),
+                "community_percentage": DRB_COMMUNITY_PERCENTAGE,
+                "team_percentage": DRB_TEAM_PERCENTAGE,
+                "bnkr_community_percentage": BNKR_COMMUNITY_PERCENTAGE,
+                "bnkr_team_percentage": BNKR_TEAM_PERCENTAGE
             },
-            "message": message
+            "note": "NEW TOKENS DEFAULT TO NON-BURNABLE" if not is_burnable else "Token is burnable"
         }
-        
     except Exception as e:
-        logger.error(f"Burnability check error: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to check burnability: {str(e)}")
+        logger.error(f"Check burnable error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to check token: {str(e)}")
 
 @api_router.post("/burn")
 async def create_burn_transaction(request: BurnRequest, background_tasks: BackgroundTasks):
