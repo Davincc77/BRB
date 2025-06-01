@@ -23,7 +23,13 @@ const AdminPanel = ({ onClose }) => {
 
   const fetchProjects = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = secureStorage.getAdminToken();
+      if (!token) {
+        alert('Admin session expired. Please login again.');
+        onClose();
+        return;
+      }
+      
       const response = await axios.get(`${API}/admin/projects`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -32,7 +38,13 @@ const AdminPanel = ({ onClose }) => {
       setProjects(response.data.projects || []);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
-      alert('Failed to load projects. Please check your admin credentials.');
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        alert('Admin session expired or invalid. Please login again.');
+        secureStorage.clearAdminToken();
+        onClose();
+      } else {
+        alert('Failed to load projects. Please check your connection.');
+      }
     }
   };
 
