@@ -1,3 +1,76 @@
+backend:
+  - task: "Core API Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "All core API endpoints (/api/health, /api/burn, /api/stats) are working correctly. The health endpoint returns proper status and timestamp. The burn endpoint correctly processes transactions and calculates allocations. The stats endpoint returns accurate percentages and transaction counts."
+
+  - task: "Community Stats Endpoint"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "The /api/community/stats endpoint is working correctly and handles empty database gracefully. It returns proper top burners and recent burns data. The leaderboard data structure is correct, showing wallet addresses and burn amounts."
+
+  - task: "Admin Project Operations"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Admin project operations (/api/admin/projects/{id} PUT/DELETE) are working correctly using the 'id' field instead of '_id'. Project creation, updating, and deletion all work as expected. Admin authentication is properly implemented."
+
+  - task: "Async/Await Fix for is_token_burnable"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "The async/await fix for is_token_burnable function is working correctly. The function properly validates both standard and non-standard tokens. The burn endpoint successfully processes transactions with different token types."
+
+  - task: "Contest and Redistribution Endpoints"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "The contest burn and redistribution endpoints are working correctly. Contest burns correctly allocate 88% to burn and 12% to community. Redistribution transactions are properly processed. Both endpoints require proper admin authentication."
+
+  - task: "Error Handling"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Error handling is implemented correctly for most endpoints. Invalid token addresses are handled gracefully. The community stats endpoint handles empty database scenarios properly. One minor issue: invalid chain parameter doesn't return 400 error as expected, but this doesn't affect core functionality."
+
 frontend:
   - task: "Main Interface & Navigation"
     implemented: true
