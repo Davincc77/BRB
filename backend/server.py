@@ -934,27 +934,47 @@ async def check_if_burnable(request_data: dict):
         raise HTTPException(status_code=500, detail=f"Failed to check token: {str(e)}")
 
 @api_router.post("/burn")
-async def create_burn_transaction(request: BurnRequest, background_tasks: BackgroundTasks):
-    """Create a new burn transaction"""
+@limiter.limit("5/minute")  # Rate limit burn transactions
+async def create_burn_transaction(request: Request, burn_request: BurnRequest, background_tasks: BackgroundTasks):
+    """Create a new burn transaction with enhanced security"""
     try:
+        # Input validation and sanitization
+        if not validate_wallet_address(burn_request.wallet_address):
+            raise HTTPException(status_code=400, detail="Invalid wallet address format")
+        
+        if not validate_token_address(burn_request.token_address):
+            raise HTTPException(status_code=400, detail="Invalid token address format")
+        
+        # Sanitize inputs
+        wallet_address = sanitize_input(burn_request.wallet_address, 42)
+        token_address = sanitize_input(burn_request.token_address, 42)
+        
+        # Validate amount
+        try:
+            amount = float(burn_request.amount)
+            if amount <= 0 or amount > 1000000000:  # Reasonable limits
+                raise HTTPException(status_code=400, detail="Invalid burn amount")
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid amount format")
+        
         # Validate token
-        is_valid = await validate_token_contract(request.token_address, request.chain)
+        is_valid = await validate_token_contract(token_address, burn_request.chain)
         if not is_valid:
             raise HTTPException(status_code=400, detail="Invalid token contract")
         
         # Check if token is burnable and if it's DRB
-        is_burnable = is_token_burnable(request.token_address)
-        is_drb = await is_drb_token(request.token_address)
+        is_burnable = is_token_burnable(token_address)
+        is_drb = await is_drb_token(token_address)
         
         # Calculate amounts based on token type
-        amounts = calculate_burn_amounts(float(request.amount), request.token_address, is_burnable, is_drb)
+        amounts = calculate_burn_amounts(amount, token_address, is_burnable, is_drb)
         
         # Create transaction record
         transaction = BurnTransaction(
-            wallet_address=request.wallet_address,
-            token_address=request.token_address,
-            amount=request.amount,
-            chain=request.chain,
+            wallet_address=wallet_address,
+            token_address=token_address,
+            amount=str(amount),
+            chain=burn_request.chain,
             burn_amount=amounts["burn_amount"],
             drb_total_amount=amounts["drb_total_amount"],
             drb_grok_amount=amounts["drb_grok_amount"],
