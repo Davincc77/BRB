@@ -1247,6 +1247,42 @@ function App() {
                     )}
                   </div>
 
+                  {/* Contest Mode Toggle */}
+                  {adminToken && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between p-4 bg-purple-800/20 rounded-lg border border-purple-600/30">
+                        <div>
+                          <label className="block text-sm font-medium text-purple-300 mb-1">
+                            Contest Mode
+                          </label>
+                          <p className="text-xs text-purple-400">
+                            {isContestMode ? 
+                              "88% burn + 12% community pool (simplified)" : 
+                              "Standard allocation (88% burn + multiple distributions)"
+                            }
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setIsContestMode(!isContestMode);
+                            if (tokenAddress) {
+                              handleTokenAddressValidation(tokenAddress); // Re-validate with new mode
+                            }
+                          }}
+                          className={`w-12 h-6 rounded-full transition-colors relative ${
+                            isContestMode ? 'bg-purple-600' : 'bg-gray-600'
+                          }`}
+                        >
+                          <div
+                            className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${
+                              isContestMode ? 'translate-x-6' : 'translate-x-0.5'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Amount Input */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
