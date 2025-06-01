@@ -1,18 +1,28 @@
 import os
+import sys
 import time
-import uuid
+import asyncio
 import logging
+import uuid
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
-from fastapi import FastAPI, HTTPException, APIRouter, Depends, Header, BackgroundTasks
+from typing import List, Dict, Any, Optional
+import jwt
+import bcrypt
+import bleach
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from fastapi import FastAPI, HTTPException, APIRouter, Depends, BackgroundTasks, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from pymongo import DESCENDING
 import uvicorn
-from jose import jwt, JWTError
+from jose import jwt as jose_jwt, JWTError
 from web3 import Web3
+import requests
 from eth_account import Account
 import asyncio
 
