@@ -1301,9 +1301,160 @@ def test_specific_endpoints():
     print("SPECIFIC ENDPOINT TESTING COMPLETE")
     print("=" * 80)
 
+def test_wallet_address_configuration():
+    """Test the updated wallet address configuration"""
+    print("\n" + "=" * 80)
+    print("TESTING UPDATED WALLET ADDRESS CONFIGURATION")
+    print("=" * 80)
+    
+    # 1. Test /api/check-burnable endpoint to verify wallet addresses
+    print("\n1. Testing /api/check-burnable endpoint for wallet addresses")
+    
+    # Test with a regular token on Base chain
+    payload = {
+        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/check-burnable", json=payload)
+    if response.status_code == 200:
+        data = response.json()
+        print("✅ /api/check-burnable endpoint returned successful response")
+        
+        # Verify recipient_wallet matches BurnReliefBot address
+        expected_recipient = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
+        if data.get("recipient_wallet") == expected_recipient:
+            print(f"✅ recipient_wallet correctly matches BurnReliefBot address: {expected_recipient}")
+        else:
+            print(f"❌ recipient_wallet does not match expected BurnReliefBot address. Got: {data.get('recipient_wallet')}, Expected: {expected_recipient}")
+        
+        # Verify chain_wallets object shows updated addresses
+        if "chain_wallets" in data:
+            chain_wallets = data.get("chain_wallets")
+            print("✅ chain_wallets object is present in the response")
+            
+            # Verify team_wallet is BurnReliefBot address
+            expected_team_wallet = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
+            if chain_wallets.get("team_wallet") == expected_team_wallet:
+                print(f"✅ team_wallet correctly matches BurnReliefBot address: {expected_team_wallet}")
+            else:
+                print(f"❌ team_wallet does not match expected BurnReliefBot address. Got: {chain_wallets.get('team_wallet')}, Expected: {expected_team_wallet}")
+            
+            # Verify community_wallet is updated address
+            expected_community_wallet = "0xdc5400599723Da6487C54d134EE44e948a22718b"
+            if chain_wallets.get("community_wallet") == expected_community_wallet:
+                print(f"✅ community_wallet correctly matches updated address: {expected_community_wallet}")
+            else:
+                print(f"❌ community_wallet does not match expected updated address. Got: {chain_wallets.get('community_wallet')}, Expected: {expected_community_wallet}")
+        else:
+            print("❌ chain_wallets object is missing from the response")
+    else:
+        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
+    
+    # 2. Test multi-chain consistency - verify address updates across chains
+    print("\n2. Testing multi-chain consistency")
+    
+    chains = ["base", "ethereum", "solana"]
+    
+    for chain in chains:
+        payload = {
+            "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
+            "chain": chain
+        }
+        
+        response = requests.post(f"{API_URL}/check-burnable", json=payload)
+        if response.status_code == 200:
+            data = response.json()
+            chain_wallets = data.get("chain_wallets", {})
+            
+            if chain in ["base", "ethereum"]:
+                # For EVM chains, verify team_wallet is BurnReliefBot address
+                expected_team_wallet = "0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F"
+                if chain_wallets.get("team_wallet") == expected_team_wallet:
+                    print(f"✅ {chain} chain: team_wallet correctly matches BurnReliefBot address")
+                else:
+                    print(f"❌ {chain} chain: team_wallet does not match expected BurnReliefBot address. Got: {chain_wallets.get('team_wallet')}")
+                
+                # For EVM chains, verify community_wallet is updated address
+                expected_community_wallet = "0xdc5400599723Da6487C54d134EE44e948a22718b"
+                if chain_wallets.get("community_wallet") == expected_community_wallet:
+                    print(f"✅ {chain} chain: community_wallet correctly matches updated address")
+                else:
+                    print(f"❌ {chain} chain: community_wallet does not match expected updated address. Got: {chain_wallets.get('community_wallet')}")
+            elif chain == "solana":
+                # For Solana, just verify the addresses are present (they may be different)
+                if "team_wallet" in chain_wallets:
+                    print(f"✅ {chain} chain: team_wallet is present: {chain_wallets.get('team_wallet')}")
+                else:
+                    print(f"❌ {chain} chain: team_wallet is missing")
+                
+                if "community_wallet" in chain_wallets:
+                    print(f"✅ {chain} chain: community_wallet is present: {chain_wallets.get('community_wallet')}")
+                else:
+                    print(f"❌ {chain} chain: community_wallet is missing")
+        else:
+            print(f"❌ /api/check-burnable endpoint failed for {chain} chain with status code: {response.status_code}")
+    
+    # 3. Test allocation logic with the updated addresses
+    print("\n3. Testing allocation logic with updated addresses")
+    
+    # Test with a regular token (should be burnable)
+    payload = {
+        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
+        "chain": "base"
+    }
+    
+    response = requests.post(f"{API_URL}/check-burnable", json=payload)
+    if response.status_code == 200:
+        data = response.json()
+        
+        # Verify allocation preview
+        if "allocation_preview" in data:
+            allocation = data.get("allocation_preview", {})
+            print("✅ allocation_preview is present in the response")
+            
+            # Verify team percentage
+            expected_team_percentage = 0.5  # Updated from 1% to 0.5%
+            if allocation.get("team_percentage") == expected_team_percentage:
+                print(f"✅ team_percentage correctly matches updated value: {expected_team_percentage}%")
+            else:
+                print(f"❌ team_percentage does not match expected updated value. Got: {allocation.get('team_percentage')}%, Expected: {expected_team_percentage}%")
+            
+            # Verify community percentage
+            expected_community_percentage = 1.5
+            if allocation.get("community_percentage") == expected_community_percentage:
+                print(f"✅ community_percentage correctly matches expected value: {expected_community_percentage}%")
+            else:
+                print(f"❌ community_percentage does not match expected value. Got: {allocation.get('community_percentage')}%, Expected: {expected_community_percentage}%")
+            
+            # Verify BNKR team percentage
+            expected_bnkr_team_percentage = 0.5  # Updated from 1% to 0.5%
+            if allocation.get("bnkr_team_percentage") == expected_bnkr_team_percentage:
+                print(f"✅ bnkr_team_percentage correctly matches updated value: {expected_bnkr_team_percentage}%")
+            else:
+                print(f"❌ bnkr_team_percentage does not match expected updated value. Got: {allocation.get('bnkr_team_percentage')}%, Expected: {expected_bnkr_team_percentage}%")
+            
+            # Verify BNKR community percentage
+            expected_bnkr_community_percentage = 1.5
+            if allocation.get("bnkr_community_percentage") == expected_bnkr_community_percentage:
+                print(f"✅ bnkr_community_percentage correctly matches expected value: {expected_bnkr_community_percentage}%")
+            else:
+                print(f"❌ bnkr_community_percentage does not match expected value. Got: {allocation.get('bnkr_community_percentage')}%, Expected: {expected_bnkr_community_percentage}%")
+        else:
+            print("❌ allocation_preview is missing from the response")
+    else:
+        print(f"❌ /api/check-burnable endpoint failed with status code: {response.status_code}")
+    
+    print("\n" + "=" * 80)
+    print("WALLET ADDRESS CONFIGURATION TESTING COMPLETE")
+    print("=" * 80)
+
 if __name__ == "__main__":
+    # Test the updated wallet address configuration
+    test_wallet_address_configuration()
+    
     # Run the specific tests for the endpoints mentioned in the review request
-    test_specific_endpoints()
+    # test_specific_endpoints()
     
     # Uncomment to run all tests
     # run_tests()
