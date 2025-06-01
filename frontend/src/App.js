@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AdminProvider, useAdmin } from './contexts/AdminContext';
+import { secureStorage } from './utils/secureStorage';
 import AdminPanel from './components/AdminPanel';
 import './App.css';
 import { ethers } from 'ethers';
