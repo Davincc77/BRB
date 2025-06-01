@@ -1783,7 +1783,8 @@ async def get_admin_projects(request: Request, admin_token: Dict = Depends(verif
         raise HTTPException(status_code=500, detail=f"Failed to fetch projects: {str(e)}")
 
 @admin_router.post("/projects")
-async def create_admin_project(project_data: dict, admin_user: dict = Depends(verify_admin_token)):
+@limiter.limit("10/minute")  # Rate limit project creation
+async def create_admin_project(request: Request, project_data: dict, admin_user: dict = Depends(verify_admin_token)):
     """Create a new project (admin only)"""
     try:
         project = {
