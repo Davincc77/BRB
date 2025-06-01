@@ -34,7 +34,7 @@ SUPPORTED_CHAINS = {
         "chain_id": 8453,
         "rpc_url": "https://mainnet.base.org",
         "explorer": "https://basescan.org",
-        "recipient_wallet": "0xFE26d9b5853F3B652456a27A3DC33Bff72A2ca7",
+        "recipient_wallet": "0xdc5400599723Da6487C54d134EE44e948a22718b",
         "currency": "ETH"
     }
 }
