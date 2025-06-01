@@ -809,6 +809,7 @@ async def check_if_burnable(request_data: dict):
     try:
         token_address = request_data.get("token_address", "").strip()
         chain = request_data.get("chain", "base").lower()
+        is_contest = request_data.get("is_contest", False)  # New parameter for contest burns
         
         # Validate inputs
         if not token_address:
@@ -826,21 +827,39 @@ async def check_if_burnable(request_data: dict):
         else:
             recipient_wallet = chain_wallets.get("recipient_wallet", DEFAULT_WALLETS["recipient_wallet"])
         
-        return {
-            "token_address": token_address,
-            "chain": chain,
-            "is_burnable": is_burnable,
-            "recipient_wallet": recipient_wallet,
-            "chain_wallets": chain_wallets,
-            "allocation_preview": {
+        # Prepare allocation preview based on type
+        if is_contest:
+            allocation_preview = {
+                "burn_percentage": CONTEST_BURN_PERCENTAGE,  # 88%
+                "community_percentage": CONTEST_COMMUNITY_PERCENTAGE,  # 12%
+                "grok_percentage": 0,
+                "team_percentage": 0,
+                "bnkr_community_percentage": 0,
+                "bnkr_team_percentage": 0,
+                "allocation_type": "contest"
+            }
+            note = "Contest allocation: 88% burn + 12% community pool"
+        else:
+            allocation_preview = {
                 "burn_percentage": BURN_PERCENTAGE if is_burnable else 0,
                 "grok_percentage": DRB_GROK_PERCENTAGE + (BURN_PERCENTAGE if not is_burnable else 0),
                 "community_percentage": DRB_COMMUNITY_PERCENTAGE,
                 "team_percentage": DRB_TEAM_PERCENTAGE,
                 "bnkr_community_percentage": BNKR_COMMUNITY_PERCENTAGE,
-                "bnkr_team_percentage": BNKR_TEAM_PERCENTAGE
-            },
-            "note": "NEW TOKENS DEFAULT TO NON-BURNABLE" if not is_burnable else "Token is burnable"
+                "bnkr_team_percentage": BNKR_TEAM_PERCENTAGE,
+                "allocation_type": "standard"
+            }
+            note = "NEW TOKENS DEFAULT TO NON-BURNABLE" if not is_burnable else "Token is burnable"
+        
+        return {
+            "token_address": token_address,
+            "chain": chain,
+            "is_burnable": is_burnable,
+            "is_contest": is_contest,
+            "recipient_wallet": recipient_wallet,
+            "chain_wallets": chain_wallets,
+            "allocation_preview": allocation_preview,
+            "note": note
         }
     except Exception as e:
         logger.error(f"Check burnable error: {e}")
