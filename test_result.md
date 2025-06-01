@@ -571,6 +571,18 @@ test_plan:
           agent: "testing"
           comment: "Verified the updated wallet address configuration is working correctly. Team allocation now correctly goes to 0x204B520ae6311491cB78d3BAaDfd7eA67FD4456F (BurnReliefBot address) and Community allocation correctly goes to 0xdc5400599723Da6487C54d134EE44e948a22718b. The /api/check-burnable endpoint correctly returns recipient_wallet matching the BurnReliefBot address and chain_wallets object shows the updated addresses. The address updates are correctly applied across all chains (base, ethereum, etc.). The redistribution calculations correctly use the updated addresses with team_percentage at 0.5% (reduced from 1%) and community_percentage at 1.5%."
 
+  - task: "Contest Token Burn Allocation System"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "Tested the new contest token burn allocation system. The /api/check-burnable endpoint with is_contest: true parameter works correctly, returning 88% burn + 12% community pool allocation with allocation_type: 'contest' and appropriate note about contest allocation. Comparison between standard and contest allocations shows the expected differences: standard has normal allocations (burn, grok, community, team) while contest has simplified allocations (88% burn, 12% community only). However, the /api/execute-contest-burn endpoint fails with authentication errors even with admin token, returning status code 500 with error message 'Contest burn failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}'. The transactions endpoint also fails with status code 500, preventing verification of database logging for contest burns. The contest allocation calculation logic is implemented correctly, but the execution and database logging functionality needs fixing."
+
   - task: "BurnReliefBot Wallet Functionality"
     implemented: true
     working: true
