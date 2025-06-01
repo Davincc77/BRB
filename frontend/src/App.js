@@ -27,7 +27,8 @@ function App() {
   const [availableChains, setAvailableChains] = useState({});
   const [walletAddress, setWalletAddress] = useState('');
   const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [connectedWallet, setConnectedWallet] = useState(''); // 'metamask' or 'phantom'
+  const [connectedWallet, setConnectedWallet] = useState(''); // 'metamask', 'phantom', or 'coinbase'
+  const [showWalletMenu, setShowWalletMenu] = useState(false); // For wallet selection dropdown
   const [tokenAddress, setTokenAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [tokenValidation, setTokenValidation] = useState(null);
