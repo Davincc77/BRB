@@ -1152,13 +1152,69 @@ function App() {
                 </button>
               </div>
             ) : (
-              <button 
-                onClick={() => connectWallet('metamask')}  // Default to MetaMask
-                className="btn-primary flex items-center gap-2"
-              >
-                <Wallet className="w-4 h-4" />
-                Connect Wallet
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowWalletMenu(!showWalletMenu)}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <Wallet className="w-4 h-4" />
+                  Connect Wallet
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Wallet Selection Dropdown */}
+                {showWalletMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+                    <div className="p-2">
+                      <div className="text-xs text-gray-400 mb-2 px-2">Choose your wallet:</div>
+                      
+                      {/* Coinbase Wallet */}
+                      <button
+                        onClick={() => connectWallet('coinbase')}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                      >
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">CB</span>
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">Coinbase Wallet</div>
+                          <div className="text-xs text-gray-400">Your keys, your crypto</div>
+                        </div>
+                      </button>
+                      
+                      {/* MetaMask */}
+                      <button
+                        onClick={() => connectWallet('metamask')}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                      >
+                        <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">MM</span>
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">MetaMask</div>
+                          <div className="text-xs text-gray-400">Browser extension wallet</div>
+                        </div>
+                      </button>
+                      
+                      {/* Phantom Wallet */}
+                      <button
+                        onClick={() => connectWallet('phantom')}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                      >
+                        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">PH</span>
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">Phantom</div>
+                          <div className="text-xs text-gray-400">Solana & Ethereum wallet</div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
           </div>
