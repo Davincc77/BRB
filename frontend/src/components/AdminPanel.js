@@ -105,7 +105,13 @@ const AdminPanel = ({ onClose }) => {
 
   const handleStartContest = async (projectId) => {
     try {
-      await axios.post(`${API}/admin/contest/start`, { project_id: projectId });
+      const token = localStorage.getItem('admin_token');
+      await axios.post(`${API}/admin/contest/start`, { project_id: projectId }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       alert('Contest started successfully!');
       fetchProjects();
     } catch (error) {
