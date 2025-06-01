@@ -208,6 +208,8 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Discrete Admin Access"
+    - "Recent Transactions Limit"
     - "Community Tab"
     - "API Integration"
     - "Core API Endpoints"
