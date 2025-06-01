@@ -115,3 +115,27 @@ Optimal chains: {'DRB': 'base', 'BNKR': 'base'}
 6.1 Testing response times
 ✅ https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/health - Response time: 0.0872 seconds
 ✅ https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/chains - Response time: 0.0356 seconds
+❌ https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/stats - Failed with status code: 500
+❌ https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/community/stats - Failed with status code: 500
+❌ https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/transactions - Failed with status code: 500
+
+6.2 Testing concurrent requests
+✅ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/chains - Response time: 0.0390 seconds
+✅ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/health - Response time: 0.0467 seconds
+✅ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/check-burnable - Response time: 0.0203 seconds
+✅ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/check-burnable - Response time: 0.0221 seconds
+✅ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/token-price/0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd/base - Response time: 0.0279 seconds
+✅ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/gas-estimates/base - Response time: 0.0566 seconds
+✅ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/swap-quote - Response time: 0.0598 seconds
+❌ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/stats - Failed with status code: 500
+❌ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/community/stats - Failed with status code: 500
+❌ Concurrent https://2da4bb13-3091-4413-9807-6a6cfcfa1853.preview.emergentagent.com/api/transactions - Failed with status code: 500
+
+Concurrent requests summary:
+Success: 7/10
+Failures: 3/10
+Average response time: 0.0389 seconds
+
+================================================================================
+SPECIFIC ENDPOINT TESTING COMPLETE
+================================================================================
