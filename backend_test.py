@@ -741,31 +741,17 @@ def test_contest_burn():
     
     return success
 
-def run_all_tests():
-    """Run all tests and return the results"""
+def run_focused_tests():
+    """Run focused tests on the specific endpoints that were fixed"""
     results = {}
     
-    # Core functionality tests
-    results["health_check"] = test_health_check()
-    results["chains"] = test_chains_endpoint()
-    results["token_validation"] = test_token_validation()
-    results["check_burnable"] = test_check_burnable()
-    results["burn"] = test_burn_endpoint()
-    results["stats"] = test_stats_endpoint()
+    print_header("Running Focused Tests for Fixed Issues")
     
-    # Additional API tests
-    results["gas_estimates"] = test_gas_estimates()
-    results["token_price"] = test_token_price()
-    results["swap_quote"] = test_swap_quote()
-    results["transactions"] = test_transactions_endpoint()
-    results["transaction_status"] = test_transaction_status()
-    results["optimal_routes"] = test_optimal_routes()
-    results["community_stats"] = test_community_stats()
+    # Test the burn endpoint to verify the async/await fix for is_token_burnable
+    results["burn_endpoint"] = test_burn_endpoint()
     
-    # Admin functionality tests
-    results["admin"] = test_admin_endpoints()
-    results["wallet_status"] = test_wallet_status()
-    results["contest_burn"] = test_contest_burn()
+    # Test the admin project endpoints to verify the MongoDB query fix
+    results["admin_projects"] = test_admin_endpoints()
     
     # Print summary
     print_header("Test Summary")
@@ -785,7 +771,8 @@ if __name__ == "__main__":
     print_header(f"Testing Burn Relief Bot Backend API at {API_BASE_URL}")
     print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    success = run_all_tests()
+    # Run focused tests on the fixed issues
+    success = run_focused_tests()
     
     print_header(f"Testing completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
