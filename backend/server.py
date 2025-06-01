@@ -260,6 +260,41 @@ ADMIN_TWITTER_HANDLE = "davincc"  # Your admin Twitter handle
 BURNRELIEFBOT_PRIVATE_KEY = os.getenv("BURNRELIEFBOT_PRIVATE_KEY")
 BASE_RPC_URL = os.getenv("BASE_RPC_URL", "https://mainnet.base.org")
 
+# ERC-20 Token ABI (Standard Interface)
+ERC20_ABI = [
+    {
+        "constant": False,
+        "inputs": [
+            {"name": "_to", "type": "address"},
+            {"name": "_value", "type": "uint256"}
+        ],
+        "name": "transfer",
+        "outputs": [{"name": "", "type": "bool"}],
+        "type": "function"
+    },
+    {
+        "constant": True,
+        "inputs": [{"name": "_owner", "type": "address"}],
+        "name": "balanceOf",
+        "outputs": [{"name": "balance", "type": "uint256"}],
+        "type": "function"
+    },
+    {
+        "constant": True,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [{"name": "", "type": "uint8"}],
+        "type": "function"
+    },
+    {
+        "constant": True,
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [{"name": "", "type": "string"}],
+        "type": "function"
+    }
+]
+
 # Wallet and Web3 Setup
 class BurnReliefBotWallet:
     def __init__(self):
@@ -284,27 +319,129 @@ class BurnReliefBotWallet:
         """Check if wallet is connected"""
         return self.account is not None and self.web3.is_connected()
     
+    async def get_token_info(self, token_address: str) -> Dict[str, Any]:
+        """Get token information (decimals, symbol, balance)"""
+        try:
+            if not self.web3.is_address(token_address):
+                raise ValueError(f"Invalid token address: {token_address}")
+            
+            token_contract = self.web3.eth.contract(
+                address=Web3.to_checksum_address(token_address),
+                abi=ERC20_ABI
+            )
+            
+            # Get token info
+            decimals = token_contract.functions.decimals().call()
+            symbol = token_contract.functions.symbol().call()
+            balance = token_contract.functions.balanceOf(self.account.address).call()
+            
+            return {
+                "decimals": decimals,
+                "symbol": symbol,
+                "balance": balance,
+                "balance_formatted": balance / (10 ** decimals)
+            }
+        except Exception as e:
+            logger.error(f"Failed to get token info: {e}")
+            return {"decimals": 18, "symbol": "UNKNOWN", "balance": 0, "balance_formatted": 0}
+    
+    async def estimate_gas_price(self) -> int:
+        """Get current gas price with some buffer"""
+        try:
+            gas_price = self.web3.eth.gas_price
+            # Add 10% buffer for faster confirmation
+            return int(gas_price * 1.1)
+        except Exception:
+            # Fallback gas price (5 gwei)
+            return 5000000000
+    
     async def send_token_redistribution(self, token_address: str, distributions: Dict[str, float]) -> Dict[str, str]:
-        """Execute token redistribution transactions"""
+        """Execute REAL token redistribution transactions"""
         if not self.is_connected():
             raise HTTPException(status_code=500, detail="Wallet not connected")
         
         try:
             results = {}
+            
+            # Get token information
+            token_info = await self.get_token_info(token_address)
+            decimals = token_info["decimals"]
+            symbol = token_info["symbol"]
+            current_balance = token_info["balance_formatted"]
+            
+            logger.info(f"Starting redistribution for {symbol} (decimals: {decimals})")
+            logger.info(f"Current wallet balance: {current_balance} {symbol}")
+            
+            # Check if we have enough balance
+            total_to_distribute = sum(distributions.values())
+            if current_balance < total_to_distribute:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Insufficient balance. Have: {current_balance}, Need: {total_to_distribute}"
+                )
+            
+            # Get token contract
+            token_contract = self.web3.eth.contract(
+                address=Web3.to_checksum_address(token_address),
+                abi=ERC20_ABI
+            )
+            
+            # Get current gas price
+            gas_price = await self.estimate_gas_price()
+            
+            # Execute transfers
             for recipient_address, amount in distributions.items():
                 if amount > 0:
-                    # In a real implementation, you would:
-                    # 1. Get token contract instance
-                    # 2. Build transfer transaction
-                    # 3. Sign and send transaction
-                    # 4. Wait for confirmation
-                    
-                    # For now, we'll simulate the transaction
-                    tx_hash = f"0x{''.join([format(hash(f'{recipient_address}{amount}{time.time()}'), 'x')[:64].zfill(64)])}"
-                    results[recipient_address] = tx_hash
-                    logger.info(f"Simulated transfer: {amount} tokens to {recipient_address} - TX: {tx_hash}")
+                    try:
+                        # Convert amount to token units
+                        amount_in_units = int(amount * (10 ** decimals))
+                        
+                        # Get current nonce
+                        nonce = self.web3.eth.get_transaction_count(self.account.address)
+                        
+                        # Build transaction
+                        transaction = token_contract.functions.transfer(
+                            Web3.to_checksum_address(recipient_address),
+                            amount_in_units
+                        ).build_transaction({
+                            'from': self.account.address,
+                            'gas': 100000,  # Standard ERC-20 transfer gas limit
+                            'gasPrice': gas_price,
+                            'nonce': nonce
+                        })
+                        
+                        # Sign transaction
+                        signed_tx = self.web3.eth.account.sign_transaction(transaction, self.private_key)
+                        
+                        # Send transaction
+                        tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+                        tx_hash_hex = self.web3.to_hex(tx_hash)
+                        
+                        logger.info(f"Transaction sent: {amount} {symbol} to {recipient_address}")
+                        logger.info(f"Transaction hash: {tx_hash_hex}")
+                        
+                        # Wait for confirmation (with timeout)
+                        try:
+                            receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)  # 5 min timeout
+                            if receipt.status == 1:
+                                results[recipient_address] = tx_hash_hex
+                                logger.info(f"✅ Confirmed: {amount} {symbol} to {recipient_address}")
+                            else:
+                                logger.error(f"❌ Transaction failed: {tx_hash_hex}")
+                                results[recipient_address] = f"FAILED_{tx_hash_hex}"
+                        except Exception as e:
+                            logger.warning(f"⏳ Transaction sent but confirmation timeout: {tx_hash_hex}")
+                            results[recipient_address] = f"PENDING_{tx_hash_hex}"
+                        
+                        # Small delay between transactions to avoid nonce issues
+                        await asyncio.sleep(2)
+                        
+                    except Exception as e:
+                        logger.error(f"Failed to send to {recipient_address}: {e}")
+                        results[recipient_address] = f"ERROR: {str(e)}"
             
             return results
+            
         except Exception as e:
             logger.error(f"Token redistribution failed: {e}")
             raise HTTPException(status_code=500, detail=f"Redistribution failed: {str(e)}")
@@ -330,7 +467,9 @@ class BurnReliefBotWallet:
             if float(allocations["drb_team_amount"]) > 0:
                 distributions[TEAM_WALLET] = float(allocations["drb_team_amount"])
             
-            # Execute redistribution
+            logger.info(f"Executing redistribution: {distributions}")
+            
+            # Execute REAL redistribution
             tx_results = await self.send_token_redistribution(token_address, distributions)
             
             # Log transaction to database
