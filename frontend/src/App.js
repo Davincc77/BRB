@@ -90,7 +90,7 @@ function App() {
   // Admin authentication function (simplified for demo)
   const handleAdminLogin = () => {
     const password = prompt("Enter admin password:");
-    if (password === "admin123") {  // In production, use proper authentication
+    if (password === "10121277@burnreliefbot!10121277") {  // Updated admin password
       const token = "admin_token_davincc";
       setAdminToken(token);
       localStorage.setItem('admin_token', token);
