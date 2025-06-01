@@ -1449,9 +1449,334 @@ def test_wallet_address_configuration():
     print("WALLET ADDRESS CONFIGURATION TESTING COMPLETE")
     print("=" * 80)
 
+def test_contest_token_burn_allocation():
+    """Test the new contest token burn allocation system"""
+    print("\n" + "=" * 80)
+    print("TESTING CONTEST TOKEN BURN ALLOCATION SYSTEM")
+    print("=" * 80)
+    
+    # 1. Test Contest Allocation Check
+    print("\n1. Testing /api/check-burnable with is_contest: true parameter")
+    
+    # Test with a regular token and is_contest: true
+    contest_payload = {
+        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
+        "chain": "base",
+        "is_contest": True
+    }
+    
+    response = requests.post(f"{API_URL}/check-burnable", json=contest_payload)
+    if response.status_code == 200:
+        data = response.json()
+        print("✅ /api/check-burnable endpoint with is_contest: true returned successful response")
+        
+        # Verify is_contest flag is returned
+        if data.get("is_contest") == True:
+            print("✅ is_contest flag is correctly returned as true")
+        else:
+            print("❌ is_contest flag is not correctly returned")
+        
+        # Verify allocation_preview for contest
+        if "allocation_preview" in data:
+            allocation = data.get("allocation_preview", {})
+            print("✅ allocation_preview is present in the response")
+            
+            # Verify burn percentage is 88%
+            expected_burn_percentage = 88.0
+            if allocation.get("burn_percentage") == expected_burn_percentage:
+                print(f"✅ burn_percentage correctly matches contest value: {expected_burn_percentage}%")
+            else:
+                print(f"❌ burn_percentage does not match expected contest value. Got: {allocation.get('burn_percentage')}%, Expected: {expected_burn_percentage}%")
+            
+            # Verify community percentage is 12%
+            expected_community_percentage = 12.0
+            if allocation.get("community_percentage") == expected_community_percentage:
+                print(f"✅ community_percentage correctly matches contest value: {expected_community_percentage}%")
+            else:
+                print(f"❌ community_percentage does not match expected contest value. Got: {allocation.get('community_percentage')}%, Expected: {expected_community_percentage}%")
+            
+            # Verify other percentages are 0
+            if allocation.get("grok_percentage") == 0:
+                print("✅ grok_percentage is correctly set to 0 for contest allocation")
+            else:
+                print(f"❌ grok_percentage is not 0 for contest allocation. Got: {allocation.get('grok_percentage')}%")
+            
+            if allocation.get("team_percentage") == 0:
+                print("✅ team_percentage is correctly set to 0 for contest allocation")
+            else:
+                print(f"❌ team_percentage is not 0 for contest allocation. Got: {allocation.get('team_percentage')}%")
+            
+            if allocation.get("bnkr_community_percentage") == 0:
+                print("✅ bnkr_community_percentage is correctly set to 0 for contest allocation")
+            else:
+                print(f"❌ bnkr_community_percentage is not 0 for contest allocation. Got: {allocation.get('bnkr_community_percentage')}%")
+            
+            if allocation.get("bnkr_team_percentage") == 0:
+                print("✅ bnkr_team_percentage is correctly set to 0 for contest allocation")
+            else:
+                print(f"❌ bnkr_team_percentage is not 0 for contest allocation. Got: {allocation.get('bnkr_team_percentage')}%")
+            
+            # Verify allocation_type is "contest"
+            if allocation.get("allocation_type") == "contest":
+                print("✅ allocation_type is correctly set to 'contest'")
+            else:
+                print(f"❌ allocation_type is not set to 'contest'. Got: {allocation.get('allocation_type')}")
+        else:
+            print("❌ allocation_preview is missing from the response")
+        
+        # Verify note about contest allocation
+        expected_note = "Contest allocation: 88% burn + 12% community pool"
+        if data.get("note") == expected_note:
+            print(f"✅ note correctly explains contest allocation: '{expected_note}'")
+        else:
+            print(f"❌ note does not match expected contest explanation. Got: '{data.get('note')}', Expected: '{expected_note}'")
+    else:
+        print(f"❌ /api/check-burnable endpoint with is_contest: true failed with status code: {response.status_code}")
+    
+    # 2. Standard vs Contest Comparison
+    print("\n2. Testing the same token with and without contest flag")
+    
+    # Standard allocation (already tested above)
+    standard_payload = {
+        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
+        "chain": "base",
+        "is_contest": False
+    }
+    
+    # Get standard allocation
+    standard_response = requests.post(f"{API_URL}/check-burnable", json=standard_payload)
+    if standard_response.status_code == 200:
+        standard_data = standard_response.json()
+        standard_allocation = standard_data.get("allocation_preview", {})
+        
+        # Get contest allocation (already fetched above)
+        contest_allocation = data.get("allocation_preview", {})
+        
+        print("Comparing standard vs contest allocations:")
+        print(f"Standard burn: {standard_allocation.get('burn_percentage')}% vs Contest burn: {contest_allocation.get('burn_percentage')}%")
+        print(f"Standard community: {standard_allocation.get('community_percentage')}% vs Contest community: {contest_allocation.get('community_percentage')}%")
+        print(f"Standard grok: {standard_allocation.get('grok_percentage')}% vs Contest grok: {contest_allocation.get('grok_percentage')}%")
+        print(f"Standard team: {standard_allocation.get('team_percentage')}% vs Contest team: {contest_allocation.get('team_percentage')}%")
+        print(f"Standard BNKR community: {standard_allocation.get('bnkr_community_percentage')}% vs Contest BNKR community: {contest_allocation.get('bnkr_community_percentage')}%")
+        print(f"Standard BNKR team: {standard_allocation.get('bnkr_team_percentage')}% vs Contest BNKR team: {contest_allocation.get('bnkr_team_percentage')}%")
+        
+        # Verify standard allocation has normal percentages
+        if standard_allocation.get("burn_percentage") == 88.0:
+            print("✅ Standard allocation has correct burn percentage (88%)")
+        else:
+            print(f"❌ Standard allocation has incorrect burn percentage. Got: {standard_allocation.get('burn_percentage')}%, Expected: 88%")
+        
+        if standard_allocation.get("grok_percentage") > 0:
+            print(f"✅ Standard allocation has non-zero grok percentage ({standard_allocation.get('grok_percentage')}%)")
+        else:
+            print("❌ Standard allocation has zero grok percentage (unexpected)")
+        
+        if standard_allocation.get("community_percentage") > 0:
+            print(f"✅ Standard allocation has non-zero community percentage ({standard_allocation.get('community_percentage')}%)")
+        else:
+            print("❌ Standard allocation has zero community percentage (unexpected)")
+        
+        if standard_allocation.get("team_percentage") > 0:
+            print(f"✅ Standard allocation has non-zero team percentage ({standard_allocation.get('team_percentage')}%)")
+        else:
+            print("❌ Standard allocation has zero team percentage (unexpected)")
+        
+        # Verify contest allocation has simplified percentages
+        if contest_allocation.get("burn_percentage") == 88.0 and contest_allocation.get("community_percentage") == 12.0:
+            print("✅ Contest allocation has correct simplified percentages (88% burn, 12% community)")
+        else:
+            print(f"❌ Contest allocation has incorrect percentages. Got: {contest_allocation.get('burn_percentage')}% burn, {contest_allocation.get('community_percentage')}% community")
+        
+        if contest_allocation.get("grok_percentage") == 0 and contest_allocation.get("team_percentage") == 0:
+            print("✅ Contest allocation correctly has zero grok and team percentages")
+        else:
+            print(f"❌ Contest allocation has non-zero grok or team percentages. Grok: {contest_allocation.get('grok_percentage')}%, Team: {contest_allocation.get('team_percentage')}%")
+    else:
+        print(f"❌ /api/check-burnable endpoint with standard allocation failed with status code: {standard_response.status_code}")
+    
+    # 3. Contest Burn Execution
+    print("\n3. Testing /api/execute-contest-burn endpoint (admin-only)")
+    
+    # Test without admin token first (should fail)
+    contest_burn_payload = {
+        "token_address": "0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd",  # Regular token
+        "amount": "1000",
+        "description": "Test contest burn"
+    }
+    
+    no_auth_response = requests.post(f"{API_URL}/execute-contest-burn", json=contest_burn_payload)
+    if no_auth_response.status_code == 401:
+        print("✅ /api/execute-contest-burn correctly requires admin authentication")
+    else:
+        print(f"❌ /api/execute-contest-burn does not properly require admin authentication. Got status code: {no_auth_response.status_code}")
+    
+    # Test with admin token
+    admin_headers = {"Authorization": "Bearer admin_token_davincc"}
+    
+    admin_response = requests.post(f"{API_URL}/execute-contest-burn", 
+                                  json=contest_burn_payload,
+                                  headers=admin_headers)
+    
+    if admin_response.status_code == 200:
+        admin_data = admin_response.json()
+        print("✅ /api/execute-contest-burn endpoint is accessible with admin token")
+        
+        # Verify transaction ID
+        if "transaction_id" in admin_data:
+            print(f"✅ Contest burn transaction ID: {admin_data['transaction_id']}")
+        else:
+            print("❌ Contest burn response missing transaction ID")
+        
+        # Verify status
+        if "status" in admin_data and admin_data["status"] == "success":
+            print("✅ Contest burn status: success")
+        else:
+            print(f"❌ Contest burn status: {admin_data.get('status', 'unknown')}")
+        
+        # Verify allocations
+        if "allocations" in admin_data:
+            allocations = admin_data["allocations"]
+            print("✅ Contest burn allocations are present in the response")
+            
+            # Check allocation type
+            if allocations.get("allocation_type") == "contest":
+                print("✅ Allocation type is correctly set to 'contest'")
+            else:
+                print(f"❌ Allocation type is not set to 'contest'. Got: {allocations.get('allocation_type')}")
+            
+            # Check burn amount
+            if "burn_amount" in allocations:
+                burn_amount = float(allocations["burn_amount"])
+                total_amount = float(contest_burn_payload["amount"])
+                expected_burn = total_amount * 0.88  # 88%
+                
+                if abs(burn_amount - expected_burn) < 0.01:  # Allow for small rounding differences
+                    print(f"✅ Burn amount is correctly calculated: {burn_amount} (88% of {total_amount})")
+                else:
+                    print(f"❌ Burn amount is incorrectly calculated. Got: {burn_amount}, Expected: {expected_burn}")
+            else:
+                print("❌ Burn amount is missing from allocations")
+            
+            # Check community amount
+            if "community_amount" in allocations:
+                community_amount = float(allocations["community_amount"])
+                total_amount = float(contest_burn_payload["amount"])
+                expected_community = total_amount * 0.12  # 12%
+                
+                if abs(community_amount - expected_community) < 0.01:  # Allow for small rounding differences
+                    print(f"✅ Community amount is correctly calculated: {community_amount} (12% of {total_amount})")
+                else:
+                    print(f"❌ Community amount is incorrectly calculated. Got: {community_amount}, Expected: {expected_community}")
+            else:
+                print("❌ Community amount is missing from allocations")
+            
+            # Check other amounts are zero
+            if "drb_grok_amount" in allocations and float(allocations["drb_grok_amount"]) == 0:
+                print("✅ DRB grok amount is correctly set to 0")
+            else:
+                print(f"❌ DRB grok amount is not 0. Got: {allocations.get('drb_grok_amount')}")
+            
+            if "drb_team_amount" in allocations and float(allocations["drb_team_amount"]) == 0:
+                print("✅ DRB team amount is correctly set to 0")
+            else:
+                print(f"❌ DRB team amount is not 0. Got: {allocations.get('drb_team_amount')}")
+        else:
+            print("❌ Contest burn response missing allocations")
+        
+        # Verify transaction hashes
+        if "transaction_hashes" in admin_data:
+            tx_hashes = admin_data["transaction_hashes"]
+            print(f"✅ Transaction hashes: {json.dumps(tx_hashes, indent=2)}")
+        else:
+            print("❌ Contest burn response missing transaction hashes")
+    elif admin_response.status_code == 500 and "wallet not connected" in admin_response.text.lower():
+        print("⚠️ Execute contest burn endpoint returns 'wallet not connected' error")
+        print(f"Response: {admin_response.text}")
+    else:
+        print(f"❌ Execute contest burn endpoint failed with status code: {admin_response.status_code}")
+        print(f"Response: {admin_response.text}")
+    
+    # 4. Database Logging
+    print("\n4. Verifying database logging for contest burns")
+    
+    # Get transactions to check if the contest burn was logged
+    response = requests.get(f"{API_URL}/transactions")
+    if response.status_code == 200:
+        data = response.json()
+        if "transactions" in data and isinstance(data["transactions"], list):
+            transactions = data["transactions"]
+            
+            # Look for contest burns
+            contest_burns = [tx for tx in transactions if tx.get("type") == "contest_burn"]
+            
+            if contest_burns:
+                print(f"✅ Found {len(contest_burns)} contest burns in the transaction log")
+                
+                # Check the most recent contest burn
+                latest_contest_burn = contest_burns[0]
+                print(f"Latest contest burn ID: {latest_contest_burn.get('id')}")
+                
+                # Verify is_contest flag
+                if latest_contest_burn.get("is_contest") == True:
+                    print("✅ is_contest flag is correctly set to true in the database")
+                else:
+                    print("❌ is_contest flag is not correctly set in the database")
+                
+                # Verify type
+                if latest_contest_burn.get("type") == "contest_burn":
+                    print("✅ type is correctly set to 'contest_burn' in the database")
+                else:
+                    print(f"❌ type is not correctly set in the database. Got: {latest_contest_burn.get('type')}")
+                
+                # Verify allocations
+                if "allocations" in latest_contest_burn:
+                    allocations = latest_contest_burn["allocations"]
+                    
+                    # Check allocation type
+                    if allocations.get("allocation_type") == "contest":
+                        print("✅ Allocation type is correctly set to 'contest' in the database")
+                    else:
+                        print(f"❌ Allocation type is not correctly set in the database. Got: {allocations.get('allocation_type')}")
+                    
+                    # Check burn amount percentage
+                    total_amount = float(latest_contest_burn.get("total_amount", 0))
+                    if total_amount > 0 and "burn_amount" in allocations:
+                        burn_amount = float(allocations["burn_amount"])
+                        burn_percentage = (burn_amount / total_amount) * 100
+                        
+                        if abs(burn_percentage - 88.0) < 1.0:  # Allow for small rounding differences
+                            print(f"✅ Burn percentage in database is approximately 88% ({burn_percentage:.2f}%)")
+                        else:
+                            print(f"❌ Burn percentage in database is not 88%. Got: {burn_percentage:.2f}%")
+                    
+                    # Check community amount percentage
+                    if total_amount > 0 and "community_amount" in allocations:
+                        community_amount = float(allocations["community_amount"])
+                        community_percentage = (community_amount / total_amount) * 100
+                        
+                        if abs(community_percentage - 12.0) < 1.0:  # Allow for small rounding differences
+                            print(f"✅ Community percentage in database is approximately 12% ({community_percentage:.2f}%)")
+                        else:
+                            print(f"❌ Community percentage in database is not 12%. Got: {community_percentage:.2f}%")
+                else:
+                    print("❌ Allocations are missing from the database record")
+            else:
+                print("⚠️ No contest burns found in the transaction log")
+        else:
+            print("❌ Transactions endpoint response doesn't have expected 'transactions' key")
+    else:
+        print(f"❌ Transactions endpoint failed with status code: {response.status_code}")
+    
+    print("\n" + "=" * 80)
+    print("CONTEST TOKEN BURN ALLOCATION SYSTEM TESTING COMPLETE")
+    print("=" * 80)
+
 if __name__ == "__main__":
+    # Test the contest token burn allocation system
+    test_contest_token_burn_allocation()
+    
     # Test the updated wallet address configuration
-    test_wallet_address_configuration()
+    # test_wallet_address_configuration()
     
     # Run the specific tests for the endpoints mentioned in the review request
     # test_specific_endpoints()
