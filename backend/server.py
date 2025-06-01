@@ -1189,10 +1189,6 @@ app.include_router(api_router, prefix="/api")
 # Admin router
 admin_router = APIRouter()
 
-# Register wallet endpoints directly to the API router
-api_router.get("/wallet/status")(get_wallet_status)
-api_router.post("/execute-redistribution")(execute_redistribution)
-
 @admin_router.get("/projects")
 async def get_admin_projects(admin_user: dict = Depends(verify_admin_token)):
     """Get all projects for admin management"""
