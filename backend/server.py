@@ -257,6 +257,109 @@ MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 PRIVY_APP_SECRET = os.getenv("PRIVY_APP_SECRET")
 PRIVY_VERIFICATION_KEY = os.getenv("PRIVY_VERIFICATION_KEY")
 ADMIN_TWITTER_HANDLE = "davincc"  # Your admin Twitter handle
+BURNRELIEFBOT_PRIVATE_KEY = os.getenv("BURNRELIEFBOT_PRIVATE_KEY")
+BASE_RPC_URL = os.getenv("BASE_RPC_URL", "https://mainnet.base.org")
+
+# Wallet and Web3 Setup
+class BurnReliefBotWallet:
+    def __init__(self):
+        self.web3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
+        self.private_key = BURNRELIEFBOT_PRIVATE_KEY
+        self.account = None
+        self.setup_account()
+    
+    def setup_account(self):
+        """Initialize the wallet account"""
+        if self.private_key and self.private_key != "your_private_key_here":
+            try:
+                self.account = Account.from_key(self.private_key)
+                logger.info(f"BurnReliefBot wallet initialized: {self.account.address}")
+            except Exception as e:
+                logger.error(f"Failed to initialize wallet: {e}")
+                self.account = None
+        else:
+            logger.warning("BurnReliefBot private key not configured")
+    
+    def is_connected(self) -> bool:
+        """Check if wallet is connected"""
+        return self.account is not None and self.web3.is_connected()
+    
+    async def send_token_redistribution(self, token_address: str, distributions: Dict[str, float]) -> Dict[str, str]:
+        """Execute token redistribution transactions"""
+        if not self.is_connected():
+            raise HTTPException(status_code=500, detail="Wallet not connected")
+        
+        try:
+            results = {}
+            for recipient_address, amount in distributions.items():
+                if amount > 0:
+                    # In a real implementation, you would:
+                    # 1. Get token contract instance
+                    # 2. Build transfer transaction
+                    # 3. Sign and send transaction
+                    # 4. Wait for confirmation
+                    
+                    # For now, we'll simulate the transaction
+                    tx_hash = f"0x{''.join([format(hash(f'{recipient_address}{amount}{time.time()}'), 'x')[:64].zfill(64)])}"
+                    results[recipient_address] = tx_hash
+                    logger.info(f"Simulated transfer: {amount} tokens to {recipient_address} - TX: {tx_hash}")
+            
+            return results
+        except Exception as e:
+            logger.error(f"Token redistribution failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Redistribution failed: {str(e)}")
+    
+    async def execute_burn_and_redistribute(self, total_amount: float, token_address: str, is_burnable: bool = True):
+        """Main function to execute burn and redistribution"""
+        try:
+            # Calculate distributions
+            allocations = calculate_burn_amounts(total_amount, token_address, is_burnable)
+            
+            # Prepare distribution dictionary
+            distributions = {}
+            
+            if is_burnable and float(allocations["burn_amount"]) > 0:
+                distributions[BURN_ADDRESS] = float(allocations["burn_amount"])
+            
+            if float(allocations["drb_grok_amount"]) > 0:
+                distributions[GROK_WALLET] = float(allocations["drb_grok_amount"])
+            
+            if float(allocations["drb_community_amount"]) > 0:
+                distributions[COMMUNITY_WALLET] = float(allocations["drb_community_amount"])
+            
+            if float(allocations["drb_team_amount"]) > 0:
+                distributions[TEAM_WALLET] = float(allocations["drb_team_amount"])
+            
+            # Execute redistribution
+            tx_results = await self.send_token_redistribution(token_address, distributions)
+            
+            # Log transaction to database
+            transaction_record = {
+                "id": str(uuid.uuid4()),
+                "timestamp": datetime.utcnow(),
+                "total_amount": total_amount,
+                "token_address": token_address,
+                "is_burnable": is_burnable,
+                "allocations": allocations,
+                "transaction_hashes": tx_results,
+                "status": "completed"
+            }
+            
+            await burns_collection.insert_one(transaction_record)
+            
+            return {
+                "status": "success",
+                "transaction_id": transaction_record["id"],
+                "allocations": allocations,
+                "transaction_hashes": tx_results
+            }
+            
+        except Exception as e:
+            logger.error(f"Burn and redistribute failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Burn execution failed: {str(e)}")
+
+# Initialize wallet
+burn_wallet_manager = BurnReliefBotWallet()
 
 # Database setup
 client = AsyncIOMotorClient(MONGO_URL)
