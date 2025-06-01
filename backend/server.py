@@ -628,22 +628,69 @@ votes_collection = db.votes
 voting_periods_collection = db.voting_periods
 
 # Admin authentication
-async def verify_admin_token(authorization: str = Header(None)):
-    """Verify admin token and check if user is authorized admin"""
+# Input sanitization utilities
+def sanitize_input(text: str, max_length: int = 1000) -> str:
+    """Sanitize user input to prevent XSS and injection attacks"""
+    if not text:
+        return ""
+    
+    # Bleach HTML tags and attributes
+    cleaned = bleach.clean(text, tags=[], attributes={}, strip=True)
+    
+    # Limit length
+    cleaned = cleaned[:max_length]
+    
+    # Remove potentially dangerous characters
+    cleaned = cleaned.replace('<', '&lt;').replace('>', '&gt;')
+    
+    return cleaned.strip()
+
+def validate_wallet_address(address: str) -> bool:
+    """Validate Ethereum wallet address format"""
+    if not address:
+        return False
+    
+    # Check if it's a valid hex address
+    if not address.startswith('0x'):
+        return False
+    
+    if len(address) != 42:
+        return False
+    
+    try:
+        int(address, 16)
+        return True
+    except ValueError:
+        return False
+
+def validate_token_address(address: str) -> bool:
+    """Validate token contract address format"""
+    return validate_wallet_address(address)  # Same validation for now
+
+@limiter.limit("10/minute")  # Rate limit admin token verification
+async def verify_admin_token(request: Request, authorization: str = Header(None)):
+    """Enhanced admin token verification with environment-based tokens"""
     if not authorization:
         raise HTTPException(status_code=401, detail="Authorization header missing")
     
     try:
         # Extract token from "Bearer <token>" format
-        token = authorization.replace("Bearer ", "")
+        token = authorization.replace("Bearer ", "").strip()
         
-        # For now, we'll implement a simple check
-        # In production, you'd verify the Privy JWT token
-        if token == "admin_token_davincc":
-            return {"user_id": "davincc", "is_admin": True}
+        # Sanitize token input
+        token = sanitize_input(token, max_length=200)
+        
+        # Check against environment-configured admin tokens
+        if token in ADMIN_TOKENS:
+            # Log successful admin access (for security monitoring)
+            logger.info(f"Admin access granted from IP: {get_remote_address(request)}")
+            return {"user_id": "admin", "is_admin": True, "token": token}
         else:
+            # Log failed attempt (for security monitoring)
+            logger.warning(f"Failed admin access attempt from IP: {get_remote_address(request)}")
             raise HTTPException(status_code=403, detail="Admin access required")
     except Exception as e:
+        logger.error(f"Admin token verification error: {e}")
         raise HTTPException(status_code=401, detail="Invalid token")
 
 # WebSocket connections storage
