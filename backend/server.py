@@ -1652,7 +1652,7 @@ async def update_admin_project(project_id: str, project_data: dict, admin_user: 
         }
         
         result = await projects_collection.update_one(
-            {"_id": project_id},
+            {"id": project_id},
             {"$set": update_data}
         )
         
