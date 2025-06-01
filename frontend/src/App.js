@@ -599,7 +599,8 @@ function App() {
         },
         body: JSON.stringify({
           token_address: address,
-          chain: activeChain
+          chain: activeChain,
+          is_contest: isContestMode  // Include contest mode
         })
       });
       
