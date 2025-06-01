@@ -1124,17 +1124,6 @@ function App() {
             <Users className="w-4 h-4 inline mr-2" />
             Community Contest
           </button>
-          <button
-            onClick={() => setActiveTab('leaderboard')}
-            className={`nav-link flex-1 py-2 px-4 rounded-md transition-colors ${
-              activeTab === 'leaderboard' 
-                ? 'bg-purple-600 text-white active' 
-                : 'text-gray-300 hover:text-white'
-            }`}
-          >
-            <Trophy className="w-4 h-4 inline mr-2" />
-            Leaderboard
-          </button>
         </div>
 
         {/* Tab Content */}
