@@ -668,7 +668,7 @@ async def is_drb_token(token_address: str, token_name: str = "", token_symbol: s
     
     return False
 
-def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burnable: bool = True, is_drb: bool = False, winning_project_wallet: str = None) -> Dict[str, str]:
+def calculate_burn_amounts(total_amount: float, token_address: str = "", is_burnable: bool = True, is_drb: bool = False, winning_project_wallet: str = None, is_contest: bool = False) -> Dict[str, str]:
     """Calculate distribution amounts for burn transaction"""
     total = float(total_amount)
     
