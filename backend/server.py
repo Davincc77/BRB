@@ -1668,7 +1668,7 @@ async def update_admin_project(project_id: str, project_data: dict, admin_user: 
 async def delete_admin_project(project_id: str, admin_user: dict = Depends(verify_admin_token)):
     """Delete a project (admin only)"""
     try:
-        result = await projects_collection.delete_one({"_id": project_id})
+        result = await projects_collection.delete_one({"id": project_id})
         
         if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail="Project not found")
